@@ -778,7 +778,7 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
       <div class="sbp-step"><div class="sbp-num">2</div>Выбери перевод по СБП</div>
       <div class="sbp-step"><div class="sbp-num">3</div>Введи номер и сумму</div>
     </div>
-    <div class="sbp-phone" onclick="copyPhone()">+7 (___) ___-__-__</div>
+    <div class="sbp-phone" onclick="copyPhone()">+7 (966) 088-92-36</div>
     <div class="sbp-hint">Нажми чтобы скопировать</div>
     <button class="btn-fill" onclick="copyPhone()">Скопировать номер</button>
   </div>
@@ -995,6 +995,7 @@ function startQuitting(){
 
 // ─── HOME ───
 function bootHome(){
+  if(S.user && S.startTime) sbUpsert(S.user, S.startTime.toISOString()).catch(()=>{});
   if(!S.user||!S.startTime)return;
   el('uc-ava').textContent=S.user.avatar;
   el('uc-name').textContent=S.user.name;
@@ -1184,7 +1185,7 @@ function openSupSheet(name){el('sup-name').textContent=name;el('sup-msg').value=
 function sendSupport(){const m=el('sup-msg').value.trim();if(!m){toast('Напиши что-нибудь','red');return}closeSheet('sup-sheet');toast('Поддержка отправлена 🤍','green')}
 function openDonate(){openSheet('donate-sheet')}
 function pickAmt(e,v){document.querySelectorAll('.amt').forEach(a=>a.classList.remove('on'));e.classList.add('on');if(v==='any')toast('Введи сумму при переводе')}
-function copyPhone(){const p='+7 (999) 000-00-00';navigator.clipboard.writeText(p.replace(/\D/g,'')).then(()=>toast('Номер скопирован!')).catch(()=>toast(p))}
+function copyPhone(){const p='+7 (966) 088-92-36';navigator.clipboard.writeText(p.replace(/\D/g,'')).then(()=>toast('Номер скопирован!')).catch(()=>toast(p))}
 
 // ─── HASHTAGS ───
 const TAGS='#quitly #бросаемвместе #бросаюкурить';
@@ -1420,6 +1421,67 @@ function getAvgStreak(){
   return Math.floor(S.history.reduce((s,h)=>s+h.secs,0)/S.history.length);
 }
 
+
+// ─── SUPABASE ───
+const SB_URL = 'https://xyvysloysykfaarupial.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5dnlzbG95c3lrZmFhcnVwaWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NzMxNjMsImV4cCI6MjA4ODU0OTE2M30.cFljP8F8zkvYqwZDHQnoRdny-YrgSH6EBnLM40QrFJk';
+const SB_HDR = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` };
+
+async function sbFeed() {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/quit_sessions?select=*&is_active=eq.true&order=started_at.desc&limit=30`, { headers: SB_HDR });
+    if (!r.ok) return null;
+    return r.json();
+  } catch { return null; }
+}
+
+async function sbUpsert(user, startTime) {
+  try {
+    await fetch(`${SB_URL}/rest/v1/quit_sessions`, {
+      method: 'POST',
+      headers: { ...SB_HDR, 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({
+        threads_handle: user.handle || user.name,
+        display_name: user.name,
+        avatar: user.avatar,
+        is_threads_user: user.threads || false,
+        cigs_per_day: user.cigs,
+        price_per_pack: user.price,
+        started_at: startTime
+      })
+    });
+  } catch {}
+}
+
+async function sbRealtime(onNew) {
+  try {
+    const ws = new WebSocket(`${SB_URL.replace('https','wss')}/realtime/v1/websocket?apikey=${SB_KEY}&vsn=1.0.0`);
+    ws.onopen = () => ws.send(JSON.stringify({ topic: 'realtime:public:quit_sessions', event: 'phx_join', payload: {}, ref: '1' }));
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg.payload?.record) onNew(msg.payload.record);
+    };
+  } catch {}
+}
+
+// Load real feed from Supabase and merge with mock data
+async function loadRealFeed() {
+  const data = await sbFeed();
+  if (!data || !data.length) return;
+  // Merge real users into FEED_DATA (dedupe by handle)
+  data.forEach(row => {
+    const exists = FEED_DATA.find(f => f.n === row.display_name);
+    if (!exists) {
+      FEED_DATA.unshift({
+        a: row.avatar || '🐺',
+        n: row.display_name,
+        t: new Date(row.started_at).getTime(),
+        th: row.is_threads_user
+      });
+    }
+  });
+}
+
 // ─── BOOT ───
 initAva();initTheme();
 if(loadLocal()){
@@ -1429,11 +1491,12 @@ if(loadLocal()){
   bootHome();setNav('home');
 }
 startLiveJoin();
+loadRealFeed().then(()=>{ if(el('feed-list')&&el('feed-list').innerHTML) renderFeedPreview(); });
 setInterval(()=>{const e=el('live-n');if(e&&Math.random()>.65)e.textContent=+e.textContent+1},5000);
 </script>
 
 <script>
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && location.hostname !== 'localhost' && !location.hostname.includes('claudeusercontent')) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then(r => console.log('SW registered:', r.scope))

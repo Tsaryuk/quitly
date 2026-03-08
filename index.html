@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Quitly</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ─── TOKENS ─── */
+:root{
+  --bg:#fafafa;--surface:#fff;--surface2:#f2f2f2;--border:#ebebeb;
+  --text:#0a0a0a;--sub:#737373;--placeholder:#a0a0a0;
+  --accent:#000;--accent-fg:#fff;
+  --green:#1a9e6b;--green-bg:#e8f7f1;--green-border:#b2e0cf;
+  --red:#d93025;--red-bg:#fdecea;--red-border:#f5c0bb;
+  --orange:#c07000;--orange-bg:#fff3e0;--orange-border:#ffd08a;
+  --blue:#0064d4;--blue-bg:#e8f0fe;--blue-border:#aac4f5;
+  --nav-h:60px;--r:16px;--r-sm:10px;
+}
+[data-theme=dark]{
+  --bg:#101010;--surface:#1a1a1a;--surface2:#242424;--border:#2e2e2e;
+  --text:#f5f5f5;--sub:#888;--placeholder:#555;
+  --accent:#f5f5f5;--accent-fg:#101010;
+  --green:#26c17e;--green-bg:#0d2318;--green-border:#1a5c3a;
+  --red:#f55;--red-bg:#2a1010;--red-border:#6b2020;
+  --orange:#f0a030;--orange-bg:#251800;--orange-border:#6b4000;
+  --blue:#4ca3ff;--blue-bg:#0a1a30;--blue-border:#1a3a6a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);transition:background .25s,color .25s}
+body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-size:15px}
+
+/* ─── SCREENS ─── */
+.scr{display:none;position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding-bottom:calc(var(--nav-h) + 16px)}
+.scr::-webkit-scrollbar{display:none}
+.scr.on{display:block;animation:fadeUp .22s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.scr.no-nav{padding-bottom:0}
+
+/* ─── NAV ─── */
+#nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:90;padding-bottom:env(safe-area-inset-bottom,0)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--placeholder);transition:color .15s;padding:8px 0;position:relative}
+.ni.on{color:var(--text)}
+.ni svg{width:24px;height:24px;stroke-width:1.8}
+.ni .nl{font-size:10px;font-weight:600;letter-spacing:.2px}
+.ni .dot{position:absolute;top:8px;right:calc(50% - 16px);width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--surface);display:none}
+
+/* ─── HEADER ─── */
+.page-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px;position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:10}
+.page-title{font-size:17px;font-weight:700}
+.hdr-action{background:none;border:none;cursor:pointer;color:var(--sub);padding:4px;border-radius:8px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500}
+
+/* ─── THEME SEGMENTED ─── */
+.theme-seg{display:inline-flex;align-items:center;background:var(--surface2);border-radius:10px;padding:3px;gap:2px;flex-shrink:0}
+.ts-btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 11px;border-radius:7px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:var(--sub);transition:all .18s;font-family:inherit;white-space:nowrap}
+.ts-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.ts-btn.on{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.10);}
+[data-theme=dark] .ts-btn.on{box-shadow:0 1px 4px rgba(0,0,0,.4)}
+
+/* ─── CARDS ─── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.card+.card{margin-top:10px}
+.divider{height:1px;background:var(--border);margin:0}
+
+/* ─── BUTTONS ─── */
+.btn-fill{width:100%;padding:14px;background:var(--accent);color:var(--accent-fg);border:none;border-radius:var(--r-sm);font-size:15px;font-weight:700;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-fill:active{opacity:.7}
+.btn-fill.green{background:var(--green);color:#fff}
+.btn-fill.red{background:var(--red);color:#fff}
+.btn-fill.outline{background:transparent;color:var(--text);border:1.5px solid var(--border)}
+.btn-fill.outline:hover{border-color:var(--sub)}
+.btn-fill.threads{background:#000;color:#fff}
+[data-theme=dark] .btn-fill.threads{background:#fff;color:#000}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn-fill{flex:1}
+.btn-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text);transition:all .15s}
+.btn-pill:hover{border-color:var(--sub)}
+.btn-pill.active{border-color:var(--text);background:var(--text);color:var(--surface)}
+
+/* ─── INPUTS ─── */
+.inp{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:13px 14px;font-size:15px;color:var(--text);outline:none;transition:border-color .15s;font-family:inherit}
+.inp:focus{border-color:var(--text);background:var(--surface)}
+.inp::placeholder{color:var(--placeholder)}
+.inp-label{font-size:12px;font-weight:600;color:var(--sub);margin-bottom:6px;display:block;letter-spacing:.2px}
+
+/* ─── AUTH GATE ─── */
+.gate-banner{margin:12px 16px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--r-sm);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.gate-ico{font-size:22px;flex-shrink:0}
+.gate-text{flex:1;font-size:13px;color:var(--blue);font-weight:500;line-height:1.45}
+.gate-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+
+/* ─── WELCOME ─── */
+#s-welcome{background:var(--bg)}
+.wl-wrap{min-height:100svh;display:flex;flex-direction:column;padding:env(safe-area-inset-top,20px) 20px env(safe-area-inset-bottom,32px)}
+.wl-top{display:flex;align-items:center;justify-content:space-between;padding:8px 0 0}
+.wl-logo{font-size:15px;font-weight:800;letter-spacing:-.3px}
+.wl-body{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:8px}
+.wl-icon{font-size:80px;text-align:center;padding:40px 0 24px;animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.wl-live{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--green-bg);border:1px solid var(--green-border);font-size:12px;font-weight:600;color:var(--green);margin-bottom:18px}
+.wl-live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}
+.wl-h1{font-size:clamp(32px,9vw,44px);font-weight:900;line-height:1.08;letter-spacing:-.5px;margin-bottom:12px}
+.wl-sub{font-size:15px;color:var(--sub);line-height:1.6;margin-bottom:28px}
+.wl-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:28px}
+.wl-stat{text-align:center;padding:12px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm)}
+.wl-sn{font-size:18px;font-weight:800;margin-bottom:2px}
+.wl-sl{font-size:11px;color:var(--sub);line-height:1.3}
+
+/* ─── HOME ─── */
+.home-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px}
+.home-day{font-size:13px;font-weight:700;color:var(--sub)}
+.home-chips{display:flex;align-items:center;gap:8px}
+
+.timer-block{padding:28px 20px 20px;text-align:center;position:relative}
+.timer-lbl{font-size:12px;font-weight:600;color:var(--sub);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.timer-val{font-size:clamp(42px,13vw,64px);font-weight:900;letter-spacing:-2px;line-height:1;color:var(--text);font-variant-numeric:tabular-nums}
+.timer-val span{color:var(--green)}
+
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
+.stat-val{font-size:24px;font-weight:800;margin-bottom:3px}
+.stat-lbl{font-size:11px;color:var(--sub);font-weight:500}
+
+/* SMOKED BUTTON */
+.smoked-wrap{padding:16px}
+.btn-smoked{width:100%;padding:16px;background:var(--red-bg);color:var(--red);border:1.5px solid var(--red-border);border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-smoked:active{opacity:.7;transform:scale(.98)}
+
+/* CRAVING */
+.craving-box{margin:0 16px 16px;background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:var(--r);padding:16px;display:flex;align-items:center;justify-content:space-between}
+.craving-left{display:flex;align-items:center;gap:12px}
+.craving-num{font-size:36px;font-weight:900;color:var(--orange);line-height:1}
+.craving-info{flex:1}
+.craving-title{font-size:14px;font-weight:700;margin-bottom:2px}
+.craving-sub{font-size:12px;color:var(--sub)}
+.btn-craving{padding:10px 16px;background:var(--orange);color:#fff;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.btn-craving:active{opacity:.7}
+
+/* TIP */
+.tip-row{margin:0 16px 16px;padding:14px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:0 var(--r-sm) var(--r-sm) 0}
+.tip-label{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.tip-text{font-size:14px;color:var(--sub);line-height:1.55}
+
+/* SHARE ROW */
+.share-row{display:flex;gap:8px;padding:0 16px 16px}
+.btn-share-t{flex:1;padding:11px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--text);transition:border-color .15s}
+.btn-share-t:hover{border-color:var(--sub)}
+
+/* SECTION LABEL */
+.sec-label{padding:12px 16px 8px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+
+/* FEED LIST ITEMS (home preview) */
+.fi{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.fi:last-child{border-bottom:none}
+.fi-ava{font-size:28px;width:40px;text-align:center;flex-shrink:0}
+.fi-info{flex:1;min-width:0}
+.fi-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:5px}
+.fi-time{font-size:12px;color:var(--sub);margin-top:1px}
+.fi-action{border:none;background:var(--surface2);border-radius:8px;padding:7px 10px;font-size:14px;cursor:pointer;flex-shrink:0;border:1px solid var(--border)}
+
+/* T-DOT */
+.t-dot{width:15px;height:15px;border-radius:50%;background:#000;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+[data-theme=dark] .t-dot{background:#fff}
+.t-dot svg{width:9px;height:9px}
+
+/* MILESTONE LIST */
+.ms-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.ms-item:last-child{border-bottom:none}
+.ms-item:active{background:var(--surface2)}
+.ms-item:last-child{border-bottom:none}
+.ms-ico{font-size:22px;width:36px;text-align:center;flex-shrink:0}
+.ms-body{flex:1}
+.ms-name{font-size:14px;font-weight:600;margin-bottom:3px}
+.ms-desc{font-size:12px;color:var(--sub)}
+.ms-bar{height:3px;background:var(--surface2);border-radius:2px;margin-top:6px;overflow:hidden}
+.ms-fill{height:100%;background:var(--green);border-radius:2px;transition:width .8s cubic-bezier(.16,1,.3,1)}
+.ms-check{color:var(--green);font-size:16px;flex-shrink:0}
+.ms-item.done .ms-name{color:var(--green)}
+
+/* FEED SCREEN */
+.feed-card{margin:0 16px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.fc-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.fc-ava{font-size:38px}
+.fc-name{font-size:15px;font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:2px}
+.fc-days{font-size:12px;color:var(--sub)}
+.fc-timer{font-size:22px;font-weight:800;margin-bottom:12px;font-variant-numeric:tabular-nums;color:var(--green)}
+.fc-btn{width:100%;padding:11px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px;font-weight:600;cursor:pointer;color:var(--text);transition:background .15s}
+.fc-btn:hover{background:var(--border)}
+
+/* RANK */
+.rank-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.rank-n{font-size:13px;font-weight:800;color:var(--sub);width:22px;text-align:center;flex-shrink:0}
+.rank-n.g1{color:#f0a000}.rank-n.g2{color:#888}.rank-n.g3{color:#b06020}
+.rank-ava{font-size:28px;flex-shrink:0}
+.rank-info{flex:1}
+.rank-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:5px}
+.rank-dur{font-size:12px;color:var(--sub);margin-top:1px}
+.rank-badge{font-size:12px;font-weight:700;color:var(--green);background:var(--green-bg);padding:4px 10px;border-radius:20px}
+
+/* CHALLENGE */
+.vs-card{margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.vs-row{display:grid;grid-template-columns:1fr 32px 1fr;align-items:center;gap:8px;margin-bottom:14px}
+.vs-side{text-align:center}
+.vs-ava{font-size:38px;margin-bottom:6px}
+.vs-name{font-size:13px;color:var(--sub);margin-bottom:4px}
+.vs-time{font-size:16px;font-weight:800;color:var(--green)}
+.vs-sep{text-align:center;font-size:14px;font-weight:900;color:var(--sub)}
+.vs-status{text-align:center;font-size:13px;color:var(--sub);border-top:1px solid var(--border);padding-top:12px}
+
+/* RELAPSE SCREEN */
+#s-relapse{background:var(--bg)}
+.relapse-wrap{min-height:100svh;display:flex;flex-direction:column;padding:env(safe-area-inset-top,20px) 24px env(safe-area-inset-bottom,32px)}
+.relapse-art{font-size:80px;text-align:center;padding:48px 0 20px}
+.relapse-title{font-size:28px;font-weight:900;line-height:1.15;margin-bottom:12px}
+.relapse-sub{font-size:16px;color:var(--sub);line-height:1.65;margin-bottom:12px}
+.relapse-fact{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.relapse-fact-lbl{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.relapse-fact-txt{font-size:14px;color:var(--sub);line-height:1.55}
+.relapse-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.rstat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;text-align:center}
+.rstat-val{font-size:22px;font-weight:800;margin-bottom:3px}
+.rstat-lbl{font-size:11px;color:var(--sub)}
+.relapse-actions{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+
+/* PROFILE */
+.prof-top{text-align:center;padding:28px 20px 16px}
+.prof-ava{font-size:64px;margin-bottom:8px}
+.prof-name{font-size:22px;font-weight:800;margin-bottom:4px}
+.prof-handle{font-size:14px;color:var(--sub);display:flex;align-items:center;justify-content:center;gap:6px}
+.prof-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 16px}
+.pst{text-align:center;padding:14px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm)}
+.pst-v{font-size:20px;font-weight:800;margin-bottom:3px;color:var(--green)}
+.pst-l{font-size:11px;color:var(--sub)}
+.badge-grid{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 16px}
+.bdg{display:flex;align-items:center;gap:7px;padding:9px 14px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:20px}
+.bdg-ico{font-size:16px}
+.bdg-txt{font-size:12px;font-weight:600;color:var(--green)}
+
+/* AUTHOR */
+.author-blk{margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.author-top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.author-ico{width:54px;height:54px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;border:1px solid var(--border)}
+.author-name{font-size:16px;font-weight:700;margin-bottom:3px}
+.author-handle{font-size:13px;color:var(--sub)}
+.author-bio{font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:14px}
+.video-wrap{border-radius:var(--r-sm);overflow:hidden;aspect-ratio:16/9;margin-bottom:8px;background:var(--surface2)}
+.video-wrap iframe{width:100%;height:100%;border:none;display:block}
+.video-meta-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.video-meta-sub{font-size:13px;color:var(--sub)}
+
+/* Article */
+.article-body{font-size:14px;line-height:1.7;color:var(--text)}
+.article-body p{margin-bottom:13px}
+.article-body h3{font-size:14px;font-weight:700;margin:18px 0 8px;color:var(--text)}
+.article-body em{font-style:italic;color:var(--sub)}
+
+.donate-blk{margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center}
+.donate-ico{font-size:36px;margin-bottom:10px}
+.donate-title{font-size:17px;font-weight:700;margin-bottom:6px}
+.donate-sub{font-size:14px;color:var(--sub);line-height:1.55;margin-bottom:18px}
+
+.links-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 16px}
+.lnk{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;text-decoration:none;transition:border-color .15s}
+.lnk:hover{border-color:var(--sub)}
+.lnk-ico{font-size:24px}
+.lnk-name{font-size:13px;font-weight:700;color:var(--text)}
+.lnk-sub{font-size:11px;color:var(--sub)}
+
+/* MODAL / SHEET */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:flex-end}
+[data-theme=dark] .overlay{background:rgba(0,0,0,.65)}
+.overlay.open{display:flex;animation:ovIn .2s ease}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+.sheet{width:100%;background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px) + 24px);animation:sheetUp .28s cubic-bezier(.16,1,.3,1)}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 20px}
+.sheet-title{font-size:17px;font-weight:700;margin-bottom:4px}
+.sheet-sub{font-size:14px;color:var(--sub);margin-bottom:18px;line-height:1.5}
+.sheet-textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:13px;font-size:15px;color:var(--text);font-family:inherit;resize:none;outline:none;margin-bottom:14px;transition:border-color .15s}
+.sheet-textarea:focus{border-color:var(--text)}
+
+/* SBP */
+.sbp-amts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.amt{padding:10px 18px;border:1.5px solid var(--border);border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all .15s}
+.amt.on{border-color:var(--text);background:var(--text);color:var(--surface)}
+.sbp-steps{background:var(--surface2);border-radius:var(--r-sm);padding:14px;margin-bottom:14px}
+.sbp-step{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:10px}
+.sbp-step:last-child{margin:0}
+.sbp-num{min-width:20px;height:20px;border-radius:50%;background:var(--text);color:var(--surface);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.sbp-phone{font-size:20px;font-weight:800;text-align:center;padding:14px;background:var(--surface2);border-radius:var(--r-sm);margin-bottom:6px;cursor:pointer;letter-spacing:.5px;transition:background .15s}
+.sbp-phone:hover{background:var(--border)}
+.sbp-hint{text-align:center;font-size:12px;color:var(--sub);margin-bottom:16px}
+
+/* SHARE CARD */
+.share-card{background:linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 100%);border-radius:20px;padding:28px 24px 24px;color:#fff;position:relative;overflow:hidden;margin-bottom:16px}
+[data-theme=light] .share-card{background:linear-gradient(135deg,#111 0%,#222 100%)}
+.sc-logo{font-size:11px;font-weight:800;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:20px}
+.sc-user{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.sc-ava{font-size:32px}
+.sc-name{font-size:15px;font-weight:700;color:#fff}
+.sc-handle{font-size:12px;color:#666;margin-top:2px}
+.sc-timer{font-size:48px;font-weight:900;line-height:1;margin-bottom:4px;font-variant-numeric:tabular-nums;letter-spacing:-2px}
+.sc-dayl{font-size:14px;color:#888;margin-bottom:20px}
+.sc-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.sc-stat{background:rgba(255,255,255,.07);border-radius:12px;padding:12px 14px}
+.sc-sv{font-size:20px;font-weight:800;margin-bottom:2px}
+.sc-sl{font-size:11px;color:#666}
+.sc-ms{display:flex;align-items:center;gap:8px;background:rgba(26,158,107,.15);border:1px solid rgba(26,158,107,.3);border-radius:10px;padding:10px 12px;margin-bottom:20px}
+.sc-ms-ico{font-size:18px}
+.sc-ms-txt{font-size:12px;color:#26c17e;font-weight:600}
+.sc-footer{display:flex;align-items:center;justify-content:space-between}
+.sc-url{font-size:12px;color:#555;font-weight:600}
+.sc-tags{font-size:11px;color:#1a9e6b;font-weight:600;text-align:right;line-height:1.4}
+/* glow accent */
+.share-card::before{content:'';position:absolute;top:-60px;right:-60px;width:160px;height:160px;background:radial-gradient(circle,rgba(26,158,107,.2) 0%,transparent 70%);pointer-events:none}
+
+/* MILESTONE CELEBRATION */
+.ms-cel-sheet .sheet-title{font-size:24px;font-weight:900;margin-bottom:6px}
+.ms-cel-ico{font-size:72px;text-align:center;margin-bottom:16px}
+.ms-cel-badge{display:inline-flex;align-items:center;gap:8px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:20px;padding:8px 16px;margin-bottom:14px}
+.ms-cel-body{font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:18px}
+
+/* LIVE ENTRY ANIM */
+@keyframes liveIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:none}}
+.fi.live-new{animation:liveIn .4s cubic-bezier(.16,1,.3,1)}
+
+/* COHORT BANNER */
+.cohort-banner{margin:0 16px 16px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--r);padding:14px 16px}
+.cohort-title{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.cohort-users{display:flex;gap:-6px;flex-wrap:wrap;gap:4px}
+.cohort-ava{width:32px;height:32px;border-radius:50%;background:var(--surface);border:2px solid var(--blue-border);display:flex;align-items:center;justify-content:center;font-size:16px}
+
+/* HASHTAG PILLS on welcome */
+.tag-pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:16px 0 0}
+.tag-pill{padding:5px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;transition:all .15s}
+.tag-pill:hover{border-color:var(--green);color:var(--green)}
+.tag-pill.accent{background:var(--green-bg);border-color:var(--green-border);color:var(--green)}
+
+/* SHARE ROW v2 */
+.share-row-v2{display:flex;gap:8px;padding:0 16px 16px}
+.btn-share-card{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:13px;background:#000;color:#fff;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s}
+[data-theme=dark] .btn-share-card{background:#fff;color:#000}
+.btn-share-card:hover{opacity:.85}
+.btn-copy-prog{padding:13px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px;font-weight:600;cursor:pointer;color:var(--text);transition:background .15s;white-space:nowrap}
+
+
+/* TOAST */
+#toasts{position:fixed;top:max(env(safe-area-inset-top,0px),12px);left:50%;transform:translateX(-50%);z-index:400;display:flex;flex-direction:column;gap:8px;width:min(320px,calc(100vw - 32px));pointer-events:none}
+.toast{background:var(--text);color:var(--surface);border-radius:10px;padding:11px 16px;font-size:14px;font-weight:600;text-align:center;opacity:0;transform:translateY(-6px);transition:all .22s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+.toast.red{background:var(--red)}
+.toast.green{background:var(--green)}
+.toast.blue{background:var(--blue)}
+</style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Quitly">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta property="og:title" content="Quitly — Бросаем вместе">
+  <meta property="og:description" content="Трекер отказа от курения с живой лентой. #бросаемвместе">
+  <meta property="og:url" content="https://quitly.vercel.app">
+  <meta property="og:image" content="https://quitly.vercel.app/icons/icon-512.png">
+</head>
+<body>
+
+<!-- ═══ WELCOME ═══ -->
+<div id="s-welcome" class="scr no-nav on">
+  <div class="wl-wrap">
+    <div class="wl-top">
+      <div class="wl-logo">Quitly</div>
+      <div class="theme-seg" id="seg-w"></div>
+    </div>
+    <div class="wl-body">
+      <div class="wl-icon">🚭</div>
+      <div><span class="wl-live"><span class="wl-live-dot"></span><span id="live-n">847</span> бросают сейчас</span></div>
+      <h1 class="wl-h1" style="margin-top:16px">Бросай.<br>Вместе.</h1>
+      <p class="wl-sub">Трекер отказа от курения с живой лентой людей, которые бросают прямо сейчас.</p>
+      <div class="wl-stats">
+        <div class="wl-stat"><div class="wl-sn" id="ws-today">847</div><div class="wl-sl">сегодня<br>бросили</div></div>
+        <div class="wl-stat"><div class="wl-sn">23д</div><div class="wl-sl">средний<br>стаж</div></div>
+        <div class="wl-stat"><div class="wl-sn">12к</div><div class="wl-sl">участ-<br>ников</div></div>
+      </div>
+      <div class="tag-pills">
+        <span class="tag-pill accent">#quitly</span>
+        <span class="tag-pill">#бросаемвместе</span>
+        <span class="tag-pill">#бросаюкурить</span>
+      </div>
+      <button class="btn-fill threads" style="margin-bottom:10px" onclick="loginThreads()">
+        <svg viewBox="0 0 192 192" width="20" height="20" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>
+        Войти через Threads
+      </button>
+      <button class="btn-fill outline" onclick="go('onboard')">Продолжить без входа →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ONBOARD ═══ -->
+<div id="s-onboard" class="scr no-nav">
+  <div style="padding:env(safe-area-inset-top,20px) 20px 0">
+    <button class="hdr-action" onclick="go('welcome')" style="margin-bottom:20px">← Назад</button>
+    <div style="text-align:center;margin-bottom:24px">
+      <span id="ob-ava" style="font-size:64px;display:block;margin-bottom:10px">🐺</span>
+      <div style="font-size:22px;font-weight:800;margin-bottom:6px">Создай профиль</div>
+      <div style="font-size:14px;color:var(--sub)">Займёт 30 секунд</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px" id="ava-grid"></div>
+    <label class="inp-label">Никнейм</label>
+    <input type="text" id="ob-name" class="inp" placeholder="как тебя звать?" maxlength="20" style="margin-bottom:14px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      <div><label class="inp-label">Сигарет в день</label><input type="number" id="ob-cigs" class="inp" value="20" min="1" max="80"></div>
+      <div><label class="inp-label">Цена пачки, ₽</label><input type="number" id="ob-price" class="inp" value="200"></div>
+    </div>
+    <button class="btn-fill green" onclick="startQuitting()">🚭 Бросаю прямо сейчас</button>
+  </div>
+</div>
+
+<!-- ═══ HOME ═══ -->
+<div id="s-home" class="scr">
+  <div class="home-hdr">
+    <div>
+      <div class="home-day" id="home-day">День 1</div>
+      <div style="font-size:12px;color:var(--sub)" id="home-since"></div>
+    </div>
+    <div class="home-chips">
+      <div class="theme-seg" id="seg-h"></div>
+      <div style="display:flex;align-items:center;gap:7px;padding:6px 12px 6px 8px;background:var(--surface2);border-radius:20px;cursor:pointer;border:1px solid var(--border)" onclick="setNav('profile')">
+        <span id="uc-ava" style="font-size:18px">🐺</span>
+        <span style="font-size:12px;font-weight:700" id="uc-name">Ты</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timer-block">
+    <div class="timer-lbl">Без сигарет</div>
+    <div class="timer-val"><span id="timer-h">00</span>:<span id="timer-m">00</span>:<span id="timer-s">00</span></div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-val" style="color:var(--green)" id="st-cigs">0</div><div class="stat-lbl">не выкурено</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--blue)" id="st-money">0 ₽</div><div class="stat-lbl">сэкономлено</div></div>
+  </div>
+
+  <!-- SMOKED BUTTON -->
+  <div class="smoked-wrap">
+    <button class="btn-smoked" onclick="openSmoked()">
+      🚬 Покурил — признаться
+    </button>
+  </div>
+
+  <!-- CRAVING -->
+  <div class="craving-box">
+    <div class="craving-left">
+      <div class="craving-num" id="craving-n">0</div>
+      <div class="craving-info">
+        <div class="craving-title">Устоял перед тягой</div>
+        <div class="craving-sub">раз сегодня</div>
+      </div>
+    </div>
+    <button class="btn-craving" onclick="craved()">💪 Устоял</button>
+  </div>
+
+  <!-- TIP -->
+  <div class="tip-row">
+    <div class="tip-label">Совет дня</div>
+    <div class="tip-text" id="tip-txt"></div>
+  </div>
+
+  <!-- SHARE -->
+  <div class="share-row-v2">
+    <button class="btn-share-card" onclick="openShareCard()">
+      <svg viewBox="0 0 192 192" width="16" height="16" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>
+      Поделиться прогрессом
+    </button>
+    <button class="btn-copy-prog" onclick="copyProgress()">📋</button>
+  </div>
+
+  <div class="divider" style="margin:0 16px"></div>
+  <div class="sec-label">Сейчас бросают</div>
+  <div style="margin:0 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px">
+    <div id="feed-preview"></div>
+    <div style="padding:12px 16px;border-top:1px solid var(--border)"><button class="btn-fill outline" style="padding:10px" onclick="setNav('feed')">Смотреть всех →</button></div>
+  </div>
+
+  <div class="sec-label">Восстановление</div>
+  <div style="margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+    <div id="ms-home"></div>
+  </div>
+</div>
+
+<!-- ═══ RELAPSE ═══ -->
+<div id="s-relapse" class="scr no-nav">
+  <div class="relapse-wrap">
+    <div class="relapse-art">😔</div>
+    <div class="relapse-title">Ничего страшного.</div>
+    <p class="relapse-sub">Это патологический инстинкт — не слабость характера. Большинство бросают с 3–5 попытки. Каждый раз нейронные связи зависимости слабеют.</p>
+    <div class="relapse-fact">
+      <div class="relapse-fact-lbl">Маршак о срывах</div>
+      <div class="relapse-fact-txt" id="relapse-fact-txt">Даже один день без сигарет уже снизил нагрузку на сердце и сосуды. Эти изменения не аннулируются одной сигаретой.</div>
+    </div>
+
+    <div class="relapse-stats">
+      <div class="rstat"><div class="rstat-val" id="r-days" style="color:var(--green)">0</div><div class="rstat-lbl">дней этот раз</div></div>
+      <div class="rstat"><div class="rstat-val" id="r-cigs" style="color:var(--blue)">0</div><div class="rstat-lbl">не выкурено</div></div>
+    </div>
+
+    <div style="background:var(--surface2);border-radius:var(--r);padding:14px 16px;margin:0 0 16px">
+      <div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Твоя статистика попыток</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+          <div style="font-size:18px;font-weight:800;color:var(--green)" id="r-best">—</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:2px">Лучший период</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+          <div style="font-size:18px;font-weight:800;color:var(--text)" id="r-attempts">1</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:2px">Попыток всего</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+          <div style="font-size:18px;font-weight:800;color:var(--orange)" id="r-total-cigs">0</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:2px">Не выкурено всего</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+          <div style="font-size:18px;font-weight:800;color:var(--text)" id="r-total-money">0₽</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:2px">Сэкономлено всего</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="relapse-actions">
+      <button class="btn-fill green" onclick="restartNow()">🚭 Начать заново прямо сейчас</button>
+      <button class="btn-fill outline" onclick="go('home')">← Вернуться к таймеру</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FEED ═══ -->
+<div id="s-feed" class="scr">
+  <div class="page-hdr">
+    <div class="page-title">Лента</div>
+    <div style="display:flex;gap:6px">
+      <button class="btn-pill active" id="tab-f" onclick="switchTab('feed')">Все</button>
+      <button class="btn-pill" id="tab-cohort" onclick="switchTab('cohort')">Мой день</button>
+      <button class="btn-pill" id="tab-r" onclick="switchTab('rank')">Топ</button>
+    </div>
+  </div>
+  <div id="feed-gate"></div>
+  <div id="panel-feed">
+    <div style="padding:10px 16px 4px;font-size:13px;color:var(--sub);display:flex;align-items:center;gap:6px">
+      <span class="wl-live-dot" style="display:inline-block"></span>
+      <span id="feed-cnt">Сегодня бросили: …</span>
+    </div>
+    <div id="feed-list"></div>
+  </div>
+  <div id="panel-cohort" style="display:none">
+    <div style="padding:12px 16px 6px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px">Бросили в тот же день что и ты 🤝</div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Люди из твоей волны — начали в течение 24 часов от тебя</div>
+    </div>
+    <div id="cohort-list"></div>
+  </div>
+  <div id="panel-rank" style="display:none">
+    <div style="padding:10px 16px 4px;font-size:13px;color:var(--sub)">Топ по длительности</div>
+    <div id="rank-list"></div>
+  </div>
+</div>
+
+<!-- ═══ CHALLENGE ═══ -->
+<div id="s-challenge" class="scr">
+  <div class="page-hdr"><div class="page-title">Дуэль</div></div>
+  <div id="ch-gate"></div>
+  <div id="ch-content"></div>
+</div>
+
+<!-- ═══ AUTHOR ═══ -->
+<div id="s-about" class="scr">
+  <div class="page-hdr"><div class="page-title">Об авторе</div></div>
+
+  <div class="author-blk">
+    <div class="author-top">
+      <div class="author-ico">👨‍⚕️</div>
+      <div>
+        <div class="author-name">Денис Царюк</div>
+        <div class="author-handle">@mr.tsaryuk · Threads</div>
+      </div>
+    </div>
+    <div class="author-bio">Изучаю причины зависимостей и способы выйти из них. Quitly — инструмент, который я сделал для себя и открыл для всех.</div>
+    <button class="btn-fill threads" onclick="window.open('https://threads.com/mr.tsaryuk','_blank')">
+      <svg viewBox="0 0 192 192" width="16" height="16" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>
+      Подписаться в Threads
+    </button>
+  </div>
+
+  <!-- Article from podcast -->
+  <div class="author-blk" style="margin-top:0">
+    <div style="margin-bottom:14px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px">Статья · Почему люди курят</div>
+
+    <div style="font-size:17px;font-weight:800;line-height:1.3;margin-bottom:12px;color:var(--text)">Курение — это не вредная привычка. Это инстинкт.</div>
+
+    <div class="article-body">
+      <p>Большинство курильщиков думают, что курение — это привычка. Что нужно просто взять и бросить. Наклеить на пачку страшную картинку. Прочитать книгу Карра. Включить силу воли. Но это не работает — и вот почему.</p>
+
+      <h3>Дисфория как корень проблемы</h3>
+      <p>По словам нарколога Якова Маршака, с которым я записал подкаст, зависимость возникает не от самого никотина. Она возникает от состояния, которое никотин снимает.</p>
+      <p>У всех людей есть уровень самоощущения — от дискомфорта до блаженства. Когда человеку плохо (дисфория), мозг ищет быстрый способ почувствовать себя лучше. Если в этот момент человек закурил — мозг запомнил формулу: <em>плохо → сигарета → хорошо</em>. Именно так формируется прижизненно запечатлённый инстинкт.</p>
+
+      <h3>Почему перерывы делают хуже</h3>
+      <p>Исследователи из UCLA алкоголизировали крыс, а потом разделили на две группы: одних поили постоянно, других — с двухнедельными перерывами. Через год у «перемежающихся» крыс в мозге было значительно больше нейронных дендритов зависимости.</p>
+      <p>Вывод: перерывы не лечат зависимость — они её углубляют. Именно поэтому многие «бросают» несколько раз в год и каждый раз всё тяжелее. Если бросать — то насовсегда.</p>
+
+      <h3>Носоглотка и дофамин</h3>
+      <p>Маршак объясняет парадоксальную вещь: заложенный нос напрямую снижает уровень дофамина. В носоглотке есть нервные окончания, чувствительные к кислороду. При снижении его притока активируются ферменты МАО, которые разрушают дофамин, серотонин и норадреналин — основу нашего настроения.</p>
+      <p>Курение воспаляет слизистую → нос закладывает → дофамин падает → хочется снова закурить. Порочный круг. Промывание носа солёной водой (нети-крия) и увлажнение воздуха — это не просто гигиена, это прямое вмешательство в химию настроения.</p>
+
+      <h3>Путь к свободе — не сила воли</h3>
+      <p>Если ты куришь, задай себе вопрос: <em>что не так сейчас в моей жизни?</em> Тяга к сигарете — это не потребность в никотине. Это сигнал дисфории. Мозг говорит тебе, что где-то внутри что-то не в порядке.</p>
+      <p>Путь к свободе от курения — это внутренний комфорт. Научиться чувствовать себя хорошо без внешних стимуляторов. Именно для этого существуют дыхательные практики, физическая активность, качественный сон и всё то, что помогает восстановить естественный баланс нейрохимии.</p>
+
+      <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:10px;padding:14px 16px;margin-top:4px">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px">Главный вывод</div>
+        <div style="font-size:14px;line-height:1.5;color:var(--text)">Бессмысленно бросать «привычку» — потому что это не привычка. Нужно устранить дисфорию, которая её питает. Quitly помогает не просто считать дни, а понять, что происходит внутри.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="author-blk" style="margin-top:0">
+    <div style="margin-bottom:10px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px">Подкаст · источник статьи</div>
+    <div class="video-wrap"><iframe src="https://www.youtube.com/embed/bfTN7etcf2E?rel=0&modestbranding=1" allowfullscreen allow="autoplay;encrypted-media"></iframe></div>
+    <div style="margin-top:12px">
+      <div class="video-meta-title">Причины курения — разбор с наркологом Яковом Маршаком</div>
+      <div class="video-meta-sub">Понять механизм — значит найти настоящий выход. Смотри полную версию.</div>
+    </div>
+  </div>
+
+  <div class="donate-blk">
+    <div class="donate-ico">🤍</div>
+    <div class="donate-title">Поддержать проект</div>
+    <div class="donate-sub">Quitly бесплатен и open source. Если помогает — поддержи разработку донатом через СБП.</div>
+    <button class="btn-fill" onclick="openDonate()">💳 Задонатить через СБП</button>
+  </div>
+
+  <div class="links-grid">
+    <a class="lnk" href="https://threads.com/mr.tsaryuk" target="_blank"><span class="lnk-ico">🧵</span><span class="lnk-name">Threads</span><span class="lnk-sub">@mr.tsaryuk</span></a>
+    <a class="lnk" href="https://youtube.com/watch?v=bfTN7etcf2E" target="_blank"><span class="lnk-ico">▶️</span><span class="lnk-name">YouTube</span><span class="lnk-sub">Подкаст</span></a>
+    <a class="lnk" href="https://t.me/tsaryuk_ru" target="_blank"><span class="lnk-ico">✈️</span><span class="lnk-name">Telegram</span><span class="lnk-sub">@tsaryuk_ru</span></a>
+    <a class="lnk" href="https://t.me/offlineclub_ru" target="_blank"><span class="lnk-ico">🤝</span><span class="lnk-name">Offline.Клуб</span><span class="lnk-sub">@offlineclub_ru</span></a>
+  </div>
+</div>
+
+<!-- ═══ PROFILE ═══ -->
+<div id="s-profile" class="scr">
+  <div class="page-hdr"><div class="page-title">Профиль</div></div>
+  <div class="prof-top">
+    <div class="prof-ava" id="p-ava">🐺</div>
+    <div class="prof-name" id="p-name">...</div>
+    <div class="prof-handle" id="p-handle"></div>
+  </div>
+
+  <!-- Current attempt stats -->
+  <div class="prof-stats">
+    <div class="pst"><div class="pst-v" id="p-days">0</div><div class="pst-l">дней сейчас</div></div>
+    <div class="pst"><div class="pst-v" id="p-cigs">0</div><div class="pst-l">не выкурено</div></div>
+    <div class="pst"><div class="pst-v" id="p-money">0₽</div><div class="pst-l">сэкономлено</div></div>
+  </div>
+
+  <div class="divider" style="margin:0 16px 0"></div>
+
+  <!-- All-time stats -->
+  <div class="sec-label">Общая статистика</div>
+  <div style="margin:0 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:22px;font-weight:800;color:var(--green)" id="p-best-streak">—</div>
+      <div style="font-size:12px;color:var(--sub);margin-top:3px">Лучший период</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:22px;font-weight:800;color:var(--text)" id="p-attempts">1</div>
+      <div style="font-size:12px;color:var(--sub);margin-top:3px">Попыток</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:22px;font-weight:800;color:var(--orange)" id="p-total-cigs">0</div>
+      <div style="font-size:12px;color:var(--sub);margin-top:3px">Не выкурено всего</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:22px;font-weight:800;color:var(--text)" id="p-total-money">0₽</div>
+      <div style="font-size:12px;color:var(--sub);margin-top:3px">Сэкономлено всего</div>
+    </div>
+  </div>
+
+  <!-- Relapse history list -->
+  <div id="p-history-wrap" style="display:none">
+    <div class="sec-label">История попыток</div>
+    <div id="p-history" style="margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden"></div>
+  </div>
+
+  <div class="divider" style="margin:0 16px 0"></div>
+  <div class="sec-label">Значки</div>
+  <div class="badge-grid" id="p-badges"></div>
+  <div style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:8px">
+    <button class="btn-share-t" style="width:100%;padding:13px;border-radius:var(--r-sm)" onclick="shareThreads()">
+      <svg viewBox="0 0 192 192" width="15" height="15" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>
+      Поделиться прогрессом в Threads
+    </button>
+    <button class="btn-fill outline" style="color:var(--red);border-color:var(--red-border)" onclick="openSmoked()">🚬 Записать срыв</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="nav" style="display:none">
+  <button class="ni on" id="ni-home" onclick="setNav('home')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m3 12 2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/></svg>
+    <span class="nl">Дом</span>
+  </button>
+  <button class="ni" id="ni-feed" onclick="setNav('feed')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    <span class="nl">Лента</span>
+  </button>
+  <button class="ni" id="ni-challenge" onclick="setNav('challenge')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0"/></svg>
+    <span class="nl">Дуэль</span>
+  </button>
+  <button class="ni" id="ni-about" onclick="setNav('about')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13z"/><path stroke-linecap="round" d="M19.14 19.14 21 21M3 21l1.86-1.86"/></svg>
+    <span class="nl">Автор</span>
+  </button>
+  <button class="ni" id="ni-profile" onclick="setNav('profile')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+    <span class="nl">Профиль</span>
+  </button>
+</nav>
+
+<!-- ═══ SHEETS ═══ -->
+
+<!-- Support -->
+<div class="overlay" id="sup-sheet" onclick="if(event.target===this)closeSheet('sup-sheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Написать поддержку</div>
+    <div class="sheet-sub">Анонимно для <b id="sup-name">...</b></div>
+    <textarea class="sheet-textarea" id="sup-msg" rows="3" placeholder="Напиши что-нибудь тёплое..."></textarea>
+    <div class="btn-row">
+      <button class="btn-fill outline" onclick="closeSheet('sup-sheet')">Отмена</button>
+      <button class="btn-fill" onclick="sendSupport()">Отправить 🤍</button>
+    </div>
+  </div>
+</div>
+
+<!-- Smoked confirm -->
+<div class="overlay" id="smoked-sheet" onclick="if(event.target===this)closeSheet('smoked-sheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="confirm-ico">🚬</div>
+    <div class="sheet-title">Покурил?</div>
+    <div class="sheet-sub">Честность важнее стрика. Таймер сбросится, но это не конец — это новый старт.</div>
+    <div class="btn-row">
+      <button class="btn-fill outline" onclick="closeSheet('smoked-sheet')">Нет, держусь</button>
+      <button class="btn-fill red" onclick="confirmSmoked()">Да, покурил</button>
+    </div>
+  </div>
+</div>
+
+<!-- Donate -->
+<div class="overlay" id="donate-sheet" onclick="if(event.target===this)closeSheet('donate-sheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Донат через СБП</div>
+    <div class="sheet-sub">Поддержи Quitly — проект живёт на донатах</div>
+    <div class="sbp-amts">
+      <span class="amt" onclick="pickAmt(this,'100')">100 ₽</span>
+      <span class="amt on" onclick="pickAmt(this,'300')">300 ₽</span>
+      <span class="amt" onclick="pickAmt(this,'500')">500 ₽</span>
+      <span class="amt" onclick="pickAmt(this,'1000')">1 000 ₽</span>
+      <span class="amt" onclick="pickAmt(this,'any')">Другая</span>
+    </div>
+    <div class="sbp-steps">
+      <div class="sbp-step"><div class="sbp-num">1</div>Открой приложение банка</div>
+      <div class="sbp-step"><div class="sbp-num">2</div>Выбери перевод по СБП</div>
+      <div class="sbp-step"><div class="sbp-num">3</div>Введи номер и сумму</div>
+    </div>
+    <div class="sbp-phone" onclick="copyPhone()">+7 (___) ___-__-__</div>
+    <div class="sbp-hint">Нажми чтобы скопировать</div>
+    <button class="btn-fill" onclick="copyPhone()">Скопировать номер</button>
+  </div>
+</div>
+
+<!-- Share Card Sheet -->
+<div class="overlay" id="share-card-sheet" onclick="if(event.target===this)closeSheet('share-card-sheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div style="font-size:13px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">Карточка прогресса</div>
+
+    <!-- Visual card preview -->
+    <div class="share-card" id="share-card-preview">
+      <div class="sc-logo">QUITLY · quitly.app</div>
+      <div class="sc-user">
+        <div class="sc-ava" id="sc-ava">🐺</div>
+        <div>
+          <div class="sc-name" id="sc-name">...</div>
+          <div class="sc-handle" id="sc-handle">quitly.app</div>
+        </div>
+      </div>
+      <div class="sc-timer" id="sc-timer">00:00</div>
+      <div class="sc-dayl" id="sc-dayl">День 1 без сигарет</div>
+      <div class="sc-stats">
+        <div class="sc-stat">
+          <div class="sc-sv" style="color:#26c17e" id="sc-cigs">0</div>
+          <div class="sc-sl">не выкурено</div>
+        </div>
+        <div class="sc-stat">
+          <div class="sc-sv" style="color:#4ca3ff" id="sc-money">0₽</div>
+          <div class="sc-sl">сэкономлено</div>
+        </div>
+      </div>
+      <div class="sc-ms" id="sc-ms-badge" style="display:none">
+        <div class="sc-ms-ico" id="sc-ms-ico">🏅</div>
+        <div class="sc-ms-txt" id="sc-ms-txt">Достижение разблокировано</div>
+      </div>
+      <div class="sc-footer">
+        <div class="sc-url">quitly.app</div>
+        <div class="sc-tags">#quitly<br>#бросаемвместе<br>#бросаюкурить</div>
+      </div>
+    </div>
+
+    <div style="font-size:12px;color:var(--sub);margin-bottom:14px;text-align:center">📸 Сделай скриншот карточки, или скопируй текст для поста</div>
+
+    <div class="btn-row">
+      <button class="btn-fill outline" onclick="copyShareText()">📋 Копировать текст</button>
+      <button class="btn-fill threads" onclick="postToThreads()">
+        <svg viewBox="0 0 192 192" width="15" height="15" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>
+        Пост в Threads
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Milestone Celebration Sheet -->
+<div class="overlay" id="ms-cel-sheet" onclick="if(event.target===this)closeSheet('ms-cel-sheet')">
+  <div class="sheet ms-cel-sheet">
+    <div class="sheet-handle"></div>
+    <div class="ms-cel-ico" id="ms-cel-ico">🏆</div>
+    <div style="text-align:center;margin-bottom:14px">
+      <span class="ms-cel-badge">
+        <span id="ms-cel-badge-ico">🏆</span>
+        <span id="ms-cel-badge-txt" style="font-size:13px;font-weight:700;color:var(--green)">Достижение</span>
+      </span>
+    </div>
+    <div class="ms-cel-sheet sheet-title" id="ms-cel-title" style="text-align:center">Ты сделал это!</div>
+    <div class="ms-cel-body" id="ms-cel-body" style="text-align:center"></div>
+    <div class="btn-row">
+      <button class="btn-fill outline" onclick="closeSheet('ms-cel-sheet')">Закрыть</button>
+      <button class="btn-fill threads" onclick="closeSheet('ms-cel-sheet');openShareCard()">
+        🎉 Поделиться победой
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+// ─── DATA ───
+const AVTS=['🐺','🦊','🐻','🦁','🐯','🐼','🦄','🐸','🔥','⚡','🌊','🎯','🦋','🐙','🌿'];
+
+// Tips from Marshak podcast — based on mechanisms, not willpower
+const TIPS=[
+  'Тяга длится 3–5 минут — это физиологический пик. Выпей воды, подыши глубоко. Волна пройдёт без сигареты.',
+  'Курение — не привычка. Это прижизненно запечатлённый инстинкт. Его не «бросают» силой воли — его замещают внутренним комфортом.',
+  'Спроси себя честно: что не так сейчас в моей жизни? Тяга к сигарете — это сигнал дисфории, а не потребность в никотине.',
+  'Промой нос тёплой солёной водой (1 ч.л. на стакан). Чистая носоглотка = больше кислорода = больше дофамина. Это работает буквально.',
+  'Перерывы углубляют зависимость — исследования UCLA показали, что мозг курильщика «с паузами» формирует больше нейронных связей. Бросай раз и навсегда.',
+  'Физическая активность вырабатывает эндогенные стимуляторы — те же вещества, что даёт никотин. 20 минут движения = естественный «приход».',
+  'День 3 — физически самый тяжёлый. После него никотин полностью выводится из крови. Только психологическая зависимость — а с ней ты справишься.',
+  'Обиды и агрессия в этот период — норма. По Маршаку, это инстинктивная реакция на дисфорию. Ты не злой — ты выздоравливаешь.',
+  'Замени утренний ритуал с сигаретой на 5 минут дыхательных упражнений. Мозг привязан к ритуалу, а не к никотину — дай ему другой.',
+  'Путь к свободе от курения — это внутренний комфорт. Научись чувствовать себя хорошо без внешних стимуляторов.',
+  'Посчитай деньги. Запланируй трату прямо сейчас — конкретную вещь или поездку. Мозгу нужна альтернативная награда.',
+  'Если сорвался — это не провал. Большинство людей бросают с 3–5 попытки. Каждая попытка — данные, а не поражение.',
+  'Заложенный нос снижает дофамин напрямую через нехватку кислорода. Промой нос — и настроение улучшится физически.',
+  'Убери сигареты и зажигалки из поля зрения. Инстинкт запускается триггерами — убери триггер, ослабишь инстинкт.',
+];
+
+const MS=[
+  {s:20*60,  l:'20 минут', i:'💓',
+   d:'Давление и пульс нормализуются. Сердце уже получает меньше нагрузки.',
+   detail:'Уже через 20 минут после последней сигареты частота сердечных сокращений снижается до нормы, а давление начинает падать. Твоё сердце буквально вздыхает с облегчением.'},
+  {s:8*3600,  l:'8 часов',  i:'🫁',
+   d:'Уровень кислорода в крови восстанавливается до нормы.',
+   detail:'Угарный газ из сигаретного дыма вытесняет кислород из эритроцитов. Через 8 часов концентрация CO падает вдвое, а кислород занимает своё место. Именно поэтому через 8 часов многие чувствуют прилив сил.'},
+  {s:48*3600, l:'2 дня',   i:'👃',
+   d:'Вкус и запах начинают возвращаться.',
+   detail:'Никотин разрушает нервные окончания, отвечающие за обоняние и вкус. Через 48 часов они начинают восстанавливаться. Еда станет вкуснее, запахи — острее. Тело буквально оживает.'},
+  {s:72*3600, l:'3 дня',   i:'🧠',
+   d:'Никотин полностью выведен из крови.',
+   detail:'Физическая зависимость исчезает. Никотиновые рецепторы перестают требовать своё. Дальше только психологическая составляющая — инстинкт, запечатлённый в памяти. Но именно с ним Quitly помогает работать.'},
+  {s:14*86400,l:'2 недели', i:'🌬️',
+   d:'Слизистые носа и горла восстановились.',
+   detail:'Мерцательный эпителий бронхов оживает — он снова начинает гнать слизь с загрязнениями наружу. Кашель может усилиться: это хороший знак, лёгкие очищаются. Носоглотка чище → больше кислорода → лучше настроение.'},
+  {s:30*86400,l:'1 месяц',  i:'😴',
+   d:'Сон глубже, храп снижается.',
+   detail:'Воспаление слизистой носа спадает — дыхание во сне улучшается. По данным сомнологов, храп у бывших курильщиков снижается уже на 30-й день. Мозг начинает получать достаточно кислорода ночью.'},
+  {s:90*86400,l:'3 месяца', i:'❤️',
+   d:'Риск инфаркта снизился вдвое от пикового.',
+   detail:'Функция лёгких улучшается на 30%. Кровообращение восстановлено. Клетки крови перестают «склеиваться» — тромбоз становится значительно менее вероятным. Твоё сердце работает как у некурящего.'},
+  {s:365*86400,l:'1 год',   i:'🏆',
+   d:'Риск болезней сердца снизился вдвое.',
+   detail:'1 год без сигарет — это медицинский рубеж. Риск коронарной болезни теперь вдвое ниже, чем у курильщика. Лёгкие восстановлены на 90%. Ты живёшь дольше — это не метафора, это факт.'},
+];
+const FEED_DATA=[{a:'🦁',n:'Максим_К',t:Date.now()-2*86400e3,th:true},{a:'🐼',n:'elena_new',t:Date.now()-18*3600e3,th:false},{a:'🔥',n:'Дмитрий88',t:Date.now()-5*3600e3,th:true},{a:'🦊',n:'stopsmoke',t:Date.now()-7*86400e3,th:true},{a:'🐸',n:'Настя_сильная',t:Date.now()-41*3600e3,th:false},{a:'⚡',n:'Igor_quit',t:Date.now()-1*3600e3,th:true},{a:'🐯',n:'Алексей_М',t:Date.now()-3*86400e3,th:false},{a:'🌊',n:'marina2025',t:Date.now()-12*3600e3,th:true}];
+const T_SVG=`<svg viewBox="0 0 192 192" width="9" height="9" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>`;
+
+// ─── STATE ───
+const S={user:null,startTime:null,cravings:0,ival:null,screen:'welcome',history:[]};
+
+// ─── UTILS ───
+const el=id=>document.getElementById(id);
+const qs=(s,p=document)=>p.querySelector(s);
+function elapsed(){return S.startTime?Math.floor((Date.now()-S.startTime)/1000):0}
+function fmtDur(s){const d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),sc=s%60;if(d>0)return`${d}д ${h}ч ${m}м`;if(h>0)return`${h}ч ${m}м ${sc}с`;return`${pad(m)}:${pad(sc)}`}
+function fmtShort(ms){const s=Math.floor((Date.now()-ms)/1000),d=Math.floor(s/86400),h=Math.floor(s/3600);return d>0?d+'д':h>0?h+'ч':Math.floor(s/60)+'м'}
+function pad(n){return String(n).padStart(2,'0')}
+function notSmoked(s,c){return Math.floor(s/(86400/(c||20)))}
+function savedMoney(s,c,p){return Math.floor(notSmoked(s,c)*((p||200)/20))}
+
+// ─── SCREENS ───
+function go(id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  el('s-'+id).classList.add('on');
+  S.screen=id;
+  const hasNav=['home','feed','challenge','about','profile'].includes(id);
+  el('nav').style.display=hasNav?'flex':'none';
+}
+function setNav(id){
+  go(id);
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  const b=el('ni-'+id);if(b)b.classList.add('on');
+  if(id==='feed'){renderFeed();renderRank()}
+  if(id==='challenge')renderChallenge();
+  if(id==='profile')renderProfile();
+}
+const SUN_SVG=`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
+const MOON_SVG=`<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+const SEG_HTML=`
+  <button class="ts-btn" data-v="light" onclick="setTheme('light')">${SUN_SVG}</button>
+  <button class="ts-btn" data-v="dark" onclick="setTheme('dark')">${MOON_SVG}</button>
+  <button class="ts-btn" data-v="auto" onclick="setTheme('auto')">Авто</button>`;
+
+function setTheme(val){
+  const mq=window.matchMedia('(prefers-color-scheme: dark)');
+  const isDark=val==='dark'||(val==='auto'&&mq.matches);
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  localStorage.setItem('ql_theme',val);
+  document.querySelectorAll('.ts-btn').forEach(b=>{
+    b.classList.toggle('on',b.dataset.v===val);
+  });
+}
+function initTheme(){
+  // inject HTML into all seg containers
+  document.querySelectorAll('.theme-seg').forEach(el=>el.innerHTML=SEG_HTML);
+  const saved=localStorage.getItem('ql_theme')||'auto';
+  setTheme(saved);
+  // follow system if auto
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{
+    if((localStorage.getItem('ql_theme')||'auto')==='auto')setTheme('auto');
+  });
+}
+
+// ─── AUTH ───
+function loginThreads(){
+  // If running on real domain — redirect to OAuth
+  if(location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+    window.location.href = '/api/auth/threads';
+    return;
+  }
+  // Dev/preview mode — mock
+  S.user={name:'mr.tsaryuk',avatar:'👨‍⚕️',cigs:20,price:200,threads:true,handle:'@mr.tsaryuk'};
+  S.startTime=new Date();S.cravings=0;S_lastMsCelebrated=-1;
+  saveLocal();bootHome();setNav('home');
+  toast('Вошёл через Threads ✓','green');
+}
+
+// ─── ONBOARD ───
+function initAva(){
+  el('ava-grid').innerHTML=AVTS.map(a=>`<span style="font-size:28px;padding:9px;border-radius:12px;cursor:pointer;border:2px solid transparent;background:var(--surface2);transition:all .15s" onclick="pickAva(this,'${a}')">${a}</span>`).join('');
+}
+function pickAva(e,a){document.querySelectorAll('#ava-grid span').forEach(s=>s.style.borderColor='transparent');e.style.borderColor='var(--green)';el('ob-ava').textContent=a}
+function startQuitting(){
+  const name=el('ob-name').value.trim();
+  if(!name){toast('Введи никнейм','red');return}
+  S.user={name,avatar:el('ob-ava').textContent,cigs:parseInt(el('ob-cigs').value)||20,price:parseInt(el('ob-price').value)||200,threads:false};
+  S.startTime=new Date();S.cravings=0;S_lastMsCelebrated=-1;
+  saveLocal();bootHome();setNav('home');
+  toast('🚭 Отсчёт пошёл!','green');
+}
+
+// ─── HOME ───
+function bootHome(){
+  if(!S.user||!S.startTime)return;
+  el('uc-ava').textContent=S.user.avatar;
+  el('uc-name').textContent=S.user.name;
+  const d=Math.floor(elapsed()/86400);
+  el('tip-txt').textContent=TIPS[Math.min(d,TIPS.length-1)];
+  el('craving-n').textContent=S.cravings;
+  el('home-since').textContent='с '+S.startTime.toLocaleDateString('ru',{day:'numeric',month:'short'});
+  renderFeedPreview();renderMsHome();
+  if(S.ival)clearInterval(S.ival);
+  S.ival=setInterval(tick,1000);tick();
+}
+
+function tick(){
+  if(!S.startTime)return;
+  const secs=elapsed(),d=Math.floor(secs/86400),h=Math.floor((secs%86400)/3600),m=Math.floor((secs%3600)/60),s=secs%60;
+  if(el('timer-h'))el('timer-h').textContent=d>0?d+'д':pad(h);
+  if(el('timer-m'))el('timer-m').textContent=pad(m);
+  if(el('timer-s'))el('timer-s').textContent=pad(s);
+  el('home-day').textContent=`День ${d+1}`;
+  el('st-cigs').textContent=notSmoked(secs,S.user?.cigs);
+  el('st-money').textContent=savedMoney(secs,S.user?.cigs,S.user?.price)+' ₽';
+  if(S.screen==='profile')updateProfileStats();
+  checkMilestones(secs);
+}
+
+function craved(){S.cravings++;el('craving-n').textContent=S.cravings;saveLocal();toast('Ты устоял! 💪','green')}
+
+// ─── SMOKED ───
+function openSmoked(){openSheet('smoked-sheet')}
+function confirmSmoked(){
+  closeSheet('smoked-sheet');
+  const secs=elapsed(),days=Math.floor(secs/86400),cigs=notSmoked(secs,S.user?.cigs),money=savedMoney(secs,S.user?.cigs,S.user?.price);
+  // Save this attempt to history
+  if(S.startTime){
+    S.history.push({start:S.startTime.toISOString(),end:new Date().toISOString(),secs,cigs,money});
+    saveLocal();
+  }
+  const attempts=S.history.length;
+  el('r-days').textContent=days;
+  el('r-cigs').textContent=cigs;
+
+  // populate stats grid
+  const bestSecs=getBestStreak();
+  const bestDays=Math.floor(bestSecs/86400),bestH=Math.floor((bestSecs%86400)/3600);
+  const bsEl=el('r-best');
+  if(bsEl)bsEl.textContent=bestDays>0?bestDays+'д '+bestH+'ч':bestH+'ч';
+  const attEl=el('r-attempts');if(attEl)attEl.textContent=attempts;
+  const tcEl=el('r-total-cigs');if(tcEl)tcEl.textContent=getTotalCigsNotSmoked();
+  const tmEl=el('r-total-money');if(tmEl)tmEl.textContent=getTotalSaved()+'₽';
+
+  const facts=[
+    'По Маршаку: перерывы только углубляют нейронные связи зависимости. Этот срыв — шаг к пониманию. Бросай насовсем.',
+    'Срыв — это данные, не провал. Что спровоцировало? Стресс, скука, компания? Запомни триггер — следующий раз ты будешь готов.',
+    `Ты сталкиваешься с патологическим инстинктом, а не слабостью. Большинство бросают с 3–5 попытки. Это попытка ${attempts}.`,
+    'Тело уже восстановилось частично. Ни одна клетка не забыла прогресс. Начни снова — и всё накопится быстрее.',
+    'Путь к свободе — не сила воли, а внутренний комфорт. Спроси себя: что сейчас не так в моей жизни?',
+  ];
+  el('relapse-fact-txt').textContent=facts[Math.min(attempts-1,facts.length-1)];
+  go('relapse');
+}
+function restartNow(){
+  S.startTime=new Date();S.cravings=0;S_lastMsCelebrated=-1;
+  saveLocal();bootHome();setNav('home');
+  toast('Новый отсчёт 🚭 Попытка '+(S.history.length+1),'green');
+}
+
+// ─── AUTH GATE ───
+function gateHTML(feature){
+  return`<div class="gate-banner">
+    <div class="gate-ico">🔒</div>
+    <div class="gate-text">${feature} доступно только для пользователей Threads</div>
+    <button class="gate-btn" onclick="loginThreads()">Войти</button>
+  </div>`;
+}
+
+// ─── FEED ───
+const tdot=`<span class="t-dot">${T_SVG}</span>`;
+function renderFeedPreview(){
+  const items=[...(S.startTime?[{a:S.user?.avatar||'🐺',n:S.user?.name||'Ты',t:S.startTime.getTime(),th:S.user?.threads}]:[]),...FEED_DATA.slice(0,4)];
+  el('feed-preview').innerHTML=items.map(it=>`<div class="fi"><div class="fi-ava">${it.a}</div><div class="fi-info"><div class="fi-name">${it.n}${it.th?tdot:''}</div><div class="fi-time">${fmtShort(it.t)} без сигарет</div></div><button class="fi-action" onclick="openSupSheet('${it.n}')">🤍</button></div>`).join('');
+}
+// ─── CHALLENGE ───
+function renderChallenge(){
+  const g=el('ch-gate'),c=el('ch-content');
+  if(!S.user?.threads){g.innerHTML=gateHTML('Дуэли доступны только после входа через Threads');c.innerHTML='';return}
+  g.innerHTML='';
+  const secs=elapsed();
+  c.innerHTML=`<div class="vs-card">
+    <div class="vs-row">
+      <div class="vs-side"><div class="vs-ava">${S.user.avatar}</div><div class="vs-name">Ты</div><div class="vs-time">${fmtDur(secs)}</div></div>
+      <div class="vs-sep">vs</div>
+      <div class="vs-side"><div class="vs-ava">🦊</div><div class="vs-name">Андрей_Д</div><div class="vs-time">${fmtDur(Math.max(0,secs-7200))}</div></div>
+    </div>
+    <div class="vs-status">Ты впереди на 2 часа 🏆</div>
+  </div>
+  <div style="padding:0 16px">
+    <label class="inp-label" style="margin-top:4px">Пригласить в дуэль</label>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <input class="inp" id="ch-inp" placeholder="@никнейм в Threads" style="flex:1">
+      <button class="btn-fill" style="width:auto;padding:13px 18px;flex-shrink:0" onclick="inviteDuel()">Позвать</button>
+    </div>
+    <button class="btn-fill outline" onclick="shareChallenge()">🔗 Поделиться вызовом в Threads</button>
+  </div>`;
+}
+function inviteDuel(){const v=el('ch-inp')?.value?.trim();if(!v){toast('Введи никнейм','red');return}toast(`Приглашение отправлено @${v}`,'green')}
+function shareChallenge(){
+  const s=elapsed(),d=Math.floor(s/86400);
+  const txt=`🤝 Бросаю курить и вызываю тебя на дуэль!\n\nЯ уже ${d>0?d+' дней':fmtDur(s)} без сигарет — сможешь победить?\n\nПрисоединяйся: quitly.app\n\n${TAGS}\n${AUTHOR}`;
+  window.open(`https://www.threads.net/intent/post?text=${encodeURIComponent(txt)}`,'_blank');
+}
+
+// ─── PROFILE ───
+function renderProfile(){
+  if(!S.user)return;
+  el('p-ava').textContent=S.user.avatar;
+  el('p-name').textContent=S.user.name;
+  el('p-handle').innerHTML=S.user.threads?`${tdot} ${S.user.handle}`:'Аноним';
+  updateProfileStats();
+
+  // all-time stats
+  const bestSecs=getBestStreak();
+  const bestDays=Math.floor(bestSecs/86400),bestH=Math.floor((bestSecs%86400)/3600);
+  el('p-best-streak').textContent=bestDays>0?bestDays+'д '+bestH+'ч':(bestH>0?bestH+'ч':'<1ч');
+  el('p-attempts').textContent=(S.history.length+1);
+  el('p-total-cigs').textContent=getTotalCigsNotSmoked();
+  el('p-total-money').textContent=getTotalSaved()+'₽';
+
+  // history list
+  const hw=el('p-history-wrap'),hl=el('p-history');
+  if(S.history.length>0){
+    hw.style.display='block';
+    hl.innerHTML=[...S.history].reverse().map((h,i)=>{
+      const n=S.history.length-i;
+      const d=Math.floor(h.secs/86400),hrs=Math.floor((h.secs%86400)/3600);
+      const date=new Date(h.start).toLocaleDateString('ru',{day:'numeric',month:'short'});
+      return`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:13px;font-weight:600">Попытка ${n}</div>
+          <div style="font-size:12px;color:var(--sub);margin-top:2px">с ${date} · ${d>0?d+'д ':''} ${hrs}ч без сигарет</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;font-weight:700;color:var(--green)">${h.cigs} сиг.</div>
+          <div style="font-size:11px;color:var(--sub)">${h.money}₽</div>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    hw.style.display='none';
+  }
+
+  const secs=elapsed(),achieved=MS.filter(m=>secs>=m.s);
+  el('p-badges').innerHTML=achieved.length?achieved.map(m=>`<div class="bdg"><span class="bdg-ico">${m.i}</span><span class="bdg-txt">${m.l}</span></div>`).join(''):`<span style="font-size:13px;color:var(--sub);padding:0 16px">Первый значок через 20 минут 🎯</span>`;
+}
+function updateProfileStats(){
+  const secs=elapsed();
+  el('p-days').textContent=Math.floor(secs/86400);
+  el('p-cigs').textContent=notSmoked(secs,S.user?.cigs);
+  el('p-money').textContent=savedMoney(secs,S.user?.cigs,S.user?.price)+'₽';
+}
+
+// ─── MILESTONES ───
+function renderMsHome(){
+  const secs=elapsed();
+  el('ms-home').innerHTML=MS.map((m,i)=>{
+    const done=secs>=m.s,pct=done?100:Math.round(secs/m.s*100);
+    return`<div class="ms-item${done?' done':''}" onclick="toggleMs(${i})">
+      <div class="ms-ico">${m.i}</div>
+      <div class="ms-body">
+        <div class="ms-name">${m.l}</div>
+        <div class="ms-desc">${m.d}</div>
+        <div class="ms-detail" id="ms-detail-${i}" style="display:none;font-size:12px;color:var(--sub);line-height:1.55;margin-top:6px">${m.detail}</div>
+        ${!done?`<div class="ms-bar"><div class="ms-fill" style="width:${pct}%"></div></div>`:''}
+      </div>
+      ${done?'<div class="ms-check">✓</div>':''}
+    </div>`;
+  }).join('');
+}
+function toggleMs(i){
+  const d=el('ms-detail-'+i);if(!d)return;
+  d.style.display=d.style.display==='none'?'block':'none';
+}
+
+// ─── SHEETS ───
+function openSheet(id){el(id).classList.add('open')}
+function closeSheet(id){el(id).classList.remove('open')}
+function openSupSheet(name){el('sup-name').textContent=name;el('sup-msg').value='';openSheet('sup-sheet')}
+function sendSupport(){const m=el('sup-msg').value.trim();if(!m){toast('Напиши что-нибудь','red');return}closeSheet('sup-sheet');toast('Поддержка отправлена 🤍','green')}
+function openDonate(){openSheet('donate-sheet')}
+function pickAmt(e,v){document.querySelectorAll('.amt').forEach(a=>a.classList.remove('on'));e.classList.add('on');if(v==='any')toast('Введи сумму при переводе')}
+function copyPhone(){const p='+7 (999) 000-00-00';navigator.clipboard.writeText(p.replace(/\D/g,'')).then(()=>toast('Номер скопирован!')).catch(()=>toast(p))}
+
+// ─── HASHTAGS ───
+const TAGS='#quitly #бросаемвместе #бросаюкурить';
+const AUTHOR='@mr.tsaryuk';
+
+// ─── SHARE TEXT BUILDER ───
+function buildShareText(includeCard=false){
+  const s=elapsed(),d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60);
+  const c=notSmoked(s,S.user?.cigs),money=savedMoney(s,S.user?.cigs,S.user?.price);
+  const achieved=MS.filter(ms=>s>=ms.s);
+  const lastMs=achieved[achieved.length-1];
+  const attempt=S.history.length+1;
+
+  let lines=[];
+  if(d>0) lines.push(`🚭 День ${d} без сигарет!`);
+  else if(h>0) lines.push(`🚭 ${h} часов без сигарет — начинаю!`);
+  else lines.push(`🚭 Только что бросил курить!`);
+
+  if(attempt>1) lines.push(`(попытка ${attempt} — и это будет последняя)`);
+  lines.push('');
+
+  if(d>0||h>0){
+    lines.push(`⏱ ${d>0?d+'д ':''} ${h}ч ${m}м без сигарет`);
+    lines.push(`🚬 Не выкурил: ${c} сигарет`);
+    lines.push(`💰 Сэкономил: ${money}₽`);
+    if(lastMs) lines.push(`🏅 Достижение: ${lastMs.l} — ${lastMs.d}`);
+    lines.push('');
+  }
+
+  lines.push(`Бросаю с ${AUTHOR} на quitly.app`);
+  lines.push('');
+  lines.push(TAGS);
+  return lines.join('\n');
+}
+
+// ─── SHARE CARD SHEET ───
+function openShareCard(){
+  const s=elapsed(),d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),sc=s%60;
+  const c=notSmoked(s,S.user?.cigs),money=savedMoney(s,S.user?.cigs,S.user?.price);
+  const achieved=MS.filter(ms=>s>=ms.s);
+  const lastMs=achieved[achieved.length-1];
+
+  // populate card
+  el('sc-ava').textContent=S.user?.avatar||'🐺';
+  el('sc-name').textContent=S.user?.name||'Аноним';
+  el('sc-handle').textContent=S.user?.threads?`${S.user.handle} · Threads`:'quitly.app';
+  el('sc-timer').textContent=d>0?`${d}д ${pad(h)}:${pad(m)}`:`${pad(h)}:${pad(m)}:${pad(sc)}`;
+  el('sc-dayl').textContent=`День ${d+1} без сигарет`;
+  el('sc-cigs').textContent=c;
+  el('sc-money').textContent=money+'₽';
+
+  const badge=el('sc-ms-badge');
+  if(lastMs){
+    badge.style.display='flex';
+    el('sc-ms-ico').textContent=lastMs.i;
+    el('sc-ms-txt').textContent=lastMs.l+' — '+lastMs.d;
+  } else {
+    badge.style.display='none';
+  }
+  openSheet('share-card-sheet');
+}
+
+function copyShareText(){
+  navigator.clipboard.writeText(buildShareText())
+    .then(()=>toast('Текст скопирован — вставляй в Threads!','green'))
+    .catch(()=>toast(buildShareText().slice(0,60)+'…'));
+}
+
+function postToThreads(){
+  window.open(`https://www.threads.net/intent/post?text=${encodeURIComponent(buildShareText())}`,'_blank');
+  closeSheet('share-card-sheet');
+}
+
+function shareThreads(){openShareCard()}
+function copyProgress(){copyShareText()}
+
+// ─── MILESTONE CELEBRATION ───
+let S_lastMsCelebrated=-1;
+function checkMilestones(secs){
+  const idx=MS.findIndex((m,i)=>secs>=m.s&&i>S_lastMsCelebrated);
+  if(idx===-1)return;
+  S_lastMsCelebrated=idx;
+  const m=MS[idx];
+  el('ms-cel-ico').textContent=m.i;
+  el('ms-cel-badge-ico').textContent=m.i;
+  el('ms-cel-badge-txt').textContent=m.l;
+  el('ms-cel-title').textContent='Ты достиг «'+m.l+'»!';
+  el('ms-cel-body').textContent=m.detail;
+  openSheet('ms-cel-sheet');
+}
+
+
+
+function renderFeed(){
+  const cnt=Math.floor(Math.random()*200)+750;
+  el('feed-cnt').textContent=`Сегодня бросили: ${cnt} человек`;
+  const items=[...(S.startTime?[{a:S.user?.avatar||'🐺',n:S.user?.name||'Ты',t:S.startTime.getTime(),th:S.user?.threads}]:[]),...FEED_DATA];
+  el('feed-list').innerHTML=items.map(it=>{
+    const secs=Math.floor((Date.now()-it.t)/1000),d=Math.floor(secs/86400);
+    return`<div class="feed-card">
+      <div class="fc-top">
+        <div class="fc-ava">${it.a}</div>
+        <div>
+          <div class="fc-name">${it.n}${it.th?tdot:''}</div>
+          <div class="fc-days">${d>0?d+' дней':'Первый день'}</div>
+        </div>
+        <button class="fc-btn" style="flex-shrink:0;width:auto;padding:8px 14px;margin-left:auto" onclick="shareSolidarity('${it.n}')">📣</button>
+      </div>
+      <div class="fc-timer">${fmtDur(secs)}</div>
+      <button class="fc-btn" onclick="openSupSheet('${it.n}')">🤍 Поддержать анонимно</button>
+    </div>`;
+  }).join('');
+  el('feed-gate').innerHTML=S.user?.threads?'':gateHTML('Лайки и реакции');
+}
+
+function renderCohort(){
+  if(!S.startTime){el('cohort-list').innerHTML='<div style="padding:20px;text-align:center;color:var(--sub);font-size:14px">Начни бросить, чтобы найти свою волну</div>';return}
+  const MY=S.startTime.getTime();
+  const cohort=FEED_DATA.filter(it=>Math.abs(it.t-MY)<86400e3);
+  if(!cohort.length){
+    el('cohort-list').innerHTML='<div style="padding:20px;text-align:center;color:var(--sub);font-size:14px">Никто не бросил в тот же день.<br>Ты первый в своей волне 🏄</div>';
+    return;
+  }
+  el('cohort-list').innerHTML=cohort.map(it=>{
+    const secs=Math.floor((Date.now()-it.t)/1000);
+    const myS=elapsed(),delta=secs-myS;
+    const aheadBehind=delta>0?`на ${fmtDur(Math.abs(delta))} впереди`:`на ${fmtDur(Math.abs(delta))} сзади`;
+    return`<div class="feed-card" style="border-left:3px solid var(--blue)">
+      <div class="fc-top">
+        <div class="fc-ava">${it.a}</div>
+        <div>
+          <div class="fc-name">${it.n}${it.th?tdot:''}</div>
+          <div class="fc-days" style="color:var(--blue)">${aheadBehind}</div>
+        </div>
+      </div>
+      <div class="fc-timer">${fmtDur(secs)}</div>
+      <button class="fc-btn" onclick="openSupSheet('${it.n}')">🤍 Поддержать</button>
+    </div>`;
+  }).join('');
+}
+
+function shareSolidarity(name){
+  const s=elapsed(),d=Math.floor(s/86400);
+  const txt=`Держись, ${name}! 💪\n\nМы бросаем вместе уже ${d>0?d+' дней':'несколько часов'}\n\n${TAGS}\n${AUTHOR}`;
+  window.open(`https://www.threads.net/intent/post?text=${encodeURIComponent(txt)}`,'_blank');
+}
+
+function renderRank(){
+  const sorted=[...FEED_DATA].sort((a,b)=>a.t-b.t);
+  if(S.startTime)sorted.unshift({a:S.user?.avatar||'🐺',n:S.user?.name||'Ты',t:S.startTime.getTime(),th:S.user?.threads});
+  const g=['g1','g2','g3'],m=['🥇','🥈','🥉'];
+  el('rank-list').innerHTML=sorted.slice(0,10).map((it,i)=>{const secs=Math.floor((Date.now()-it.t)/1000),d=Math.floor(secs/86400);return`<div class="rank-row"><div class="rank-n ${g[i]||''}">${m[i]||i+1}</div><div class="rank-ava">${it.a}</div><div class="rank-info"><div class="rank-name">${it.n}${it.th?tdot:''}</div><div class="rank-dur">${fmtDur(secs)}</div></div><div class="rank-badge">${d>0?d+'д':'сегодня'}</div></div>`}).join('');
+}
+
+function switchTab(t){
+  ['feed','cohort','rank'].forEach(id=>{
+    const btn=el('tab-'+id.replace('feed','f').replace('cohort','cohort').replace('rank','r'));
+    if(btn)btn.classList.toggle('active',t===id||((t==='feed')&&id==='feed'));
+  });
+  el('tab-f').classList.toggle('active',t==='feed');
+  const tabCohort=el('tab-cohort');if(tabCohort)tabCohort.classList.toggle('active',t==='cohort');
+  el('tab-r').classList.toggle('active',t==='rank');
+  el('panel-feed').style.display=t==='feed'?'block':'none';
+  const pc=el('panel-cohort');if(pc)pc.style.display=t==='cohort'?'block':'none';
+  el('panel-rank').style.display=t==='rank'?'block':'none';
+  if(t==='cohort')renderCohort();
+}
+
+// Live feed — simulate new person joining every 12–20s
+let liveJoinTimer;
+function startLiveJoin(){
+  clearInterval(liveJoinTimer);
+  const NAMES=['Алексей_Н','Мария_П','sergio_quit','Влад_бросил','Ольга_2025','korolev_v','stopsmoking_ru','Паша_сильный'];
+  const AVAS=['🐸','🌊','⚡','🎯','🦋','🔥','🐼','🌿'];
+  liveJoinTimer=setInterval(()=>{
+    const fp=el('feed-preview');if(!fp)return;
+    const n=NAMES[Math.floor(Math.random()*NAMES.length)];
+    const a=AVAS[Math.floor(Math.random()*AVAS.length)];
+    const div=document.createElement('div');
+    div.className='fi live-new';
+    div.innerHTML=`<div class="fi-ava">${a}</div><div class="fi-info"><div class="fi-name">${n}</div><div class="fi-time" style="color:var(--green)">только что бросил!</div></div><button class="fi-action">🤍</button>`;
+    fp.insertBefore(div,fp.firstChild);
+    // keep max 6 in preview
+    while(fp.children.length>6)fp.removeChild(fp.lastChild);
+    // bump live counter
+    const lc=el('live-n');if(lc)lc.textContent=+lc.textContent+1;
+    const wsc=el('ws-today');if(wsc)wsc.textContent=+lc?.textContent||0;
+  },Math.random()*8000+12000);
+}
+
+// ─── TOAST ───
+function toast(msg,type=''){
+  const t=document.createElement('div');t.className='toast '+(type||'');t.textContent=msg;
+  el('toasts').appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},2600);
+}
+
+// ─── PERSIST ───
+function saveLocal(){
+  if(!S.user)return;
+  localStorage.setItem('ql_u',JSON.stringify(S.user));
+  if(S.startTime)localStorage.setItem('ql_t',S.startTime.toISOString());
+  localStorage.setItem('ql_c',S.cravings);
+  localStorage.setItem('ql_h',JSON.stringify(S.history||[]));
+}
+function loadLocal(){
+  try{
+    const u=localStorage.getItem('ql_u'),t=localStorage.getItem('ql_t');
+    if(u&&t){
+      S.user=JSON.parse(u);
+      S.startTime=new Date(t);
+      S.cravings=parseInt(localStorage.getItem('ql_c')||'0');
+      S.history=JSON.parse(localStorage.getItem('ql_h')||'[]');
+      return true;
+    }
+  }catch{}return false;
+}
+
+// ─── STATS HELPERS ───
+function getBestStreak(){
+  const all=[...S.history.map(h=>h.secs)];
+  if(S.startTime)all.push(elapsed());
+  return all.length?Math.max(...all):0;
+}
+function getTotalSaved(){
+  return S.history.reduce((sum,h)=>sum+h.money,0)+savedMoney(elapsed(),S.user?.cigs,S.user?.price);
+}
+function getTotalCigsNotSmoked(){
+  return S.history.reduce((sum,h)=>sum+h.cigs,0)+notSmoked(elapsed(),S.user?.cigs);
+}
+function getAvgStreak(){
+  if(!S.history.length)return 0;
+  return Math.floor(S.history.reduce((s,h)=>s+h.secs,0)/S.history.length);
+}
+
+// ─── BOOT ───
+initAva();initTheme();
+if(loadLocal()){
+  // restore milestone progress - find last achieved
+  const s=elapsed();
+  S_lastMsCelebrated=MS.reduce((last,m,i)=>s>=m.s?i:last,-1);
+  bootHome();setNav('home');
+}
+startLiveJoin();
+setInterval(()=>{const e=el('live-n');if(e&&Math.random()>.65)e.textContent=+e.textContent+1},5000);
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(r => console.log('SW registered:', r.scope))
+      .catch(e => console.log('SW error:', e));
+  });
+}
+// Handle Threads OAuth callback params
+(function(){
+  const p = new URLSearchParams(location.search);
+  if(p.get('threads_user')) {
+    const u = {
+      name: p.get('name') || p.get('handle'),
+      handle: p.get('handle'),
+      threads: true,
+      avatar: '🧵',
+      cigs: 20,
+      price: 200,
+      token: p.get('token')
+    };
+    localStorage.setItem('ql_u', JSON.stringify(u));
+    history.replaceState({}, '', '/');
+  }
+})();
+</script>
+</body>
+</html>

@@ -352,6 +352,24 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
 .toast.red{background:var(--red)}
 .toast.green{background:var(--green)}
 .toast.blue{background:var(--blue)}
+
+/* ─── MOBILE FIXES ─── */
+@media (max-width: 380px){
+  .timer-big{font-size:clamp(48px,18vw,72px)!important}
+  .wl-icon{font-size:60px;padding:24px 0 16px}
+  .wl-title{font-size:28px!important}
+  .page-hdr{padding:12px 12px 6px}
+  .card{padding:13px}
+}
+/* Safe area for iPhone notch bottom */
+.scr{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 16px)}
+#nav{padding-bottom:env(safe-area-inset-bottom, 0px)}
+/* Prevent text selection on swipe */
+.scr{-webkit-user-select:none;user-select:none}
+.inp,-webkit-user-select:text;
+/* Active states for mobile tap */
+.btn-fill:active,.btn-pill:active,.ni:active{opacity:.65;transform:scale(.98)}
+
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -703,6 +721,7 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
       Поделиться прогрессом в Threads
     </button>
     <button class="btn-fill outline" style="color:var(--red);border-color:var(--red-border)" onclick="openSmoked()">🚬 Записать срыв</button>
+    <button class="btn-fill outline" style="color:var(--sub);margin-top:4px" onclick="confirmLogout()">Выйти из аккаунта</button>
   </div>
 </div>
 
@@ -937,6 +956,23 @@ function setNav(id){
   if(id==='feed'){renderFeed();renderRank()}
   if(id==='challenge')renderChallenge();
   if(id==='profile')renderProfile();
+}
+
+function confirmLogout(){
+  if(!confirm('Выйти из аккаунта? Данные о прогрессе сохранятся.')) return;
+  logout();
+}
+function logout(){
+  clearInterval(S.ival);
+  localStorage.removeItem('ql_u');
+  localStorage.removeItem('ql_t');
+  localStorage.removeItem('ql_c');
+  localStorage.removeItem('ql_h');
+  S={user:null,startTime:null,cravings:0,ival:null,screen:'welcome',history:[]};
+  S_lastMsCelebrated=-1;
+  el('nav').style.display='none';
+  go('welcome');
+  toast('Вышли из аккаунта');
 }
 const SUN_SVG=`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
 const MOON_SVG=`<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
@@ -1481,6 +1517,37 @@ async function loadRealFeed() {
     }
   });
 }
+
+
+// ─── SWIPE NAVIGATION ───
+(function(){
+  const NAV_ORDER = ['home','feed','challenge','about','profile'];
+  let tx=0, ty=0, swiping=false;
+
+  document.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1) return;
+    tx = e.touches[0].clientX;
+    ty = e.touches[0].clientY;
+    swiping = true;
+  }, {passive:true});
+
+  document.addEventListener('touchend', e=>{
+    if(!swiping) return;
+    swiping = false;
+    const dx = e.changedTouches[0].clientX - tx;
+    const dy = e.changedTouches[0].clientY - ty;
+    // Only horizontal swipes, not vertical scrolls
+    if(Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)*1.5) return;
+    // Only swipe on main nav screens
+    const cur = NAV_ORDER.indexOf(S.screen);
+    if(cur === -1) return;
+    // Ignore swipes on feed tabs area
+    if(S.screen === 'feed') return;
+    const next = dx < 0 ? cur+1 : cur-1;
+    if(next < 0 || next >= NAV_ORDER.length) return;
+    setNav(NAV_ORDER[next]);
+  }, {passive:true});
+})();
 
 // ─── BOOT ───
 initAva();initTheme();

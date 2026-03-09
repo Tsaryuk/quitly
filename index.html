@@ -29,7 +29,7 @@
   --blue-bg: #e8f0fe;
   --acc: #0a0a0a;
   --acc-fg: #ffffff;
-  --nav-h: 60px;
+  --nav-h: 52px;
   --r: 14px;
   --r-sm: 9px;
   --safe-top: env(safe-area-inset-top, 0px);
@@ -132,21 +132,19 @@ body {
 .ni {
   flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding-top: 6px;
   background: none;
   border: none;
   cursor: pointer;
   color: var(--ph);
-  transition: color .15s;
+  transition: color .15s, transform .1s;
   font-family: inherit;
+  padding: 0;
 }
+.ni:active { transform: scale(.88); }
 .ni.on { color: var(--text); }
-.ni svg { width: 22px; height: 22px; stroke-width: 1.8; }
-.ni span { font-size: 10px; font-weight: 600; letter-spacing: .1px; }
+.ni svg { width: 26px; height: 26px; stroke-width: 1.6; }
 /* Active indicator dot */
 
 
@@ -962,23 +960,18 @@ body {
   <nav id="nav" style="display:none">
     <button class="ni on" data-i="0" onclick="swipeTo(0)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m3 12 2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/></svg>
-      <span>Дом</span>
     </button>
     <button class="ni" data-i="1" onclick="swipeTo(1)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4" stroke-linecap="round"/></svg>
-      <span>Лента</span>
     </button>
     <button class="ni" data-i="2" onclick="swipeTo(2)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-      <span>Дуэль</span>
     </button>
     <button class="ni" data-i="3" onclick="swipeTo(3)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="8" r="4" stroke-linecap="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg>
-      <span>Автор</span>
     </button>
     <button class="ni" data-i="4" onclick="swipeTo(4)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="8" r="4" stroke-linecap="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 20v-1a8 8 0 0 1 16 0v1"/></svg>
-      <span>Профиль</span>
     </button>
   </nav>
 

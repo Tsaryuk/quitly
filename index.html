@@ -32,9 +32,10 @@ body{height:100%;overflow:hidden;display:flex;flex-direction:column;background:v
 body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-size:15px}
 
 /* ─── SCREENS ─── */
-.scr{display:none;flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;min-height:0}
+.scr{display:none;flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;min-height:0;padding-bottom:24px;width:100%}
+.scr.no-nav{padding-bottom:env(safe-area-inset-bottom,16px)}
 .scr::-webkit-scrollbar{display:none}
-.scr.on{display:flex;flex-direction:column;animation:fadeUp .22s ease both}
+.scr.on{display:block;animation:fadeUp .22s ease both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .scr.no-nav{/* no special padding */}
 
@@ -448,15 +449,8 @@ input, textarea { -webkit-user-select: text; user-select: text; }
    Flexbox nav — НЕТ position:fixed, НЕТ padding-bottom трюков
 ═══════════════════════════════════════════════════════════════ */
 
-/* Screens — flex children of #app-wrap */
-.scr {
-  width: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding-bottom: 16px;
-  min-height: 0;
-}
-.scr.no-nav { padding-bottom: env(safe-area-inset-bottom, 16px); }
+/* Screens — flex:1 is set in base .scr rule above */
+/* padding-bottom handled per screen */
 
 /* Nav — flex child, естественно прижат к низу */
 #nav {
@@ -531,7 +525,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
     </div>
     <div class="wl-body">
       <div class="wl-icon">✊</div>
-      <div><span class="wl-live"><span class="wl-live-dot"></span><span id="live-n">847</span> бросают прямо сейчас</span></div>
+      <div><span class="wl-live"><span class="wl-live-dot"></span><span id="live-n">0</span> бросают прямо сейчас</span></div>
       <h1 class="wl-h1">Бросай.<br>Вместе.</h1>
       <p class="wl-sub">Трекер отказа от курения. Реальные люди, живая лента поддержки.</p>
 
@@ -1183,18 +1177,23 @@ function confirmLogout(){
 }
 function logout(){
   clearInterval(S.ival);
+  if(_tgCodePollTimer) clearInterval(_tgCodePollTimer);
   ['ql_u','ql_t','ql_c','ql_h'].forEach(k=>localStorage.removeItem(k));
   S={user:null,startTime:null,cravings:0,ival:null,screen:'welcome',history:[]};
   S_lastMsCelebrated=-1;
-  // Показываем welcome сразу — скрываем nav, убираем все .scr.on
-  const nav=el('nav'); if(nav) nav.style.display='none';
+  FEED_DATA.length=0; // чистим ленту
+  // Скрываем nav немедленно
+  const nav=el('nav');
+  if(nav){ nav.style.display='none'; nav.style.setProperty('display','none','important'); }
+  // Переключаем экраны
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
-  const wl=el('s-welcome'); if(wl) wl.classList.add('on');
-  // Сбрасываем welcome к шагу 1
-  const step1=el('wl-step1'); if(step1) step1.style.display='';
-  const step2=el('wl-step2'); if(step2) step2.style.display='none';
-  const codeBlk=el('wl-code-block'); if(codeBlk) codeBlk.style.display='none';
-  const tgBtn=el('wl-tg-btn'); if(tgBtn){tgBtn.style.display='';tgBtn.disabled=false;tgBtn.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46 4.073 13.52c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg> Войти через Telegram';}
+  el('s-welcome').classList.add('on');
+  // Сбрасываем welcome к начальному состоянию
+  el('wl-step1').style.display='';
+  el('wl-step2').style.display='none';
+  const cb=el('wl-code-block'); if(cb) cb.style.display='none';
+  const tb=el('wl-tg-btn');
+  if(tb){ tb.style.display=''; tb.disabled=false; tb.textContent=''; }
   toast('Вышли из аккаунта');
 }
 const SUN_SVG=`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
@@ -1822,8 +1821,8 @@ function checkMilestones(secs){
 
 
 function renderFeed(){
-  const cnt=Math.floor(Math.random()*200)+750;
-  el('feed-cnt').textContent=`Сегодня бросили: ${cnt} человек`;
+  const cnt=FEED_DATA.filter(it=>it.real).length+(S.startTime?1:0);
+  el('feed-cnt').textContent=cnt>0?`Бросают прямо сейчас: ${cnt} ${cnt===1?'человек':cnt<5?'человека':'человек'}`:'';
   const myTgId=S.user?.tgId?String(S.user.tgId):null;
   const myHandle=(S.user?.handle||'').toLowerCase().replace('@','');
   const others=FEED_DATA.filter(function(it){if(!it.n)return false;if(myTgId&&it.tgId&&String(it.tgId)===myTgId)return false;if(myHandle&&it.n.toLowerCase()===myHandle)return false;return true;});
@@ -1879,11 +1878,27 @@ function shareSolidarity(name){
   postToThreads();
 }
 
+function rankAva(it){
+  var url=it.photo||(it.a&&it.a.startsWith('http')?it.a:null);
+  if(url) return '<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block" onerror="this.parentElement.textContent=\'🐺\'">';
+  return it.a||'🐺';
+}
 function renderRank(){
-  const sorted=[...FEED_DATA].sort((a,b)=>a.t-b.t);
-  if(S.startTime)sorted.unshift({a:S.user?.avatar||'🐺',n:S.user?.name||'Ты',t:S.startTime.getTime(),th:S.user?.threads});
+  const myTgId=S.user?.tgId?String(S.user.tgId):null;
+  const myHandle=(S.user?.handle||'').toLowerCase().replace('@','');
+  const others=FEED_DATA.filter(function(it){
+    if(!it.n)return false;
+    if(myTgId&&it.tgId&&String(it.tgId)===myTgId)return false;
+    if(myHandle&&it.n.toLowerCase()===myHandle)return false;
+    return true;
+  });
+  const sorted=[...others].sort((a,b)=>a.t-b.t);
+  if(S.startTime)sorted.unshift({photo:S.user?.photo,a:S.user?.avatar||'🐺',n:S.user?.name||'Ты',t:S.startTime.getTime(),me:true});
   const g=['g1','g2','g3'],m=['🥇','🥈','🥉'];
-  el('rank-list').innerHTML=sorted.slice(0,10).map((it,i)=>{const secs=Math.floor((Date.now()-it.t)/1000),d=Math.floor(secs/86400);return`<div class="rank-row"><div class="rank-n ${g[i]||''}">${m[i]||i+1}</div><div class="rank-ava">${it.a}</div><div class="rank-info"><div class="rank-name">${it.n}${it.th?tdot:''}</div><div class="rank-dur">${fmtDur(secs)}</div></div><div class="rank-badge">${d>0?d+'д':'сегодня'}</div></div>`}).join('');
+  el('rank-list').innerHTML=sorted.slice(0,10).map((it,i)=>{
+    const secs=Math.floor((Date.now()-it.t)/1000),d=Math.floor(secs/86400);
+    return '<div class="rank-row"><div class="rank-n '+(g[i]||'')+'">'+(m[i]||i+1)+'</div><div class="rank-ava">'+rankAva(it)+'</div><div class="rank-info"><div class="rank-name">'+it.n+'</div><div class="rank-dur">'+fmtDur(secs)+'</div></div><div class="rank-badge">'+(d>0?d+'д':'сегодня')+'</div></div>';
+  }).join('');
 }
 
 function switchTab(t){
@@ -1902,25 +1917,7 @@ function switchTab(t){
 
 // Live feed — simulate new person joining every 12–20s
 let liveJoinTimer;
-function startLiveJoin(){
-  clearInterval(liveJoinTimer);
-  const NAMES=['Алексей_Н','Мария_П','sergio_quit','Влад_бросил','Ольга_2025','korolev_v','stopsmoking_ru','Паша_сильный'];
-  const AVAS=['🐸','🌊','⚡','🎯','🦋','🔥','🐼','🌿'];
-  liveJoinTimer=setInterval(()=>{
-    const fp=el('feed-preview');if(!fp)return;
-    const n=NAMES[Math.floor(Math.random()*NAMES.length)];
-    const a=AVAS[Math.floor(Math.random()*AVAS.length)];
-    const div=document.createElement('div');
-    div.className='fi live-new';
-    div.innerHTML=`<div class="fi-ava">${a}</div><div class="fi-info"><div class="fi-name">${n}</div><div class="fi-time" style="color:var(--green)">только что бросил!</div></div><button class="fi-action">🤍</button>`;
-    fp.insertBefore(div,fp.firstChild);
-    // keep max 6 in preview
-    while(fp.children.length>6)fp.removeChild(fp.lastChild);
-    // bump live counter
-    const lc=el('live-n');if(lc)lc.textContent=+lc.textContent+1;
-    const wsc=el('ws-today');if(wsc)wsc.textContent=+lc?.textContent||0;
-  },Math.random()*8000+12000);
-}
+function startLiveJoin(){ /* removed — no fake activity */ }
 
 // ─── TOAST ───
 function toast(msg,type=''){
@@ -2099,12 +2096,20 @@ async function sbRealtime(onNew) {
 async function loadRealFeed() {
   const data = await sbFeed();
   if(!data || !data.length) return;
+  const myTgId=S.user?.tgId?String(S.user.tgId):null;
   data.forEach(row => {
-    const handle = row.tg_handle || row.display_name;
-    const exists = FEED_DATA.find(f => f.n === row.display_name);
+    if(!row.display_name) return;
+    // Не добавляем себя
+    if(myTgId && row.tg_id && String(row.tg_id)===myTgId) return;
+    // Дедупликация по tg_id или display_name
+    const exists=FEED_DATA.find(f=>
+      (row.tg_id && f.tgId && String(f.tgId)===String(row.tg_id)) ||
+      f.n===row.display_name
+    );
     if(!exists) {
-      FEED_DATA.unshift({
-        a: row.photo_url || '🐺',
+      FEED_DATA.push({
+        photo: row.photo_url||null,
+        a: '🐺',
         n: row.display_name,
         h: row.tg_handle,
         t: new Date(row.started_at).getTime(),
@@ -2113,6 +2118,9 @@ async function loadRealFeed() {
       });
     }
   });
+  // Обновляем счётчик на welcome
+  const lc=el('live-n');
+  if(lc) lc.textContent=FEED_DATA.filter(f=>f.real).length+(S.startTime?1:0);
 }
 
 // Обратная совместимость

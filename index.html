@@ -430,6 +430,22 @@ body { overflow-x: hidden; max-width: 100vw; }
 .scr { -webkit-user-select: none; user-select: none; }
 input, textarea { -webkit-user-select: text; user-select: text; }
 .btn-fill:active, .btn-smoked:active, .btn-craving:active, .ni:active { opacity: 0.65; transform: scale(0.98); }
+
+/* ─── WELCOME FORM ─── */
+.wl-form{display:flex;flex-direction:column;gap:12px}
+.wl-field-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.wl-handle-wrap{position:relative}
+.wl-handle-at{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:16px;font-weight:600;pointer-events:none}
+.wl-handle-inp{width:100%;padding:15px 14px 15px 30px;font-size:16px;font-weight:600;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);outline:none;font-family:inherit;transition:border-color .15s;-webkit-appearance:none}
+.wl-handle-inp:focus{border-color:var(--text);background:var(--surface)}
+.wl-num-inp{width:100%;padding:14px;font-size:16px;font-weight:700;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);outline:none;font-family:inherit;transition:border-color .15s;-webkit-appearance:none}
+.wl-num-inp:focus{border-color:var(--text);background:var(--surface)}
+.wl-cig-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wl-cig-box{display:flex;flex-direction:column}
+.btn-tg{width:100%;padding:16px;background:#229ED9;color:#fff;border:none;border-radius:var(--r);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;-webkit-tap-highlight-color:transparent;transition:opacity .15s}
+.btn-tg:active{opacity:.8}
+[data-theme=dark] .btn-tg{background:#229ED9}
+
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -466,6 +482,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
       <div><span class="wl-live"><span class="wl-live-dot"></span><span id="live-n">847</span> бросают прямо сейчас</span></div>
       <h1 class="wl-h1">Бросай.<br>Вместе.</h1>
       <p class="wl-sub">Трекер отказа от курения. Реальные люди, живая лента поддержки.</p>
+
       <div class="wl-form">
         <div>
           <div class="wl-field-label">Твой Telegram username</div>
@@ -473,7 +490,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
             <span class="wl-handle-at">@</span>
             <input id="wl-handle" class="wl-handle-inp" type="text" placeholder="username"
               autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="text"
-              onkeydown="if(event.key==='Enter')nextField()">
+              onkeydown="if(event.key==='Enter')el('wl-cigs').focus()">
           </div>
         </div>
         <div class="wl-cig-row">
@@ -486,9 +503,9 @@ input, textarea { -webkit-user-select: text; user-select: text; }
             <input id="wl-price" class="wl-num-inp" type="number" value="200" min="50" max="1000" step="10" inputmode="numeric">
           </div>
         </div>
-        <button class="btn-tg" onclick="enterHandle()">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46 4.073 13.52c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
-          Начать бросать
+        <button class="btn-tg" onclick="startFromWelcome()">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46 4.073 13.52c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
+          Бросить прямо сейчас
         </button>
       </div>
     </div>
@@ -1075,104 +1092,34 @@ function initTheme(){
 }
 
 // ─── AUTH ───
-// Telegram auth globals
-let _tgPendingUser = null;
-
-function triggerTgLogin(){
-  // The widget script renders a hidden button — we click it programmatically
-  const btn = document.querySelector('#tg-widget + iframe')
-    || document.querySelector('iframe[src*="telegram"]');
-  if(btn){ btn.click(); return; }
-  // fallback: find the real tg widget button inside iframe
-  const w = document.querySelector('iframe[src*="telegram"]');
-  if(w){ w.contentDocument?.querySelector('button')?.click(); return; }
-  // If widget not loaded yet, show manual handle input as fallback
-  showManualFallback();
+// ─── AUTH ───
+function startFromWelcome(){
+  const handle = (el('wl-handle')?.value || '').trim().replace(/^@+/, '');
+  if(!handle){ toast('Введи Telegram username','red'); el('wl-handle')?.focus(); return; }
+  const cigs = parseInt(el('wl-cigs')?.value) || 20;
+  const price = parseInt(el('wl-price')?.value) || 200;
+  S.user = { name: handle, handle: '@' + handle, cigs, price, tg: true };
+  S.startTime = new Date(); S.cravings = 0; S_lastMsCelebrated = -1;
+  saveLocal(); bootHome(); setNav('home');
+  toast('@' + handle + ' — отсчёт пошёл 🚭', 'green');
 }
-
+function enterHandle(){ startFromWelcome(); }
+function loginThreads(){ startFromWelcome(); }
 function onTelegramAuth(user){
-  // Called by Telegram widget after user approves
-  const btn = el('tg-login-btn');
-  if(btn){ btn.disabled = true; btn.textContent = 'Проверяем...'; }
-  
+  // TG widget callback — будет работать после /setdomain в BotFather
   fetch('/api/auth/telegram-verify', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(user)
-  })
-  .then(r => r.json())
-  .then(data => {
-    if(!data.ok) throw new Error(data.error || 'Auth failed');
-    _tgPendingUser = data.user;
-    // Show cig setup
-    const setup = el('wl-cig-setup');
-    if(setup) setup.style.display = '';
-    if(btn){ btn.style.display = 'none'; }
-    // Update subtitle
-    const sub = document.querySelector('#tg-login-area p');
-    if(sub) sub.textContent = '✅ ' + (data.user.handle || data.user.name) + ' — теперь задай параметры';
-    toast('Telegram подтверждён ✓','green');
-  })
-  .catch(err => {
-    toast('Ошибка входа: ' + err.message, 'red');
-    if(btn){ btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46 4.073 13.52c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg> Попробовать снова'; }
-  });
+  }).then(r=>r.json()).then(data=>{
+    if(!data.ok) throw new Error(data.error);
+    const u = data.user;
+    S.user = { name: u.name, handle: u.handle || ('@'+u.name), photo: u.photo||null, cigs:20, price:200, tg:true, tgId:u.id };
+    S.startTime=new Date(); S.cravings=0; S_lastMsCelebrated=-1;
+    saveLocal(); bootHome(); setNav('home');
+    toast((S.user.handle||S.user.name)+' — поехали 🚭','green');
+  }).catch(e=>{ toast('Ошибка: '+e.message,'red'); });
 }
-
-function startWithTgUser(){
-  if(!_tgPendingUser){ toast('Сначала войди через Telegram','red'); return; }
-  const cigs = parseInt(el('wl-cigs')?.value) || 20;
-  const price = parseInt(el('wl-price')?.value) || 200;
-  S.user = {
-    name: _tgPendingUser.name,
-    handle: _tgPendingUser.handle || ('@' + _tgPendingUser.name),
-    photo: _tgPendingUser.photo || null,
-    cigs, price, tg: true,
-    tgId: _tgPendingUser.id
-  };
-  S.startTime = new Date(); S.cravings = 0; S_lastMsCelebrated = -1;
-  saveLocal(); bootHome(); setNav('home');
-  toast((S.user.handle || S.user.name) + ' — отсчёт пошёл 🚭','green');
-}
-
-function showManualFallback(){
-  // fallback if widget fails to load
-  const area = el('tg-login-area');
-  if(!area) return;
-  area.innerHTML = `
-    <div class="wl-field-label">Telegram username (без @)</div>
-    <div class="wl-handle-wrap" style="margin-bottom:10px">
-      <span class="wl-handle-at">@</span>
-      <input id="wl-handle-fb" class="wl-handle-inp" type="text" placeholder="username"
-        autocorrect="off" autocapitalize="none" spellcheck="false">
-    </div>
-    <div class="wl-cig-row">
-      <div class="wl-cig-box">
-        <div class="wl-field-label">Сигарет в день</div>
-        <input id="wl-cigs" class="wl-num-inp" type="number" value="20" min="1" max="60" inputmode="numeric">
-      </div>
-      <div class="wl-cig-box">
-        <div class="wl-field-label">Цена пачки (₽)</div>
-        <input id="wl-price" class="wl-num-inp" type="number" value="200" min="50" max="1000" step="10" inputmode="numeric">
-      </div>
-    </div>
-    <button class="btn-tg" style="margin-top:12px" onclick="enterHandleFallback()">🚭 Бросить</button>`;
-}
-
-function enterHandleFallback(){
-  const handle = (el('wl-handle-fb')?.value||'').trim().replace(/^@+/,'');
-  if(!handle){ toast('Введи username','red'); return; }
-  const cigs = parseInt(el('wl-cigs')?.value)||20;
-  const price = parseInt(el('wl-price')?.value)||200;
-  S.user = {name:handle, handle:'@'+handle, cigs, price, tg:false};
-  S.startTime=new Date(); S.cravings=0; S_lastMsCelebrated=-1;
-  saveLocal(); bootHome(); setNav('home');
-  toast('@'+handle+' — поехали 🚭','green');
-}
-
-function enterHandle(){ enterHandleFallback(); }
-function nextField(){ el('wl-cigs')?.focus(); }
-function loginThreads(){ triggerTgLogin(); }
 
 // ─── ONBOARD ───
 function initAva(){

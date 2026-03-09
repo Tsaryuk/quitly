@@ -27,19 +27,21 @@
   --blue:#4ca3ff;--blue-bg:#0a1a30;--blue-border:#1a3a6a;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:var(--bg);transition:background .25s,color .25s}
+html{height:100%;overflow:hidden;background:var(--bg);transition:background .25s,color .25s}
+body{height:100%;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);transition:background .25s,color .25s}
 body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-size:15px}
 
 /* ─── SCREENS ─── */
-.scr{display:none;position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;padding-bottom:calc(var(--nav-h) + 16px)}
+.scr{display:none;flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;min-height:0}
 .scr::-webkit-scrollbar{display:none}
-.scr.on{display:block;animation:fadeUp .22s ease both}
+.scr.on{display:flex;flex-direction:column;animation:fadeUp .22s ease both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.scr.no-nav{padding-bottom:0}
+.scr.no-nav{/* no special padding */}
 
 /* ─── NAV ─── */
-/* #nav — see LAYOUT FOUNDATION block below */
+/* nav — flex-shrink:0, no fixed */
 .ni{background:none;border:none;cursor:pointer;color:var(--placeholder);transition:color .15s;position:relative}
+#nav{flex-shrink:0;display:none;background:var(--surface);border-top:1px solid var(--border);z-index:50;padding-bottom:env(safe-area-inset-bottom,0px)}
 .ni.on{color:var(--text)}
 .ni svg{width:24px;height:24px;stroke-width:1.8}
 .ni .nl{font-size:10px;font-weight:600;letter-spacing:.2px}
@@ -442,144 +444,67 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 .uc-pill-ava img{width:100%;height:100%;object-fit:cover;display:block}
 .uc-pill-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
 
-/* ═══════════════════════════════════════════════════
-   LAYOUT FOUNDATION — все экраны в рамках экрана
-═══════════════════════════════════════════════════ */
+/* ═══ LAYOUT FOUNDATION ═══════════════════════════════════════
+   Flexbox nav — НЕТ position:fixed, НЕТ padding-bottom трюков
+═══════════════════════════════════════════════════════════════ */
 
-/* 1. Запрещаем горизонтальный скролл глобально */
-html { overflow-x: hidden; max-width: 100vw; }
-body { overflow-x: hidden; max-width: 100vw; }
-*, *::before, *::after { max-width: 100%; }
-
-/* 2. Каждый экран — строго внутри вьюпорта */
+/* Screens — flex children of #app-wrap */
 .scr {
   width: 100%;
-  max-width: 100vw;
   overflow-x: hidden;
   overflow-y: auto;
-  /* Отступ снизу = высота nav + safe area + зазор */
-  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 16px) !important;
+  padding-bottom: 16px;
+  min-height: 0;
 }
-.scr.no-nav { padding-bottom: env(safe-area-inset-bottom, 16px) !important; }
+.scr.no-nav { padding-bottom: env(safe-area-inset-bottom, 16px); }
 
-/* 3. NAV — надёжная фиксация к низу на iOS PWA */
+/* Nav — flex child, естественно прижат к низу */
 #nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  /* Высота = 60px + safe area */
+  display: none;
+  flex-shrink: 0;
   height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--surface);
   border-top: 1px solid var(--border);
-  display: flex;
-  align-items: flex-start; /* кнопки прижаты к верху nav */
-  z-index: 99;
-  /* Подложка под safe area — тот же фон */
-  -webkit-backdrop-filter: none;
+  align-items: flex-start;
+  z-index: 50;
 }
-/* Nav items занимают ровно var(--nav-h) */
 .ni {
   height: var(--nav-h);
-  flex: 1;
-  max-width: 20%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  flex: 1; max-width: 20%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
   gap: 3px;
 }
 
-/* 4. Все карточки и блоки — строго в ширину */
+/* All blocks stay within screen */
 .home-hdr, .stats-row, .smoked-wrap, .craving-box,
 .share-row-v2, .share-row, .sec-label, .feed-card,
 .prof-stats, .badge-grid, .links-grid, .vs-card,
 .author-blk, .donate-blk, .cohort-banner, .gate-banner,
 .wl-wrap, .relapse-wrap, .page-hdr, .btn-share-card,
 .article-body, .video-wrap {
-  max-width: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  overflow-x: hidden;
-  word-break: break-word;
-  overflow-wrap: break-word;
+  max-width: 100%; width: 100%;
+  box-sizing: border-box; overflow-x: hidden;
+  word-break: break-word; overflow-wrap: break-word;
 }
-
-/* 5. Share row */
 .share-row-v2 { display: flex; flex-wrap: nowrap; gap: 8px; }
 .btn-share-card { flex: 1; min-width: 0; overflow: hidden; padding: 13px 8px; font-size: 14px; }
 .btn-copy-prog { flex-shrink: 0; padding: 13px 14px; }
-
-/* 6. Craving box */
 .craving-box { margin: 0 16px; width: calc(100% - 32px); }
-
-/* 7. Timer */
 .timer-val { font-size: clamp(36px, 11vw, 64px); }
-
-/* 8. Article */
 .article-body { font-size: 15px; line-height: 1.6; }
 .article-body p { margin-bottom: 14px; }
 .article-body h3 { font-size: 16px; font-weight: 800; margin: 20px 0 8px; }
 .article-body em { font-style: italic; color: var(--sub); }
-
-/* 9. Video iframe */
-.video-wrap {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16/9;
-  overflow: hidden;
-  border-radius: 12px;
-}
-.video-wrap iframe {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  border: 0;
-}
-
-/* 10. Welcome — центрируем иконку и форму */
+.video-wrap { position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; }
+.video-wrap iframe { position: absolute; top:0; left:0; width:100%; height:100%; border:0; }
 .wl-wrap {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  padding: env(safe-area-inset-top, 20px) 20px
-           calc(env(safe-area-inset-bottom, 0px) + 32px);
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
+  min-height: 100%; display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top,20px) 20px calc(env(safe-area-inset-bottom,0px) + 32px);
+  width: 100%; overflow-x: hidden;
 }
-.wl-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-.wl-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  /* НЕ ограничиваем max-width здесь — это ломает центровку */
-  width: 100%;
-  padding: 0;
-}
-.wl-icon { font-size: 80px; text-align: center; padding: 32px 0 20px; }
-
-/* 11. Feed — баннер не вылезает */
-.gate-banner {
-  margin: 0 16px 12px;
-  border-radius: var(--r);
-  overflow: hidden;
-}
-
-/* 12. Small phones */
-@media (max-width: 390px) {
-  .timer-val { font-size: clamp(32px, 10vw, 52px); }
-  .prof-stats { grid-template-columns: repeat(2, 1fr); }
-}
-
-
+.wl-top { display:flex; align-items:center; justify-content:space-between; width:100%; }
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -595,6 +520,7 @@ body { overflow-x: hidden; max-width: 100vw; }
   <!-- TG auth: bot code flow, no widget needed -->
 </head>
 <body>
+<div id="app-wrap" style="display:flex;flex-direction:column;height:100%;height:100dvh;overflow:hidden">
 
 <!-- ═══ WELCOME ═══ -->
 <div id="s-welcome" class="scr no-nav on">
@@ -918,7 +844,7 @@ body { overflow-x: hidden; max-width: 100vw; }
     </div>
   </div>
 
-  <div class="author-blk" style="margin-top:0">
+  <div style="margin:0 16px 16px">
     <div style="margin-bottom:10px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px">Подкаст · источник статьи</div>
     <div class="video-wrap" style="position:relative;width:100%;max-width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:12px"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" src="https://www.youtube.com/embed/bfTN7etcf2E?rel=0&modestbranding=1" allowfullscreen allow="autoplay;encrypted-media"></iframe></div>
     <div style="margin-top:12px">
@@ -1027,6 +953,8 @@ body { overflow-x: hidden; max-width: 100vw; }
     <span class="nl">Профиль</span>
   </button>
 </nav>
+
+</div><!-- /#app-wrap -->
 
 <!-- ═══ SHEETS ═══ -->
 
@@ -1204,7 +1132,7 @@ const MS=[
    d:'Риск болезней сердца снизился вдвое.',
    detail:'1 год без сигарет — это медицинский рубеж. Риск коронарной болезни теперь вдвое ниже, чем у курильщика. Лёгкие восстановлены на 90%. Ты живёшь дольше — это не метафора, это факт.'},
 ];
-const FEED_DATA=[{a:'🦁',n:'Максим_К',t:Date.now()-2*86400e3,th:true},{a:'🐼',n:'elena_new',t:Date.now()-18*3600e3,th:false},{a:'🔥',n:'Дмитрий88',t:Date.now()-5*3600e3,th:true},{a:'🦊',n:'stopsmoke',t:Date.now()-7*86400e3,th:true},{a:'🐸',n:'Настя_сильная',t:Date.now()-41*3600e3,th:false},{a:'⚡',n:'Igor_quit',t:Date.now()-1*3600e3,th:true},{a:'🐯',n:'Алексей_М',t:Date.now()-3*86400e3,th:false},{a:'🌊',n:'marina2025',t:Date.now()-12*3600e3,th:true}];
+const FEED_DATA=[]; // только реальные люди из Supabase
 const T_SVG=`<svg viewBox="0 0 192 192" width="9" height="9" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>`;
 
 // ─── STATE ───
@@ -1255,14 +1183,18 @@ function confirmLogout(){
 }
 function logout(){
   clearInterval(S.ival);
-  localStorage.removeItem('ql_u');
-  localStorage.removeItem('ql_t');
-  localStorage.removeItem('ql_c');
-  localStorage.removeItem('ql_h');
+  ['ql_u','ql_t','ql_c','ql_h'].forEach(k=>localStorage.removeItem(k));
   S={user:null,startTime:null,cravings:0,ival:null,screen:'welcome',history:[]};
   S_lastMsCelebrated=-1;
-  el('nav').style.display='none';
-  go('welcome');
+  // Показываем welcome сразу — скрываем nav, убираем все .scr.on
+  const nav=el('nav'); if(nav) nav.style.display='none';
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  const wl=el('s-welcome'); if(wl) wl.classList.add('on');
+  // Сбрасываем welcome к шагу 1
+  const step1=el('wl-step1'); if(step1) step1.style.display='';
+  const step2=el('wl-step2'); if(step2) step2.style.display='none';
+  const codeBlk=el('wl-code-block'); if(codeBlk) codeBlk.style.display='none';
+  const tgBtn=el('wl-tg-btn'); if(tgBtn){tgBtn.style.display='';tgBtn.disabled=false;tgBtn.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46 4.073 13.52c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg> Войти через Telegram';}
   toast('Вышли из аккаунта');
 }
 const SUN_SVG=`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;

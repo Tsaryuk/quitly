@@ -228,7 +228,7 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
 .prof-ava{font-size:64px;margin-bottom:8px}
 .prof-name{font-size:22px;font-weight:800;margin-bottom:4px}
 .prof-handle{font-size:14px;color:var(--sub);display:flex;align-items:center;justify-content:center;gap:6px}
-.prof-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 16px}
+.prof-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 16px 16px;max-width:100%;box-sizing:border-box}
 .pst{text-align:center;padding:14px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm)}
 .pst-v{font-size:20px;font-weight:800;margin-bottom:3px;color:var(--green)}
 .pst-l{font-size:11px;color:var(--sub)}
@@ -361,17 +361,33 @@ html { overflow-x: hidden; }
 body { overflow-x: hidden; max-width: 100vw; }
 .scr { overflow-x: hidden; }
 
-/* 2. Fix bottom nav — safe area padding, items stick to top */
+/* 2. Fix bottom nav — safe area */
 #nav {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
   height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   align-items: flex-start;
+  /* extend bg behind home indicator */
+  background: var(--surface);
+}
+/* pseudo element fills gap between nav and physical screen edge */
+#nav::after {
+  content: '';
+  display: block;
+  position: absolute;
+  bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
+  left: 0; right: 0;
+  height: env(safe-area-inset-bottom, 0px);
+  background: var(--surface);
 }
 .ni { height: var(--nav-h); flex: 1; max-width: 20%; }
 
 /* 3. Fix .scr padding so content isn't hidden under nav */
 .scr {
-  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 12px);
+  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 16px) !important;
 }
 
 /* 4. All content sections — stay within screen */
@@ -451,10 +467,18 @@ input, textarea { -webkit-user-select: text; user-select: text; }
         <span class="tag-pill">#бросаемвместе</span>
         <span class="tag-pill">#бросаюкурить</span>
       </div>
-      <button class="btn-fill threads" style="margin-bottom:10px" onclick="loginThreads()">
-        <svg viewBox="0 0 192 192" width="20" height="20" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>
-        Войти через Threads
-      </button>
+      <div style="width:100%;margin-bottom:10px">
+        <div style="position:relative">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:15px;pointer-events:none">@</span>
+          <input id="wl-handle" class="inp" type="text" placeholder="твой username в Threads" autocorrect="off" autocapitalize="none" spellcheck="false"
+            style="padding-left:28px;font-size:16px"
+            onkeydown="if(event.key==='Enter')enterHandle()">
+        </div>
+        <button class="btn-fill threads" style="margin-top:10px;width:100%" onclick="enterHandle()">
+          <svg viewBox="0 0 192 192" width="18" height="18" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>
+          Бросить с Threads
+        </button>
+      </div>
 
     </div>
   </div>
@@ -712,12 +736,12 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 </div>
 
 <!-- ═══ PROFILE ═══ -->
-<div id="s-profile" class="scr">
+<div id="s-profile" class="scr" style="overflow-x:hidden">
   <div class="page-hdr"><div class="page-title">Профиль</div></div>
   <div class="prof-top">
     <div class="prof-ava" id="p-ava" style="display:flex;align-items:center;justify-content:center;width:96px;height:96px;border-radius:50%;overflow:hidden;margin:0 auto 12px;background:var(--surface2);font-size:64px">🐺</div>
     <div class="prof-name" id="p-name">...</div>
-    <div class="prof-handle" id="p-handle"></div>
+    <div class="prof-handle" id="p-handle" style="max-width:100%;overflow:hidden;word-break:break-word;flex-wrap:wrap"></div>
   </div>
 
   <!-- Current attempt stats -->
@@ -1046,22 +1070,16 @@ function initTheme(){
 }
 
 // ─── AUTH ───
-function loginThreads(){
-  if(location.hostname === 'localhost' || location.hostname === '127.0.0.1'){
-    // Dev mode mock
-    setUser({name:'mr.tsaryuk',photo:'',threads:true,handle:'@mr.tsaryuk',cigs:20,price:200});
-    S.startTime=new Date();S.cravings=0;S_lastMsCelebrated=-1;
-    saveLocal();bootHome();setNav('home');
-    toast('Вошёл через Threads ✓','green');
-    return;
-  }
-  window.location.href = '/api/auth/threads';
+function enterHandle(){
+  let handle = (el('wl-handle')?.value || '').trim().replace(/^@+/, '');
+  if(!handle){ toast('Введи @username из Threads','red'); el('wl-handle')?.focus(); return; }
+  S.user = {name: handle, handle: '@' + handle, threads: true, cigs: 20, price: 200};
+  S.startTime = new Date(); S.cravings = 0; S_lastMsCelebrated = -1;
+  saveLocal(); bootHome(); setNav('home');
+  toast('@' + handle + ' — отсчёт пошёл 🚭','green');
 }
-
-// helper — устанавливаем user и рендерим аватар везде
-function setUser(u){
-  S.user = u;
-}
+// legacy alias
+function loginThreads(){ enterHandle(); }
 
 // ─── ONBOARD ───
 function initAva(){
@@ -1161,7 +1179,7 @@ function gateHTML(feature){
   return`<div class="gate-banner">
     <div class="gate-ico">🔒</div>
     <div class="gate-text">${feature} доступно только для пользователей Threads</div>
-    <button class="gate-btn" onclick="loginThreads()">Войти</button>
+    <button class="gate-btn" onclick="setNav('welcome')">Войти</button>
   </div>`;
 }
 
@@ -1206,7 +1224,7 @@ function renderProfile(){
   if(!S.user)return;
   renderAvatar('p-ava', S.user.photo, S.user.name, 96);
   el('p-name').textContent=S.user.name;
-  el('p-handle').innerHTML=S.user.threads?`${tdot} ${S.user.handle}`:'Аноним';
+  el('p-handle').innerHTML=S.user.handle ? `${tdot} ${S.user.handle}` : 'Аноним';
   updateProfileStats();
 
   // all-time stats

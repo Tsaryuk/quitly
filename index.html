@@ -661,9 +661,7 @@ body { overflow-x: hidden; max-width: 100vw; }
           <div id="wl-code-status" style="font-size:13px;color:var(--sub);text-align:center;margin-top:8px;min-height:20px"></div>
         </div>
 
-        <button onclick="showManualInput()" style="width:100%;padding:10px;background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit;margin-top:4px">
-          Войти без Telegram →
-        </button>
+
       </div>
 
       <!-- ШАГ 2: Настройки после TG-входа -->
@@ -786,12 +784,12 @@ body { overflow-x: hidden; max-width: 100vw; }
     <button class="btn-craving" onclick="craved()">💪 Устоял</button>
   </div>
 
-  <div class="tip-row" style="margin:14px 16px 0">
+  <div class="tip-row" style="margin:12px 16px 8px">
     <div class="tip-label">Совет дня</div>
     <div class="tip-text" id="tip-txt"></div>
   </div>
 
-  <div class="share-row-v2">
+  <div class="share-row-v2" style="padding-top:0">
     <button class="btn-share-card" onclick="openShareCard()" style="display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 192 192" width="16" height="16" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg> Поделиться прогрессом</button>
     <button class="btn-copy-prog" onclick="copyProgress()">📋</button>
   </div>
@@ -897,11 +895,15 @@ body { overflow-x: hidden; max-width: 100vw; }
   <div class="page-hdr"><div class="page-title">Об авторе</div></div>
 
   <div class="author-blk">
-    <div class="author-top">
-      <div class="author-ico">👨‍⚕️</div>
-      <div>
-        <div class="author-name">Денис Царюк</div>
-        <div class="author-handle">@mr.tsaryuk · Threads</div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+      <div style="width:62px;height:62px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--surface2);border:1px solid var(--border)">
+        <img src="https://unavatar.io/threads/mr.tsaryuk" alt="Денис Царюк"
+             style="width:100%;height:100%;object-fit:cover;display:block"
+             onerror="this.outerHTML='<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:28px>👨‍⚕️</div>'">
+      </div>
+      <div style="min-width:0">
+        <div style="font-size:17px;font-weight:800;margin-bottom:3px">Денис Царюк</div>
+        <div style="font-size:13px;color:var(--sub)">@mr.tsaryuk · Threads</div>
       </div>
     </div>
     <div class="author-bio">Изучаю причины зависимостей и способы выйти из них. Quitly — инструмент, который я сделал для себя и открыл для всех.</div>
@@ -1587,31 +1589,71 @@ function gateHTML(feature){
 // ─── FEED ───
 const tdot=`<span class="t-dot">${T_SVG}</span>`;
 function renderFeedPreview(){
-  const items=[...(S.startTime?[{a:S.user?.avatar||'🐺',n:S.user?.name||'Ты',t:S.startTime.getTime(),th:S.user?.threads}]:[]),...FEED_DATA.slice(0,4)];
-  el('feed-preview').innerHTML=items.map(it=>`<div class="fi"><div class="fi-ava">${it.a}</div><div class="fi-info"><div class="fi-name">${it.n}${it.th?tdot:''}</div><div class="fi-time">${fmtShort(it.t)} без сигарет</div></div><button class="fi-action" onclick="openSupSheet('${it.n}','${it.tgId||''}')">🤍</button></div>`).join('');
+  const myTgId=S.user?.tgId?String(S.user.tgId):null;
+  const myHandle=(S.user?.handle||'').toLowerCase().replace('@','');
+  const others=FEED_DATA.filter(function(it){
+    if(!it.n)return false;
+    if(myTgId&&it.tgId&&String(it.tgId)===myTgId)return false;
+    if(myHandle&&it.n.toLowerCase()===myHandle)return false;
+    return true;
+  });
+  const meArr=S.startTime?[{photo:S.user?.photo,a:S.user?.avatar||'🐺',n:S.user?.name||'Ты',t:S.startTime.getTime(),me:true}]:[];
+  const items=meArr.concat(others.slice(0,4));
+  el('feed-preview').innerHTML=items.map(function(it){
+    var ava=it.photo&&it.photo.startsWith('http')?'<img src="'+it.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block" onerror="this.parentElement.textContent=\'👤\'">':(it.a||'🐺');
+    var btn=it.me?'':'<button class="fi-action" data-n="'+it.n+'" data-tid="'+(it.tgId||'')+'" onclick="openSupSheet(this.dataset.n,this.dataset.tid)">🤍</button>';
+    return '<div class="fi"><div class="fi-ava">'+ava+'</div><div class="fi-info"><div class="fi-name">'+it.n+'</div><div class="fi-time">'+fmtShort(it.t)+' без сигарет</div></div>'+btn+'</div>';
+  }).join('');
 }
 // ─── CHALLENGE ───
 function renderChallenge(){
-  const g=el('ch-gate'),c=el('ch-content');
-  if(!S.user?.threads){g.innerHTML=gateHTML('Дуэли доступны только после входа через Threads');c.innerHTML='';return}
+  var g=el('ch-gate'),c=el('ch-content');
   g.innerHTML='';
-  const secs=elapsed();
-  c.innerHTML=`<div class="vs-card">
-    <div class="vs-row">
-      <div class="vs-side"><div class="vs-ava">${S.user.avatar}</div><div class="vs-name">Ты</div><div class="vs-time">${fmtDur(secs)}</div></div>
-      <div class="vs-sep">vs</div>
-      <div class="vs-side"><div class="vs-ava">🦊</div><div class="vs-name">Андрей_Д</div><div class="vs-time">${fmtDur(Math.max(0,secs-7200))}</div></div>
-    </div>
-    <div class="vs-status">Ты впереди на 2 часа 🏆</div>
-  </div>
-  <div style="padding:0 16px">
-    <label class="inp-label" style="margin-top:4px">Пригласить в дуэль</label>
-    <div style="display:flex;gap:8px;margin-bottom:10px">
-      <input class="inp" id="ch-inp" placeholder="@никнейм в Threads" style="flex:1">
-      <button class="btn-fill" style="width:auto;padding:13px 18px;flex-shrink:0" onclick="inviteDuel()">Позвать</button>
-    </div>
-    <button class="btn-fill outline" onclick="shareChallenge()">🔗 Поделиться вызовом в Threads</button>
-  </div>`;
+  if(!S.user||!S.startTime){
+    c.innerHTML='<div style="padding:48px 24px;text-align:center;color:var(--sub)"><div style="font-size:52px;margin-bottom:12px">⚡</div><div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px">Начни бросить</div><div style="font-size:14px;line-height:1.5">Войди и начни — здесь появится твоя статистика и место в топе</div></div>';
+    return;
+  }
+  var secs=elapsed();
+  var d=Math.floor(secs/86400);
+  var cigsAvoided=notSmoked(secs,S.user.cigs);
+  var moneySaved=savedMoney(secs,S.user.cigs,S.user.price);
+  var best=getBestStreak();
+  var bestD=Math.floor(best/86400),bestH=Math.floor((best%86400)/3600);
+  var myTgId=S.user.tgId?String(S.user.tgId):null;
+  var everyone=FEED_DATA.slice();
+  var alreadyMe=myTgId&&everyone.find(function(p){return p.tgId&&String(p.tgId)===myTgId;});
+  if(!alreadyMe)everyone.push({a:S.user.photo||null,n:S.user.name||'Ты',t:S.startTime.getTime(),tgId:myTgId,me:true});
+  everyone.sort(function(a,b){return a.t-b.t;});
+  var myIdx=everyone.findIndex(function(p){return(myTgId&&p.tgId&&String(p.tgId)===myTgId)||p.me;});
+  var myRank=myIdx>=0?myIdx+1:'-';
+  var medals=['🥇','🥈','🥉'];
+  var topHTML=everyone.slice(0,7).map(function(p,i){
+    var ps=Math.floor((Date.now()-p.t)/1000);
+    var isMe=(myTgId&&p.tgId&&String(p.tgId)===myTgId)||p.me;
+    var ava=p.a&&p.a.startsWith('http')?'<img src="'+p.a+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent=\'🐺\'">':(p.a||'🐺');
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">'
+      +'<div style="font-size:15px;width:22px;text-align:center">'+(i<3?medals[i]:(i+1))+'</div>'
+      +'<div style="width:34px;height:34px;border-radius:50%;background:var(--surface2);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">'+ava+'</div>'
+      +'<div style="flex:1;min-width:0;font-size:13px;font-weight:'+(isMe?'800':'600')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:'+(isMe?'var(--green)':'var(--text)')+'">'+p.n+(isMe?' (ты)':'')+'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--green);flex-shrink:0">'+fmtDur(ps)+'</div>'
+      +'</div>';
+  }).join('');
+  c.innerHTML='<div style="padding:0 16px 16px">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Твой результат</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<div class="pg-card accent"><div class="pg-val">'+(d>0?d+' дн':fmtDur(secs))+'</div><div class="pg-lbl">текущая серия</div></div>'
+    +'<div class="pg-card blue"><div class="pg-val">#'+myRank+'</div><div class="pg-lbl">место в топе</div></div>'
+    +'<div class="pg-card"><div class="pg-val">'+cigsAvoided+'</div><div class="pg-lbl">не выкурено</div></div>'
+    +'<div class="pg-card orange"><div class="pg-val">'+moneySaved+' ₽</div><div class="pg-lbl">сэкономлено</div></div>'
+    +'</div>'
+    +(S.history.length>0?'<div class="pg-card" style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><div class="pg-lbl">Лучшая серия</div><div class="pg-val" style="font-size:18px">'+(bestD>0?bestD+' дн ':'')+(bestH>0?bestH+'ч':'< 1ч')+'</div></div>':'')
+    +'</div>'
+    +'<div style="padding:0 16px 16px">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Топ бросающих</div>'
+    +'<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:0 16px">'
+    +(topHTML||'<div style="padding:20px;text-align:center;color:var(--sub);font-size:13px">Ты первый 🏆</div>')
+    +'</div></div>'
+    +'<div style="padding:0 16px 16px"><button class="btn-fill" onclick="shareChallenge()">📣 Позвать друга бросить вместе</button></div>';
 }
 function inviteDuel(){const v=el('ch-inp')?.value?.trim();if(!v){toast('Введи никнейм','red');return}toast(`Приглашение отправлено @${v}`,'green')}
 function shareChallenge(){
@@ -1890,7 +1932,7 @@ function renderFeed(){
       <button class="fc-btn" onclick="openSupSheet('${it.n}','${it.tgId||''}')">🤍 Поддержать анонимно</button>
     </div>`;
   }).join('');
-  el('feed-gate').innerHTML=S.user?.threads?'':gateHTML('Лайки и реакции');
+  el('feed-gate').innerHTML='';
 }
 
 function renderCohort(){

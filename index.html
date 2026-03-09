@@ -601,7 +601,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   </div>
 
   <div class="share-row-v2">
-    <button class="btn-share-card" onclick="openShareCard()">📤 Поделиться прогрессом</button>
+    <button class="btn-share-card" onclick="openShareCard()" style="display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 192 192" width="16" height="16" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg> Поделиться прогрессом</button>
     <button class="btn-copy-prog" onclick="copyProgress()">📋</button>
   </div>
 
@@ -702,7 +702,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 </div>
 
 <!-- ═══ AUTHOR ═══ -->
-<div id="s-about" class="scr">
+<div id="s-about" class="scr" style="overflow-x:hidden;word-break:break-word">
   <div class="page-hdr"><div class="page-title">Об авторе</div></div>
 
   <div class="author-blk">
@@ -754,7 +754,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 
   <div class="author-blk" style="margin-top:0">
     <div style="margin-bottom:10px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px">Подкаст · источник статьи</div>
-    <div class="video-wrap"><iframe src="https://www.youtube.com/embed/bfTN7etcf2E?rel=0&modestbranding=1" allowfullscreen allow="autoplay;encrypted-media"></iframe></div>
+    <div class="video-wrap" style="position:relative;width:100%;max-width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:12px"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" src="https://www.youtube.com/embed/bfTN7etcf2E?rel=0&modestbranding=1" allowfullscreen allow="autoplay;encrypted-media"></iframe></div>
     <div style="margin-top:12px">
       <div class="video-meta-title">Причины курения — разбор с наркологом Яковом Маршаком</div>
       <div class="video-meta-sub">Понять механизм — значит найти настоящий выход. Смотри полную версию.</div>
@@ -831,7 +831,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
     <div class="badge-grid" id="p-badges"></div>
 
     <div class="prof-actions">
-      <button class="btn-fill outline" onclick="openShareCard()">📤 Поделиться прогрессом</button>
+      <button class="btn-fill outline" onclick="openShareCard()" style="display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 192 192" width="16" height="16" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg> Поделиться прогрессом</button>
       <button class="btn-fill outline" style="color:var(--red);border-color:var(--red-border)" onclick="openSmoked()">🚬 Записать срыв</button>
       <button class="btn-fill outline" style="color:var(--sub)" onclick="confirmLogout()">Выйти</button>
     </div>
@@ -1072,8 +1072,17 @@ function setNav(id){
 }
 
 function confirmLogout(){
-  if(!confirm('Выйти из аккаунта? Данные о прогрессе сохранятся.')) return;
-  logout();
+  // confirm() блокируется в PWA, используем кастомный тост
+  const t = document.createElement('div');
+  t.style.cssText='position:fixed;bottom:80px;left:16px;right:16px;background:#1a1a1a;color:#fff;border-radius:14px;padding:16px 18px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:12px';
+  t.innerHTML=`<div style="font-size:15px;font-weight:700">Выйти из аккаунта?</div>
+    <div style="font-size:13px;color:#aaa;line-height:1.4">Прогресс сохранится — можно войти снова.</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="document.getElementById('logout-confirm-box').remove()" style="flex:1;padding:11px;background:#333;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">Отмена</button>
+      <button onclick="document.getElementById('logout-confirm-box').remove();logout()" style="flex:1;padding:11px;background:#e03131;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">Выйти</button>
+    </div>`;
+  t.id='logout-confirm-box';
+  document.body.appendChild(t);
 }
 function logout(){
   clearInterval(S.ival);
@@ -1287,7 +1296,7 @@ function inviteDuel(){const v=el('ch-inp')?.value?.trim();if(!v){toast('Введ
 function shareChallenge(){
   const s=elapsed(),d=Math.floor(s/86400);
   const txt=`🤝 Бросаю курить и вызываю тебя на дуэль!\n\nЯ уже ${d>0?d+' дней':fmtDur(s)} без сигарет — сможешь победить?\n\nПрисоединяйся: quitly.app\n\n${TAGS}\n${AUTHOR}`;
-  window.open(`https://www.threads.net/intent/post?text=${encodeURIComponent(txt)}`,'_blank');
+  postToThreads();
 }
 
 // ─── PROFILE ───
@@ -1447,8 +1456,49 @@ function copyShareText(){
 }
 
 function postToThreads(){
-  window.open(`https://www.threads.net/intent/post?text=${encodeURIComponent(buildShareText())}`,'_blank');
-  closeSheet('share-card-sheet');
+  const txt = buildShareText();
+  const webUrl = 'https://www.threads.net/intent/post?text=' + encodeURIComponent(txt);
+  
+  // На iOS — пробуем открыть Threads app через URL scheme
+  // threadsapp:// — нативный deeplink, открывает приложение напрямую
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isAndroid = /Android/.test(navigator.userAgent);
+  
+  if (isIOS) {
+    // Пробуем нативный deeplink Threads
+    // Если приложение не установлено — через 600ms fallback на веб
+    const deeplink = 'threadsapp://intent/post?text=' + encodeURIComponent(txt);
+    const start = Date.now();
+    
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = deeplink;
+    document.body.appendChild(iframe);
+    
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+      // Если приложение открылось — страница уходит в background и время "стоит"
+      // Если нет (прошло менее 700ms реального времени) — открываем веб
+      if (Date.now() - start < 700) {
+        const a = document.createElement('a');
+        a.href = webUrl; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        document.body.appendChild(a); a.click();
+        setTimeout(() => document.body.removeChild(a), 300);
+      }
+    }, 600);
+    
+  } else if (isAndroid) {
+    // Android — intent URL
+    const intent = 'intent://intent/post?text=' + encodeURIComponent(txt) + '#Intent;package=com.instagram.threadsapp;scheme=threadsapp;end';
+    const a = document.createElement('a');
+    a.href = intent; a.target = '_blank';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => document.body.removeChild(a), 300);
+    
+  } else {
+    // Desktop — открываем веб
+    window.open(webUrl, '_blank');
+  }
 }
 
 function shareThreads(){openShareCard()}
@@ -1522,7 +1572,7 @@ function renderCohort(){
 function shareSolidarity(name){
   const s=elapsed(),d=Math.floor(s/86400);
   const txt=`Держись, ${name}! 💪\n\nМы бросаем вместе уже ${d>0?d+' дней':'несколько часов'}\n\n${TAGS}\n${AUTHOR}`;
-  window.open(`https://www.threads.net/intent/post?text=${encodeURIComponent(txt)}`,'_blank');
+  postToThreads();
 }
 
 function renderRank(){

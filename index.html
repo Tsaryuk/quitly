@@ -57,7 +57,12 @@
 
 /* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html { height: 100%; }
+html {
+  height: 100%;
+  height: 100dvh;
+  /* Safari iOS fix */
+  height: -webkit-fill-available;
+}
 body {
   font-family: 'Manrope', system-ui, sans-serif;
   font-size: 15px;
@@ -65,17 +70,23 @@ body {
   background: var(--bg);
   height: 100%;
   height: 100dvh;
+  height: -webkit-fill-available;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   transition: background .2s, color .2s;
+  margin: 0;
+  padding: 0;
 }
 
 /* ─── APP SHELL — pure flexbox, no fixed ─── */
 #app-shell {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  /* Трёхступенчатый fallback для разных браузеров */
+  height: 100vh;
   height: 100dvh;
+  height: -webkit-fill-available;
+  max-height: 100dvh;
   overflow: hidden;
   position: relative;
 }
@@ -124,6 +135,7 @@ body {
 /* ─── BOTTOM NAV — natural flex element, never fixed ─── */
 #nav {
   flex-shrink: 0;
+  /* Занимаем весь нижний safe area включая системную панель */
   height: calc(var(--nav-h) + var(--safe-bot));
   padding-bottom: var(--safe-bot);
   background: var(--surface);
@@ -131,6 +143,16 @@ body {
   display: flex;
   align-items: flex-start;
   transition: background .2s;
+  /* Расширяем фон за пределы safe-area на случай если что-то выходит за край */
+  position: relative;
+}
+#nav::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -40px;
+  height: 40px;
+  background: var(--surface);
+  pointer-events: none;
 }
 .ni {
   flex: 1;
@@ -1410,8 +1432,6 @@ function loadLocal() {
 function bootApp() {
   el('welcome-screen').classList.add('hidden');
   el('app-shell').style.display = 'flex';
-  el('app-shell').style.flexDirection = 'column';
-  el('app-shell').style.height = '100dvh';
   updatePill();
   startTimer();
   renderHome();

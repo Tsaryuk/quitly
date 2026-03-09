@@ -1416,7 +1416,8 @@ function handleTgCodeSuccess(user){
   const ava = el('wl-prev-ava');
   if(ava){
     if(user.photo){
-      ava.innerHTML = '<img src="' + user.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block" onerror="this.parentElement.textContent='' + (user.name||'?')[0].toUpperCase() + ''">';
+      const fallbackLetter = (user.name||'?')[0].toUpperCase();
+      ava.innerHTML = `<img src="${user.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block" onerror="this.textContent='${fallbackLetter}'">`;
     } else {
       ava.textContent = (user.name||'?')[0].toUpperCase();
     }

@@ -446,6 +446,29 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 .btn-tg:active{opacity:.8}
 [data-theme=dark] .btn-tg{background:#229ED9}
 
+
+/* ─── PROFILE REDESIGN ─── */
+.prof-wrap{width:100%;overflow-x:hidden}
+.prof-hero{display:flex;flex-direction:column;align-items:center;padding:24px 20px 16px;text-align:center}
+.prof-photo{width:80px;height:80px;border-radius:50%;overflow:hidden;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;margin-bottom:12px;flex-shrink:0;border:2px solid var(--border);color:var(--text)}
+.prof-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.prof-name{font-size:20px;font-weight:800;margin-bottom:4px}
+.prof-handle-lbl{font-size:13px;color:var(--sub);display:flex;align-items:center;justify-content:center;gap:5px}
+.prof-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 16px;width:100%}
+.pg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;overflow:hidden;min-width:0}
+.pg-val{font-size:20px;font-weight:800;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pg-lbl{font-size:11px;color:var(--sub);font-weight:500}
+.pg-card.accent .pg-val{color:var(--green)}
+.pg-card.blue .pg-val{color:var(--blue)}
+.pg-card.orange .pg-val{color:var(--orange)}
+.prof-actions{padding:0 16px 16px;display:flex;flex-direction:column;gap:10px}
+
+/* ─── HOME PILL ─── */
+.uc-pill{display:flex;align-items:center;gap:6px;padding:5px 10px 5px 5px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;cursor:pointer;max-width:140px;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.uc-pill-ava{width:26px;height:26px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--text)}
+.uc-pill-ava img{width:100%;height:100%;object-fit:cover;display:block}
+.uc-pill-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">

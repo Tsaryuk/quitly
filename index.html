@@ -619,14 +619,7 @@ body { overflow-x: hidden; max-width: 100vw; }
   <meta property="og:description" content="Трекер отказа от курения с живой лентой. #бросаемвместе">
   <meta property="og:url" content="https://quitly.vercel.app">
   <meta property="og:image" content="https://quitly.vercel.app/icons/icon-512.png">
-  <!-- Telegram Login Widget — redirect mode (работает в iOS PWA) -->
-  <script async src="https://telegram.org/js/telegram-widget.js?22"
-    id="tg-widget"
-    data-telegram-login="quitly1_bot"
-    data-size="large"
-    data-auth-url="https://quitly-sigma.vercel.app/"
-    data-request-access="write">
-  </script>
+  <!-- TG auth: bot code flow, no widget needed -->
 </head>
 <body>
 
@@ -643,16 +636,32 @@ body { overflow-x: hidden; max-width: 100vw; }
       <h1 class="wl-h1">Бросай.<br>Вместе.</h1>
       <p class="wl-sub">Трекер отказа от курения. Реальные люди, живая лента поддержки.</p>
 
-      <!-- ШАГ 1: TG вход -->
+      <!-- ШАГ 1: TG вход через бот-код -->
       <div id="wl-step1" class="wl-form">
-        <!-- Telegram Login Widget рендерится здесь -->
-        <div id="tg-widget-wrap" style="display:flex;justify-content:center;min-height:52px;align-items:center">
-          <div id="tg-widget-loading" style="color:var(--sub);font-size:14px">Загружаем виджет...</div>
+
+        <!-- Кнопка — открывает бот в Telegram -->
+        <button class="btn-tg" id="wl-tg-btn" onclick="startTgCodeFlow()">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46 4.073 13.52c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
+          Войти через Telegram
+        </button>
+
+        <!-- Блок ввода кода — появляется после нажатия кнопки -->
+        <div id="wl-code-block" style="display:none">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;text-align:center">
+            <div style="font-size:13px;color:var(--sub);margin-bottom:8px;line-height:1.5">
+              Открылся Telegram. Нажми <strong style="color:var(--text)">Старт</strong> в боте —<br>
+              он пришлёт тебе код подтверждения.
+            </div>
+            <div style="font-size:28px">👇</div>
+          </div>
+          <div class="wl-field-label">Код из Telegram</div>
+          <input id="wl-code-inp" class="wl-num-inp" type="number" placeholder="123456"
+            inputmode="numeric" maxlength="6" style="text-align:center;font-size:24px;letter-spacing:4px"
+            oninput="if(this.value.length===6) verifyTgCode()">
+          <div id="wl-code-status" style="font-size:13px;color:var(--sub);text-align:center;margin-top:8px;min-height:20px"></div>
         </div>
-        <p style="font-size:13px;color:var(--sub);text-align:center;line-height:1.5;margin-top:4px">
-          Нажми — откроется Telegram. Имя и фото подтянутся автоматически.
-        </p>
-        <button onclick="showManualInput()" style="width:100%;padding:10px;background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit;margin-top:2px">
+
+        <button onclick="showManualInput()" style="width:100%;padding:10px;background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit;margin-top:4px">
           Войти без Telegram →
         </button>
       </div>
@@ -1309,8 +1318,8 @@ function initTheme(){
 // AUTH + CLOUD SESSION
 // ═══════════════════════════════════════════════════
 
-// --- Welcome screen steps ---
-let _tgUser = null; // временно хранит данные из TG виджета
+// ── Welcome screen nav ──────────────────────────────────────────────
+let _tgUser = null;
 
 function showManualInput(){
   el('wl-step1').style.display = 'none';
@@ -1323,63 +1332,100 @@ function showTgStep(){
   el('wl-step2').style.display = 'none';
   el('wl-step-manual').style.display = 'none';
 }
+function mountTgWidget(){ /* bot-code flow, no widget */ }
+function onTelegramAuth(){ /* not used */ }
 
-// Монтируем TG виджет в нужный контейнер
-function mountTgWidget(){
-  const wrap = el('tg-widget-wrap');
-  const loading = el('tg-widget-loading');
-  if(!wrap) return;
+// ── Bot-code flow ────────────────────────────────────────────────
+let _tgCodePollTimer = null;
+let _currentCode = null;
 
-  const iframes = document.querySelectorAll('iframe[src*="telegram"]');
-  if(iframes.length > 0){
-    if(loading) loading.style.display = 'none';
-    iframes.forEach(f => {
-      f.style.cssText = 'border:none;width:240px;height:52px;display:block;margin:0 auto';
-      wrap.appendChild(f);
-    });
-  } else {
-    setTimeout(mountTgWidget, 300);
+async function startTgCodeFlow(){
+  const btn = el('wl-tg-btn');
+  if(btn){ btn.disabled = true; btn.innerHTML = '⏳ Открываем Telegram...'; }
+
+  try {
+    const r = await fetch('/api/auth/tg-init', { method: 'POST' });
+    const data = await r.json();
+    if(!data.code) throw new Error(data.error || 'Сервер не ответил');
+    _currentCode = data.code;
+
+    // Открываем бот через нативный deeplink — откроет приложение Telegram
+    const link = document.createElement('a');
+    link.href = `tg://resolve?domain=quitly1_bot&start=${data.code}`;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => document.body.removeChild(link), 500);
+
+    // Показываем поле ввода кода
+    el('wl-code-block').style.display = '';
+    if(btn) btn.style.display = 'none';
+    el('wl-code-status').textContent = '⏳ Жду подтверждения от бота...';
+
+    startCodePolling(_currentCode);
+  } catch(e) {
+    toast('Ошибка: ' + e.message, 'red');
+    if(btn){ btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46 4.073 13.52c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg> Войти через Telegram'; }
   }
 }
 
-// Callback от Telegram Login Widget
-function onTelegramAuth(rawUser){
-  const loading = el('tg-widget-loading');
-  if(loading){ loading.textContent = 'Проверяем...'; loading.style.display = ''; }
-
-  fetch('/api/auth/telegram-verify', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(rawUser)
-  })
-  .then(r => r.json())
-  .then(data => {
-    if(!data.ok) throw new Error(data.error || 'Ошибка проверки');
-    _tgUser = data.user;
-    // Показываем превью
-    const ava = el('wl-prev-ava');
-    if(ava){
-      if(_tgUser.photo){
-        ava.innerHTML = `<img src="${_tgUser.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block" onerror="this.parentElement.textContent='${(_tgUser.name||'?')[0].toUpperCase()}'">`;
-      } else {
-        ava.textContent = (_tgUser.name||'?')[0].toUpperCase();
-      }
+function startCodePolling(code){
+  if(_tgCodePollTimer) clearInterval(_tgCodePollTimer);
+  let attempts = 0;
+  _tgCodePollTimer = setInterval(async () => {
+    attempts++;
+    if(attempts > 150){ // 5 минут
+      clearInterval(_tgCodePollTimer);
+      el('wl-code-status').textContent = '❌ Время вышло. Попробуй снова.';
+      el('wl-tg-btn').style.display = '';
+      el('wl-tg-btn').disabled = false;
+      el('wl-code-block').style.display = 'none';
+      return;
     }
-    const nm = el('wl-prev-name');
-    if(nm) nm.textContent = _tgUser.name || 'Пользователь';
-    const hd = el('wl-prev-handle');
-    if(hd) hd.textContent = _tgUser.handle || ('TG ID: ' + _tgUser.id);
+    try {
+      const r = await fetch('/api/auth/tg-check?code=' + code);
+      const data = await r.json();
+      if(data.claimed && data.user){
+        clearInterval(_tgCodePollTimer);
+        handleTgCodeSuccess(data.user);
+      }
+    } catch(_){}
+  }, 2000);
+}
 
-    // Переходим к шагу 2
-    el('wl-step1').style.display = 'none';
-    el('wl-step2').style.display = '';
-    el('wl-step-manual').style.display = 'none';
-    toast('Telegram подтверждён ✓','green');
-  })
-  .catch(e => {
-    toast('Ошибка входа: ' + e.message, 'red');
-    if(loading) loading.textContent = 'Ошибка — попробуй ещё раз';
-  });
+async function verifyTgCode(){
+  const code = (el('wl-code-inp')?.value || '').trim();
+  if(code.length !== 6) return;
+  el('wl-code-status').textContent = 'Проверяем...';
+  try {
+    const r = await fetch('/api/auth/tg-check?code=' + code);
+    const data = await r.json();
+    if(data.claimed && data.user){
+      if(_tgCodePollTimer) clearInterval(_tgCodePollTimer);
+      handleTgCodeSuccess(data.user);
+    } else if(data.error === 'Code expired'){
+      el('wl-code-status').textContent = '❌ Код истёк. Нажми «Войти» снова.';
+    } else {
+      el('wl-code-status').textContent = '⏳ Бот ещё не ответил. Нажми Старт в Telegram.';
+    }
+  } catch(e){ el('wl-code-status').textContent = 'Ошибка: ' + e.message; }
+}
+
+function handleTgCodeSuccess(user){
+  _tgUser = user;
+  const ava = el('wl-prev-ava');
+  if(ava){
+    if(user.photo){
+      ava.innerHTML = '<img src="' + user.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block" onerror="this.parentElement.textContent='' + (user.name||'?')[0].toUpperCase() + ''">';
+    } else {
+      ava.textContent = (user.name||'?')[0].toUpperCase();
+    }
+  }
+  if(el('wl-prev-name')) el('wl-prev-name').textContent = user.name || '';
+  if(el('wl-prev-handle')) el('wl-prev-handle').textContent = user.handle || ('ID: ' + user.id);
+  el('wl-step1').style.display = 'none';
+  el('wl-step2').style.display = '';
+  toast('Telegram подтверждён ✓', 'green');
 }
 
 // Запуск после TG авторизации + настройки сигарет

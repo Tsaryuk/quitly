@@ -90,7 +90,7 @@ body {
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: calc(var(--safe-top) + 32px) 24px calc(var(--safe-bot) + 32px);
+  padding: calc(var(--safe-top) + 20px) 24px calc(var(--safe-bot) + 32px);
 }
 #welcome-screen.hidden { display: none; }
 
@@ -268,6 +268,7 @@ body {
 .wl-tagline { font-size: 15px; color: var(--sub); margin-bottom: 40px; line-height: 1.5; }
 .wl-step { display: none; }
 .wl-step.on { display: flex; flex-direction: column; gap: 12px; }
+@keyframes wlPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
 
 /* Step 2 preview */
 .tg-preview {
@@ -355,16 +356,27 @@ body {
 }
 
 /* Milestones */
-.milestone-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; margin-bottom: 12px; }
-.milestone-row::-webkit-scrollbar { display: none; }
-.ms-chip {
-  flex-shrink: 0; display: flex; align-items: center; gap: 6px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 24px; padding: 7px 12px;
-  font-size: 12px; font-weight: 600; color: var(--sub);
+/* ─── MILESTONE PROGRESS ─── */
+.ms-wrap { margin-bottom: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.ms-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 8px; }
+.ms-title { font-size: 11px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: .6px; }
+.ms-next-label { font-size: 11px; font-weight: 700; color: var(--green); }
+.ms-bar-wrap { height: 4px; background: var(--surface2); margin: 0 14px 12px; border-radius: 2px; overflow: hidden; }
+.ms-bar { height: 100%; background: var(--green); border-radius: 2px; transition: width .5s ease; }
+.ms-list { padding: 0 6px 8px; }
+.ms-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 8px; border-radius: var(--r-sm);
+  transition: background .15s;
 }
-.ms-chip.done { border-color: var(--green-border); background: var(--green-bg); color: var(--green); }
-.ms-chip.next { border-color: var(--text); color: var(--text); }
+.ms-item.done { opacity: .55; }
+.ms-item.next { background: var(--green-bg); }
+.ms-ico { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; margin-top: 1px; }
+.ms-info { flex: 1; min-width: 0; }
+.ms-label { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.ms-label .ms-done-mark { color: var(--green); font-size: 11px; }
+.ms-label .ms-next-mark { font-size: 10px; font-weight: 700; color: var(--green); background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 4px; padding: 1px 5px; }
+.ms-desc { font-size: 12px; color: var(--sub); line-height: 1.4; margin-top: 2px; }
 
 /* Action buttons */
 .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
@@ -628,43 +640,66 @@ body {
      WELCOME SCREEN
 ════════════════════════════════════════ -->
 <div id="welcome-screen">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:36px">
-    <div>
-      <div class="wl-logo">Quit<span>ly</span></div>
-      <div style="font-size:14px;color:var(--sub);font-weight:500">Брось. Вместе.</div>
-    </div>
-    <button class="theme-btn" onclick="toggleTheme()">
-      <svg class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg class="sun-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-    </button>
-  </div>
 
-  <!-- Step 1: TG login -->
-  <div id="wl-step1" class="wl-step on">
-    <div style="font-size:15px;font-weight:600;color:var(--sub);margin-bottom:4px;line-height:1.6">
-      Отслеживай прогресс, поддерживай других<br>и получай поддержку сам.
+  <!-- Step 1: Landing + TG login -->
+  <div id="wl-step1" class="wl-step on" style="flex:1;display:flex;flex-direction:column;justify-content:space-between">
+
+    <!-- TOP: theme toggle -->
+    <div style="display:flex;justify-content:flex-end">
+      <button class="theme-btn" onclick="toggleTheme()">
+        <svg class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2"/></svg>
+      </button>
     </div>
-    <div style="height:24px"></div>
-    <button id="wl-tg-btn" class="btn btn-tg" onclick="startTgCodeFlow()">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46l-2.987-.94c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
-      Войти через Telegram
-    </button>
-    <div id="wl-code-block" style="display:none;flex-direction:column;gap:10px">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center">
-        <div style="font-size:13px;color:var(--sub);line-height:1.5">Открылся <strong style="color:var(--text)">@quitly1_bot</strong> в Telegram.<br>Нажми <strong style="color:var(--text)">Старт</strong> — бот пришлёт код.</div>
+
+    <!-- HERO -->
+    <div style="text-align:center;padding:24px 0 20px">
+      <div style="font-size:72px;line-height:1;margin-bottom:24px;animation:wlPulse 3s ease-in-out infinite">✊</div>
+
+      <!-- live counter pill -->
+      <div id="wl-live-pill" style="display:inline-flex;align-items:center;gap:7px;
+           background:var(--green-bg);border:1.5px solid var(--green-border);
+           border-radius:24px;padding:6px 14px;margin-bottom:24px">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0"></div>
+        <span id="wl-live-count" style="font-size:13px;font-weight:700;color:var(--green)">Загружаем…</span>
       </div>
-      <div class="inp-label">Код из Telegram</div>
-      <input id="wl-code-inp" class="inp" type="number" inputmode="numeric" placeholder="123456"
-        style="text-align:center;font-size:28px;font-weight:900;letter-spacing:6px"
-        oninput="if(this.value.length===6) verifyTgCode()">
-      <div id="wl-code-status" style="font-size:13px;color:var(--sub);text-align:center;min-height:18px"></div>
-      <a id="tg-fallback-link" href="#" target="_blank" rel="noopener"
-         style="display:none;align-items:center;justify-content:center;gap:8px;
-                padding:12px 16px;background:#229ED9;color:#fff;border-radius:var(--r);
-                font-weight:700;font-size:14px;text-decoration:none;border:none">
-        📲 Открыть Telegram вручную
-      </a>
-      <button class="btn btn-ghost btn-sm" onclick="cancelTgFlow()">Отмена</button>
+
+      <div style="font-size:42px;font-weight:900;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px">Бросай.<br>Вместе.</div>
+      <div style="font-size:16px;color:var(--sub);font-weight:500;line-height:1.5;max-width:280px;margin:0 auto">
+        Трекер отказа от курения. Реальные люди, живая лента поддержки.
+      </div>
+    </div>
+
+    <!-- BOTTOM: CTA -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button id="wl-tg-btn" class="btn btn-tg" onclick="startTgCodeFlow()" style="font-size:17px;padding:18px">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46l-2.987-.94c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
+        Войти через Telegram
+      </button>
+
+      <div id="wl-code-block" style="display:none;flex-direction:column;gap:10px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center">
+          <div style="font-size:24px;margin-bottom:8px">💬</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">Telegram открылся</div>
+          <div style="font-size:13px;color:var(--sub);line-height:1.5">Нажми <strong style="color:var(--text)">Старт</strong> у бота <strong style="color:var(--text)">@quitly1_bot</strong><br>— он подтвердит вход автоматически</div>
+        </div>
+        <div style="text-align:center;font-size:13px;color:var(--sub)">или введи код вручную</div>
+        <input id="wl-code-inp" class="inp" type="number" inputmode="numeric" placeholder="123456"
+          style="text-align:center;font-size:28px;font-weight:900;letter-spacing:6px"
+          oninput="if(this.value.length===6) verifyTgCode()">
+        <div id="wl-code-status" style="font-size:13px;color:var(--sub);text-align:center;min-height:18px"></div>
+        <a id="tg-fallback-link" href="#" target="_blank" rel="noopener"
+           style="display:none;align-items:center;justify-content:center;gap:8px;
+                  padding:12px 16px;background:#229ED9;color:#fff;border-radius:var(--r);
+                  font-weight:700;font-size:14px;text-decoration:none">
+          📲 Открыть Telegram вручную
+        </a>
+        <button class="btn btn-ghost btn-sm" onclick="cancelTgFlow()">Отмена</button>
+      </div>
+
+      <div style="text-align:center;font-size:12px;color:var(--ph);line-height:1.5">
+        Без регистрации. Данные хранятся анонимно.
+      </div>
     </div>
   </div>
 
@@ -746,12 +781,12 @@ body {
             </button>
           </div>
 
-          <div class="milestone-row" id="h-milestones"></div>
+          <div class="ms-wrap" id="h-milestones"></div>
 
           <div class="action-row">
             <button class="btn btn-ghost" onclick="openShare()">
-              <svg width="16" height="16" viewBox="0 0 192 192" fill="currentColor"><path d="M141.537 88.988c-.827-.396-1.667-.778-2.518-1.143-1.482-27.307-16.403-42.94-41.457-43.1-.114-.001-.227-.001-.34-.001-14.986 0-27.605 6.397-35.458 17.054l13.75 9.42c5.777-8.627 14.707-10.568 21.728-10.568 10.196.066 17.678 3.242 22.516 9.41 3.505 4.446 5.827 10.515 6.941 18.133-7.678-1.33-15.98-1.694-24.83-1.167-23.544 1.352-38.565 14.473-37.638 32.846.469 9.297 5.114 17.068 12.943 22.034 6.617 4.2 15.011 6.246 23.77 5.789 11.588-.622 20.784-5.168 26.97-13.5 4.747-6.404 7.717-14.58 8.977-24.688 5.646 3.471 9.796 8.198 12.061 13.963 4.081 10.479 4.321 27.962-8.068 40.298-10.828 10.78-23.855 15.396-43.528 15.544-21.856-.17-38.447-6.944-49.44-20.147-10.323-12.427-15.659-30.61-15.826-54.115.167-23.505 5.504-41.688 15.826-54.114 10.993-13.197 27.584-19.972 49.44-20.141 22.018.171 38.864 6.979 50.044 20.247 5.532 6.563 9.764 14.742 12.561 24.222l15.816-4.296c-3.449-11.848-8.666-21.937-15.687-30.203C158.066 41.236 138.066 33.083 109.456 32.904h-.079c-28.548.178-48.315 8.384-62.126 25.168C35.052 73.075 28.728 94.638 28.52 122.12c.207 27.482 6.532 49.046 18.731 63.99 13.81 16.784 33.578 24.891 62.126 25.07h.079c25.394-.163 43.757-7.422 57.625-21.247 18.162-18.108 17.582-40.839 11.785-54.659-3.976-9.438-11.474-17.258-25.295-30.285zM101.283 131.705c-9.228.504-18.817-3.572-19.283-11.77-.333-6.093 4.104-12.777 20.259-13.726 1.827-.109 3.613-.16 5.357-.16 6.249 0 12.096.609 17.388 1.766-1.99 21.683-13.857 23.364-23.721 23.89z"/></svg>
-              Поделиться
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              В Threads
             </button>
             <button class="btn btn-ghost" style="color:var(--red)" onclick="showRelapse()">
               🚬 Срыв
@@ -873,6 +908,32 @@ body {
               <div class="lnk-arr">›</div>
             </a>
           </div>
+
+          <div class="sec-title" style="margin-top:4px">Офлайн-клуб</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px">
+            <div style="font-size:22px;margin-bottom:8px">🤝</div>
+            <div style="font-size:15px;font-weight:800;margin-bottom:6px">Встречи #БросаемВместе</div>
+            <div style="font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:12px">
+              Каждый месяц собираемся в Москве — делимся опытом, поддерживаем друг друга. Вход бесплатный.
+            </div>
+            <a href="https://t.me/quitly1_bot" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="var(--text)"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46l-2.987-.94c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
+              Узнать расписание
+            </a>
+          </div>
+
+          <div class="sec-title" style="margin-top:4px">Поддержать проект</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:24px">
+            <div style="font-size:22px;margin-bottom:8px">☕</div>
+            <div style="font-size:15px;font-weight:800;margin-bottom:6px">Купи кофе Денису</div>
+            <div style="font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:12px">
+              Quitly бесплатен и без рекламы. Если приложение помогает — можно поддержать разработку.
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <a href="https://boosty.to/mr.tsaryuk" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">☕ Boosty</a>
+              <a href="https://t.me/quitly1_bot" target="_blank" class="btn btn-primary btn-sm" style="text-decoration:none">💳 Перевод</a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -899,8 +960,8 @@ body {
 
         <div class="prof-actions">
           <button class="btn btn-ghost" onclick="openShare()">
-            <svg viewBox="0 0 192 192" width="16" height="16" fill="currentColor"><path d="M141.537 88.988c-.827-.396-1.667-.778-2.518-1.143-1.482-27.307-16.403-42.94-41.457-43.1-.114-.001-.227-.001-.34-.001-14.986 0-27.605 6.397-35.458 17.054l13.75 9.42c5.777-8.627 14.707-10.568 21.728-10.568 10.196.066 17.678 3.242 22.516 9.41 3.505 4.446 5.827 10.515 6.941 18.133-7.678-1.33-15.98-1.694-24.83-1.167-23.544 1.352-38.565 14.473-37.638 32.846.469 9.297 5.114 17.068 12.943 22.034 6.617 4.2 15.011 6.246 23.77 5.789 11.588-.622 20.784-5.168 26.97-13.5 4.747-6.404 7.717-14.58 8.977-24.688 5.646 3.471 9.796 8.198 12.061 13.963 4.081 10.479 4.321 27.962-8.068 40.298-10.828 10.78-23.855 15.396-43.528 15.544-21.856-.17-38.447-6.944-49.44-20.147-10.323-12.427-15.659-30.61-15.826-54.115.167-23.505 5.504-41.688 15.826-54.114 10.993-13.197 27.584-19.972 49.44-20.141 22.018.171 38.864 6.979 50.044 20.247 5.532 6.563 9.764 14.742 12.561 24.222l15.816-4.296c-3.449-11.848-8.666-21.937-15.687-30.203C158.066 41.236 138.066 33.083 109.456 32.904h-.079c-28.548.178-48.315 8.384-62.126 25.168C35.052 73.075 28.728 94.638 28.52 122.12c.207 27.482 6.532 49.046 18.731 63.99 13.81 16.784 33.578 24.891 62.126 25.07h.079c25.394-.163 43.757-7.422 57.625-21.247 18.162-18.108 17.582-40.839 11.785-54.659-3.976-9.438-11.474-17.258-25.295-30.285zM101.283 131.705c-9.228.504-18.817-3.572-19.283-11.77-.333-6.093 4.104-12.777 20.259-13.726 1.827-.109 3.613-.16 5.357-.16 6.249 0 12.096.609 17.388 1.766-1.99 21.683-13.857 23.364-23.721 23.89z"/></svg>
-            Поделиться прогрессом
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            Поделиться в Threads
           </button>
           <button class="btn btn-ghost" style="color:var(--red)" onclick="showRelapse()">🚬 Записать срыв</button>
           <button class="btn btn-ghost" style="color:var(--sub)" onclick="showLogoutConfirm()">Выйти из аккаунта</button>
@@ -1000,12 +1061,12 @@ const TIPS = [
 ];
 
 const MILESTONES = [
-  { ms: 3600000, label: '1 час', emoji: '🌱' },
-  { ms: 86400000, label: '1 день', emoji: '⚡' },
-  { ms: 259200000, label: '3 дня', emoji: '🔥' },
-  { ms: 604800000, label: '1 неделя', emoji: '🏆' },
-  { ms: 2592000000, label: '1 месяц', emoji: '💎' },
-  { ms: 7776000000, label: '3 месяца', emoji: '🚀' },
+  { ms: 3600000, label: '1 час', emoji: '🌱', desc: 'Никотин начинает выводиться. Давление и пульс нормализуются.' },
+  { ms: 86400000, label: '1 день', emoji: '⚡', desc: 'Риск инфаркта снижается. Кислород в крови возвращается к норме.' },
+  { ms: 259200000, label: '3 дня', emoji: '🔥', desc: 'Физическая зависимость от никотина почти исчезла. Дышать становится легче.' },
+  { ms: 604800000, label: '1 неделя', emoji: '🏆', desc: 'Вкус и запах восстанавливаются. Кашель и одышка уменьшаются.' },
+  { ms: 2592000000, label: '1 месяц', emoji: '💎', desc: 'Лёгкие чистятся. Кожа улучшается. Энергии заметно больше.' },
+  { ms: 7776000000, label: '3 месяца', emoji: '🚀', desc: 'Риск инфаркта вдвое ниже, чем у курильщика. Иммунитет восстановился.' },
 ];
 
 /* ════════════════════════════════════════════
@@ -1350,11 +1411,13 @@ function bootApp() {
   el('welcome-screen').classList.add('hidden');
   el('app-shell').style.display = 'flex';
   el('app-shell').style.flexDirection = 'column';
-  el('app-shell').style.height = '100%';
+  el('app-shell').style.height = '100dvh';
   updatePill();
   startTimer();
   renderHome();
   loadRealFeed();
+  // Всегда стартуем на Home
+  setTimeout(() => swipeTo(0), 0);
 }
 
 function logout() {
@@ -1410,14 +1473,39 @@ function renderHome() {
 
   el('h-cravings').textContent = S.cravings;
 
-  // Milestones
+  // Milestones progress bar
   const msEl = el('h-milestones');
-  const ms = Date.now() - S.startTime.getTime();
-  msEl.innerHTML = MILESTONES.map(m => {
-    const done = ms >= m.ms;
-    const next = !done && MILESTONES.find(x => ms < x.ms) === m;
-    return '<div class="ms-chip ' + (done ? 'done' : next ? 'next' : '') + '">' + m.emoji + ' ' + m.label + '</div>';
-  }).join('');
+  const ms = S.startTime ? Date.now() - S.startTime.getTime() : 0;
+  const nextMs = MILESTONES.find(m => ms < m.ms);
+  const prevMs = nextMs ? MILESTONES[MILESTONES.indexOf(nextMs) - 1] : MILESTONES[MILESTONES.length - 1];
+  const pct = nextMs
+    ? Math.min(100, ((ms - (prevMs ? prevMs.ms : 0)) / (nextMs.ms - (prevMs ? prevMs.ms : 0))) * 100)
+    : 100;
+  const nextLabel = nextMs
+    ? ('до ' + nextMs.label + ': ' + fmtDur(Math.ceil((nextMs.ms - ms) / 1000)))
+    : 'Все этапы пройдены 🎉';
+  msEl.innerHTML =
+    '<div class="ms-header">' +
+      '<span class="ms-title">Что произойдёт</span>' +
+      '<span class="ms-next-label">' + nextLabel + '</span>' +
+    '</div>' +
+    '<div class="ms-bar-wrap"><div class="ms-bar" style="width:' + pct.toFixed(1) + '%"></div></div>' +
+    '<div class="ms-list">' +
+    MILESTONES.map(m => {
+      const done = ms >= m.ms;
+      const isNext = m === nextMs;
+      return '<div class="ms-item ' + (done ? 'done' : isNext ? 'next' : '') + '">' +
+        '<div class="ms-ico">' + m.emoji + '</div>' +
+        '<div class="ms-info">' +
+          '<div class="ms-label">' + m.label +
+            (done ? '<span class="ms-done-mark">✓</span>' : '') +
+            (isNext ? '<span class="ms-next-mark">следующий</span>' : '') +
+          '</div>' +
+          '<div class="ms-desc">' + m.desc + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('') +
+    '</div>';
 
   // Tip
   const tipIdx = Math.floor(Date.now() / 3600000) % TIPS.length;
@@ -1700,14 +1788,20 @@ function openShare() {
   const secs = elapsed();
   const d = Math.floor(secs / 86400);
   const nosm = Math.floor(secs / 86400 * (S.user?.cigs || 20));
-  const txt = 'Я не курю уже ' + fmtDur(secs) + ' ⏱\n' +
-    'Не выкурено: ' + nosm + ' сигарет\n\n' +
+  const saved = Math.floor(nosm / 20 * (S.user?.price || 200));
+  const txt = (d > 0
+    ? 'Не курю уже ' + d + ' ' + (d===1?'день':d<5?'дня':'дней') + ' \u23f1'
+    : 'Первый день без сигарет \u23f1') + '\n' +
+    '\ud83d\udea2 Не выкурено: ' + nosm + ' сиг.  \ud83d\udcb0 Сэкономлено: \u20bd' + saved.toLocaleString('ru') + '\n\n' +
     TAGS + '\nquitly-sigma.vercel.app';
-  if (navigator.share) {
-    navigator.share({ text: txt }).catch(() => {});
-  } else {
-    navigator.clipboard.writeText(txt).then(() => toast('Скопировано!')).catch(() => toast('Не удалось скопировать'));
-  }
+
+  // iOS: попытка открыть нативный Threads через deeplink
+  const encoded = encodeURIComponent(txt);
+  // Threads web intent
+  const threadsUrl = 'https://www.threads.net/intent/post?text=' + encoded;
+
+  // Открываем Threads
+  window.open(threadsUrl, '_blank', 'noopener');
 }
 
 /* ════════════════════════════════════════════
@@ -1722,6 +1816,21 @@ function openShare() {
   if (loadLocal() && S.user) {
     bootApp();
   }
+
+  // Загружаем live-счётчик на welcome экране
+  (async () => {
+    try {
+      const r = await fetch(SB_URL + '/rest/v1/quit_sessions?select=tg_id&is_active=eq.true', { headers: SB_HDR });
+      const data = await r.json();
+      const n = data?.length || 0;
+      const el2 = document.getElementById('wl-live-count');
+      if (el2) {
+        el2.textContent = n > 0
+          ? n + ' ' + (n===1?'бросает':n<5?'бросают':'бросают') + ' прямо сейчас'
+          : 'Будь первым — начни сейчас';
+      }
+    } catch {}
+  })();
 
   // Telegram WebApp redirect (from bot deeplink)
   const params = new URLSearchParams(window.location.search);

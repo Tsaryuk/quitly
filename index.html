@@ -114,10 +114,10 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
 
 .timer-block{padding:28px 20px 20px;text-align:center;position:relative}
 .timer-lbl{font-size:12px;font-weight:600;color:var(--sub);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
-.timer-val{font-size:clamp(42px,13vw,64px);font-weight:900;letter-spacing:-2px;line-height:1;color:var(--text);font-variant-numeric:tabular-nums}
+.timer-val{font-size:clamp(38px,12vw,64px);font-weight:900;letter-spacing:-1px;line-height:1;color:var(--text);font-variant-numeric:tabular-nums;word-break:keep-all;overflow:visible}
 .timer-val span{color:var(--green)}
 
-.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;box-sizing:border-box;width:100%}
 .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
 .stat-val{font-size:24px;font-weight:800;margin-bottom:3px}
 .stat-lbl{font-size:11px;color:var(--sub);font-weight:500}
@@ -128,7 +128,7 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
 .btn-smoked:active{opacity:.7;transform:scale(.98)}
 
 /* CRAVING */
-.craving-box{margin:0 16px 16px;background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:var(--r);padding:16px;display:flex;align-items:center;justify-content:space-between}
+.craving-box{margin:0 16px 16px;background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:var(--r);padding:14px 12px;display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;max-width:calc(100% - 32px)}
 .craving-left{display:flex;align-items:center;gap:12px}
 .craving-num{font-size:36px;font-weight:900;color:var(--orange);line-height:1}
 .craving-info{flex:1}
@@ -338,8 +338,8 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
 .tag-pill.accent{background:var(--green-bg);border-color:var(--green-border);color:var(--green)}
 
 /* SHARE ROW v2 */
-.share-row-v2{display:flex;gap:8px;padding:0 16px 16px}
-.btn-share-card{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:13px;background:#000;color:#fff;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.share-row-v2{display:flex;gap:8px;padding:0 16px 16px;box-sizing:border-box;width:100%}
+.btn-share-card{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 10px;background:#000;color:#fff;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s;overflow:hidden}
 [data-theme=dark] .btn-share-card{background:#fff;color:#000}
 .btn-share-card:hover{opacity:.85}
 .btn-copy-prog{padding:13px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px;font-weight:600;cursor:pointer;color:var(--text);transition:background .15s;white-space:nowrap}
@@ -354,22 +354,66 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
 .toast.blue{background:var(--blue)}
 
 /* ─── MOBILE FIXES ─── */
-@media (max-width: 380px){
-  .timer-big{font-size:clamp(48px,18vw,72px)!important}
-  .wl-icon{font-size:60px;padding:24px 0 16px}
-  .wl-title{font-size:28px!important}
-  .page-hdr{padding:12px 12px 6px}
-  .card{padding:13px}
-}
-/* Safe area for iPhone notch bottom */
-.scr{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 16px)}
-#nav{padding-bottom:env(safe-area-inset-bottom, 0px)}
-/* Prevent text selection on swipe */
-.scr{-webkit-user-select:none;user-select:none}
-.inp,-webkit-user-select:text;
-/* Active states for mobile tap */
-.btn-fill:active,.btn-pill:active,.ni:active{opacity:.65;transform:scale(.98)}
 
+/* 1. Prevent ANY horizontal scroll */
+*, *::before, *::after { box-sizing: border-box; }
+html { overflow-x: hidden; }
+body { overflow-x: hidden; max-width: 100vw; }
+.scr { overflow-x: hidden; }
+
+/* 2. Fix bottom nav — safe area padding, items stick to top */
+#nav {
+  height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  align-items: flex-start;
+}
+.ni { height: var(--nav-h); flex: 1; max-width: 20%; }
+
+/* 3. Fix .scr padding so content isn't hidden under nav */
+.scr {
+  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 20px);
+}
+
+/* 4. All content sections — stay within screen */
+.home-hdr, .stats-row, .smoked-wrap, .craving-box,
+.share-row-v2, .share-row, .sec-label,
+.prof-stats, .badge-grid, .links-grid,
+.author-blk, .donate-blk, .cohort-banner,
+.gate-banner, .feed-card, .vs-card,
+.wl-wrap, .relapse-wrap, .page-hdr {
+  max-width: 100%;
+  width: 100%;
+}
+
+/* 5. Fix share row buttons — no overflow */
+.share-row-v2 { width: 100%; flex-wrap: nowrap; }
+.btn-share-card { flex: 1; min-width: 0; overflow: hidden; padding: 13px 8px; font-size: 14px; }
+.btn-copy-prog { flex-shrink: 0; padding: 13px 14px; }
+
+/* 6. Craving box — fixed width with margins */
+.craving-box { width: calc(100% - 32px); margin-left: 16px; margin-right: 16px; }
+
+/* 7. Timer — fluid font */
+.timer-val { font-size: clamp(36px, 11vw, 64px); }
+
+/* 8. Small phones */
+@media (max-width: 390px) {
+  .wl-title { font-size: clamp(24px, 8vw, 36px) !important; }
+  .timer-val { font-size: clamp(34px, 10vw, 56px); }
+  .prof-stats { grid-template-columns: repeat(2, 1fr); }
+  .wl-stats { grid-template-columns: repeat(2, 1fr); }
+  .theme-seg { transform: scale(0.88); transform-origin: right center; }
+}
+
+@media (max-width: 360px) {
+  .ni-lbl { font-size: 9px; }
+  .home-chips { gap: 4px; }
+}
+
+/* 9. Touch interaction */
+.scr { -webkit-user-select: none; user-select: none; }
+input, textarea { -webkit-user-select: text; user-select: text; }
+.btn-fill:active, .btn-smoked:active, .btn-craving:active, .ni:active { opacity: 0.65; transform: scale(0.98); }
 </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">

@@ -58,6 +58,10 @@
 /* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; padding: 0; height: 100%; }
+html {
+  /* Фон html = цвет nav — белая полоска под nav становится невидимой */
+  background: var(--surface);
+}
 body {
   font-family: 'Manrope', system-ui, sans-serif;
   font-size: 15px;
@@ -116,12 +120,13 @@ body {
   position: fixed;
   left: 0; right: 0; bottom: 0;
   z-index: 999;
+  /* Высота = кнопки + safe area + ещё 60px запаса на любой экран */
   height: calc(var(--nav-h) + var(--safe-bot));
   padding-bottom: var(--safe-bot);
   background: var(--surface);
   border-top: 1px solid var(--border);
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   transition: background .2s;
 }
 .ni {

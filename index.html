@@ -179,9 +179,9 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
 .ms-item.done .ms-name{color:var(--green)}
 
 /* FEED SCREEN */
-.feed-card{margin:0 16px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
-.fc-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.fc-ava{font-size:38px}
+.feed-card{margin:0 16px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;overflow:hidden;box-sizing:border-box;width:calc(100% - 32px)}
+.fc-top{display:flex;align-items:center;gap:12px;margin-bottom:10px;min-width:0;overflow:hidden}
+.fc-ava{font-size:38px;width:48px;height:48px;border-radius:50%;flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--surface2)}
 .fc-name{font-size:15px;font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:2px}
 .fc-days{font-size:12px;color:var(--sub)}
 .fc-timer{font-size:22px;font-weight:800;margin-bottom:12px;font-variant-numeric:tabular-nums;color:var(--green)}
@@ -361,34 +361,7 @@ html { overflow-x: hidden; }
 body { overflow-x: hidden; max-width: 100vw; }
 .scr { overflow-x: hidden; }
 
-/* 2. Fix bottom nav — safe area */
-#nav {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  align-items: flex-start;
-  /* extend bg behind home indicator */
-  background: var(--surface);
-}
-/* pseudo element fills gap between nav and physical screen edge */
-#nav::after {
-  content: '';
-  display: block;
-  position: absolute;
-  bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
-  left: 0; right: 0;
-  height: env(safe-area-inset-bottom, 0px);
-  background: var(--surface);
-}
-.ni { height: var(--nav-h); flex: 1; max-width: 20%; }
-
-/* 3. Fix .scr padding so content isn't hidden under nav */
-.scr {
-  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 16px) !important;
-}
+/* 2-3. Nav & scr — see LAYOUT FOUNDATION block below */
 
 /* 4. All content sections — stay within screen */
 .home-hdr, .stats-row, .smoked-wrap, .craving-box,
@@ -897,9 +870,9 @@ body { overflow-x: hidden; max-width: 100vw; }
   <div class="author-blk">
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
       <div style="width:62px;height:62px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--surface2);border:1px solid var(--border)">
-        <img src="https://unavatar.io/threads/mr.tsaryuk" alt="Денис Царюк"
+        <img src="https://unavatar.io/telegram/tsaryuk_denis" alt="Денис Царюк"
              style="width:100%;height:100%;object-fit:cover;display:block"
-             onerror="this.outerHTML='<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:28px>👨‍⚕️</div>'">
+             onerror="this.src='https://unavatar.io/threads/mr.tsaryuk'">
       </div>
       <div style="min-width:0">
         <div style="font-size:17px;font-weight:800;margin-bottom:3px">Денис Царюк</div>
@@ -1267,7 +1240,10 @@ function setNav(id){
 function confirmLogout(){
   // confirm() блокируется в PWA, используем кастомный тост
   const t = document.createElement('div');
-  t.style.cssText='position:fixed;bottom:80px;left:16px;right:16px;background:#1a1a1a;color:#fff;border-radius:14px;padding:16px 18px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:12px';
+  const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')||'60');
+  const safeB = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')||'0') || 0;
+  const bottomOffset = navH + 12;
+  t.style.cssText='position:fixed;bottom:'+bottomOffset+'px;left:16px;right:16px;background:#1a1a1a;color:#fff;border-radius:14px;padding:16px 18px;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:12px';
   t.innerHTML=`<div style="font-size:15px;font-weight:700">Выйти из аккаунта?</div>
     <div style="font-size:13px;color:#aaa;line-height:1.4">Прогресс сохранится — можно войти снова.</div>
     <div style="display:flex;gap:10px">
@@ -1916,12 +1892,16 @@ function checkMilestones(secs){
 function renderFeed(){
   const cnt=Math.floor(Math.random()*200)+750;
   el('feed-cnt').textContent=`Сегодня бросили: ${cnt} человек`;
-  const items=[...(S.startTime?[{a:S.user?.avatar||'🐺',n:S.user?.name||'Ты',t:S.startTime.getTime(),th:S.user?.threads}]:[]),...FEED_DATA];
+  const myTgId=S.user?.tgId?String(S.user.tgId):null;
+  const myHandle=(S.user?.handle||'').toLowerCase().replace('@','');
+  const others=FEED_DATA.filter(function(it){if(!it.n)return false;if(myTgId&&it.tgId&&String(it.tgId)===myTgId)return false;if(myHandle&&it.n.toLowerCase()===myHandle)return false;return true;});
+  const meArr=S.startTime?[{photo:S.user?.photo,a:S.user?.avatar||'🐺',n:S.user?.name||'Ты',t:S.startTime.getTime(),me:true}]:[];
+  const items=meArr.concat(others);
   el('feed-list').innerHTML=items.map(it=>{
     const secs=Math.floor((Date.now()-it.t)/1000),d=Math.floor(secs/86400);
     return`<div class="feed-card">
       <div class="fc-top">
-        <div class="fc-ava">${it.a}</div>
+        <div class="fc-ava">${it.photo&&it.photo.startsWith('http')?'<img src="'+it.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent=String.fromCodePoint(128058)">':(it.a||'🐺')}</div>
         <div>
           <div class="fc-name">${it.n}${it.th?tdot:''}</div>
           <div class="fc-days">${d>0?d+' дней':'Первый день'}</div>
@@ -1949,7 +1929,7 @@ function renderCohort(){
     const aheadBehind=delta>0?`на ${fmtDur(Math.abs(delta))} впереди`:`на ${fmtDur(Math.abs(delta))} сзади`;
     return`<div class="feed-card" style="border-left:3px solid var(--blue)">
       <div class="fc-top">
-        <div class="fc-ava">${it.a}</div>
+        <div class="fc-ava">${it.photo&&it.photo.startsWith('http')?'<img src="'+it.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent=String.fromCodePoint(128058)">':(it.a||'🐺')}</div>
         <div>
           <div class="fc-name">${it.n}${it.th?tdot:''}</div>
           <div class="fc-days" style="color:var(--blue)">${aheadBehind}</div>

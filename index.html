@@ -94,7 +94,7 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
 .wl-wrap{min-height:100svh;display:flex;flex-direction:column;padding:env(safe-area-inset-top,20px) 20px env(safe-area-inset-bottom,32px)}
 .wl-top{display:flex;align-items:center;justify-content:space-between;padding:8px 0 0}
 .wl-logo{font-size:15px;font-weight:800;letter-spacing:-.3px}
-.wl-body{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:8px}
+.wl-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 24px;max-width:440px;width:100%;margin:0 auto}
 .wl-icon{font-size:80px;text-align:center;padding:40px 0 24px;animation:float 4s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .wl-live{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--green-bg);border:1px solid var(--green-border);font-size:12px;font-weight:600;color:var(--green);margin-bottom:18px}
@@ -442,6 +442,15 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   <meta property="og:description" content="Трекер отказа от курения с живой лентой. #бросаемвместе">
   <meta property="og:url" content="https://quitly.vercel.app">
   <meta property="og:image" content="https://quitly.vercel.app/icons/icon-512.png">
+  <!-- Telegram Login Widget -->
+  <script async src="https://telegram.org/js/telegram-widget.js?22"
+    id="tg-widget"
+    data-telegram-login="quitly1_bot"
+    data-size="large"
+    data-onauth="onTelegramAuth(user)"
+    data-request-access="write"
+    style="display:none">
+  </script>
 </head>
 <body>
 
@@ -449,41 +458,42 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 <div id="s-welcome" class="scr no-nav on">
   <div class="wl-wrap">
     <div class="wl-top">
-      <div class="wl-logo">Quitly</div>
+      <div class="wl-logo">🚭 Quitly</div>
       <div class="theme-seg" id="seg-w"></div>
     </div>
     <div class="wl-body">
-      <div class="wl-icon">🚭</div>
-      <div><span class="wl-live"><span class="wl-live-dot"></span><span id="live-n">847</span> бросают сейчас</span></div>
-      <h1 class="wl-h1" style="margin-top:16px">Бросай.<br>Вместе.</h1>
-      <p class="wl-sub">Трекер отказа от курения с живой лентой людей, которые бросают прямо сейчас.</p>
-      <div class="wl-stats">
-        <div class="wl-stat"><div class="wl-sn" id="ws-today">847</div><div class="wl-sl">сегодня<br>бросили</div></div>
-        <div class="wl-stat"><div class="wl-sn">23д</div><div class="wl-sl">средний<br>стаж</div></div>
-        <div class="wl-stat"><div class="wl-sn">12к</div><div class="wl-sl">участ-<br>ников</div></div>
-      </div>
-      <div class="tag-pills">
-        <span class="tag-pill accent">#quitly</span>
-        <span class="tag-pill">#бросаемвместе</span>
-        <span class="tag-pill">#бросаюкурить</span>
-      </div>
-      <div style="width:100%;margin-bottom:10px">
-        <div style="position:relative">
-          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:15px;pointer-events:none">@</span>
-          <input id="wl-handle" class="inp" type="text" placeholder="твой username в Threads" autocorrect="off" autocapitalize="none" spellcheck="false"
-            style="padding-left:28px;font-size:16px"
-            onkeydown="if(event.key==='Enter')enterHandle()">
+      <div class="wl-icon">✊</div>
+      <div><span class="wl-live"><span class="wl-live-dot"></span><span id="live-n">847</span> бросают прямо сейчас</span></div>
+      <h1 class="wl-h1">Бросай.<br>Вместе.</h1>
+      <p class="wl-sub">Трекер отказа от курения. Реальные люди, живая лента поддержки.</p>
+      <div class="wl-form">
+        <div>
+          <div class="wl-field-label">Твой Telegram username</div>
+          <div class="wl-handle-wrap">
+            <span class="wl-handle-at">@</span>
+            <input id="wl-handle" class="wl-handle-inp" type="text" placeholder="username"
+              autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="text"
+              onkeydown="if(event.key==='Enter')nextField()">
+          </div>
         </div>
-        <button class="btn-fill threads" style="margin-top:10px;width:100%" onclick="enterHandle()">
-          <svg viewBox="0 0 192 192" width="18" height="18" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>
-          Бросить с Threads
+        <div class="wl-cig-row">
+          <div class="wl-cig-box">
+            <div class="wl-field-label">Сигарет в день</div>
+            <input id="wl-cigs" class="wl-num-inp" type="number" value="20" min="1" max="60" inputmode="numeric">
+          </div>
+          <div class="wl-cig-box">
+            <div class="wl-field-label">Цена пачки (₽)</div>
+            <input id="wl-price" class="wl-num-inp" type="number" value="200" min="50" max="1000" step="10" inputmode="numeric">
+          </div>
+        </div>
+        <button class="btn-tg" onclick="enterHandle()">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46 4.073 13.52c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
+          Начать бросать
         </button>
       </div>
-
     </div>
   </div>
 </div>
-
 <!-- ═══ ONBOARD ═══ -->
 <div id="s-onboard" class="scr no-nav">
   <div style="padding:env(safe-area-inset-top,20px) 20px 0">
@@ -509,13 +519,13 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   <div class="home-hdr">
     <div>
       <div class="home-day" id="home-day">День 1</div>
-      <div style="font-size:12px;color:var(--sub)" id="home-since"></div>
+      <div class="home-since-lbl" id="home-since"></div>
     </div>
     <div class="home-chips">
       <div class="theme-seg" id="seg-h"></div>
-      <div style="display:flex;align-items:center;gap:7px;padding:6px 12px 6px 8px;background:var(--surface2);border-radius:20px;cursor:pointer;border:1px solid var(--border)" onclick="setNav('profile')">
-        <span id="uc-ava" style="font-size:18px;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;overflow:hidden;vertical-align:middle">🐺</span>
-        <span style="font-size:12px;font-weight:700" id="uc-name">Ты</span>
+      <div class="uc-pill" onclick="setNav('profile')">
+        <div class="uc-pill-ava" id="uc-ava">👤</div>
+        <span class="uc-pill-name" id="uc-name">Ты</span>
       </div>
     </div>
   </div>
@@ -530,14 +540,10 @@ input, textarea { -webkit-user-select: text; user-select: text; }
     <div class="stat-box"><div class="stat-val" style="color:var(--blue)" id="st-money">0 ₽</div><div class="stat-lbl">сэкономлено</div></div>
   </div>
 
-  <!-- SMOKED BUTTON -->
   <div class="smoked-wrap">
-    <button class="btn-smoked" onclick="openSmoked()">
-      🚬 Покурил — признаться
-    </button>
+    <button class="btn-smoked" onclick="openSmoked()">🚬 Покурил — признаться</button>
   </div>
 
-  <!-- CRAVING -->
   <div class="craving-box">
     <div class="craving-left">
       <div class="craving-num" id="craving-n">0</div>
@@ -549,22 +555,17 @@ input, textarea { -webkit-user-select: text; user-select: text; }
     <button class="btn-craving" onclick="craved()">💪 Устоял</button>
   </div>
 
-  <!-- TIP -->
-  <div class="tip-row">
+  <div class="tip-row" style="margin:14px 16px 0">
     <div class="tip-label">Совет дня</div>
     <div class="tip-text" id="tip-txt"></div>
   </div>
 
-  <!-- SHARE -->
   <div class="share-row-v2">
-    <button class="btn-share-card" onclick="openShareCard()">
-      <svg viewBox="0 0 192 192" width="16" height="16" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>
-      Поделиться прогрессом
-    </button>
+    <button class="btn-share-card" onclick="openShareCard()">📤 Поделиться прогрессом</button>
     <button class="btn-copy-prog" onclick="copyProgress()">📋</button>
   </div>
 
-  <div class="divider" style="margin:0 16px"></div>
+  <div class="divider" style="margin:14px 16px 0"></div>
   <div class="sec-label">Сейчас бросают</div>
   <div style="margin:0 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px">
     <div id="feed-preview"></div>
@@ -736,83 +737,87 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 </div>
 
 <!-- ═══ PROFILE ═══ -->
-<div id="s-profile" class="scr" style="overflow-x:hidden">
+<div id="s-profile" class="scr">
   <div class="page-hdr"><div class="page-title">Профиль</div></div>
-  <div class="prof-top">
-    <div class="prof-ava" id="p-ava" style="display:flex;align-items:center;justify-content:center;width:96px;height:96px;border-radius:50%;overflow:hidden;margin:0 auto 12px;background:var(--surface2);font-size:64px">🐺</div>
-    <div class="prof-name" id="p-name">...</div>
-    <div class="prof-handle" id="p-handle" style="max-width:100%;overflow:hidden;word-break:break-word;flex-wrap:wrap"></div>
-  </div>
-
-  <!-- Current attempt stats -->
-  <div class="prof-stats">
-    <div class="pst"><div class="pst-v" id="p-days">0</div><div class="pst-l">дней сейчас</div></div>
-    <div class="pst"><div class="pst-v" id="p-cigs">0</div><div class="pst-l">не выкурено</div></div>
-    <div class="pst"><div class="pst-v" id="p-money">0₽</div><div class="pst-l">сэкономлено</div></div>
-  </div>
-
-  <div class="divider" style="margin:0 16px 0"></div>
-
-  <!-- All-time stats -->
-  <div class="sec-label">Общая статистика</div>
-  <div style="margin:0 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
-      <div style="font-size:22px;font-weight:800;color:var(--green)" id="p-best-streak">—</div>
-      <div style="font-size:12px;color:var(--sub);margin-top:3px">Лучший период</div>
+  <div class="prof-wrap">
+    <div class="prof-hero">
+      <div class="prof-photo" id="p-ava">👤</div>
+      <div class="prof-name" id="p-name">—</div>
+      <div class="prof-handle-lbl" id="p-handle"></div>
     </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
-      <div style="font-size:22px;font-weight:800;color:var(--text)" id="p-attempts">1</div>
-      <div style="font-size:12px;color:var(--sub);margin-top:3px">Попыток</div>
-    </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
-      <div style="font-size:22px;font-weight:800;color:var(--orange)" id="p-total-cigs">0</div>
-      <div style="font-size:12px;color:var(--sub);margin-top:3px">Не выкурено всего</div>
-    </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
-      <div style="font-size:22px;font-weight:800;color:var(--text)" id="p-total-money">0₽</div>
-      <div style="font-size:12px;color:var(--sub);margin-top:3px">Сэкономлено всего</div>
-    </div>
-  </div>
 
-  <!-- Relapse history list -->
-  <div id="p-history-wrap" style="display:none">
-    <div class="sec-label">История попыток</div>
-    <div id="p-history" style="margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden"></div>
-  </div>
+    <div class="sec-label">Текущая попытка</div>
+    <div class="prof-grid">
+      <div class="pg-card accent">
+        <div class="pg-val" id="p-days">0</div>
+        <div class="pg-lbl">дней</div>
+      </div>
+      <div class="pg-card blue">
+        <div class="pg-val" id="p-money">0₽</div>
+        <div class="pg-lbl">сэкономлено</div>
+      </div>
+      <div class="pg-card orange">
+        <div class="pg-val" id="p-cigs">0</div>
+        <div class="pg-lbl">не выкурено</div>
+      </div>
+      <div class="pg-card">
+        <div class="pg-val" id="p-attempts">1</div>
+        <div class="pg-lbl">попыток</div>
+      </div>
+    </div>
 
-  <div class="divider" style="margin:0 16px 0"></div>
-  <div class="sec-label">Значки</div>
-  <div class="badge-grid" id="p-badges"></div>
-  <div style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:8px">
-    <button class="btn-share-t" style="width:100%;padding:13px;border-radius:var(--r-sm)" onclick="shareThreads()">
-      <svg viewBox="0 0 192 192" width="15" height="15" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>
-      Поделиться прогрессом в Threads
-    </button>
-    <button class="btn-fill outline" style="color:var(--red);border-color:var(--red-border)" onclick="openSmoked()">🚬 Записать срыв</button>
-    <button class="btn-fill outline" style="color:var(--sub);margin-top:4px" onclick="confirmLogout()">Выйти из аккаунта</button>
+    <div class="sec-label">Рекорды</div>
+    <div class="prof-grid">
+      <div class="pg-card accent" style="grid-column:1/-1">
+        <div class="pg-val" id="p-best-streak">—</div>
+        <div class="pg-lbl">лучший период без сигарет</div>
+      </div>
+      <div class="pg-card">
+        <div class="pg-val" id="p-total-cigs">0</div>
+        <div class="pg-lbl">не выкурено всего</div>
+      </div>
+      <div class="pg-card">
+        <div class="pg-val" id="p-total-money">0₽</div>
+        <div class="pg-lbl">сэкономлено всего</div>
+      </div>
+    </div>
+
+    <div id="p-history-wrap" style="display:none">
+      <div class="sec-label">История попыток</div>
+      <div id="p-history" style="margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden"></div>
+    </div>
+
+    <div class="sec-label">Значки</div>
+    <div class="badge-grid" id="p-badges"></div>
+
+    <div class="prof-actions">
+      <button class="btn-fill outline" onclick="openShareCard()">📤 Поделиться прогрессом</button>
+      <button class="btn-fill outline" style="color:var(--red);border-color:var(--red-border)" onclick="openSmoked()">🚬 Записать срыв</button>
+      <button class="btn-fill outline" style="color:var(--sub)" onclick="confirmLogout()">Выйти</button>
+    </div>
   </div>
 </div>
 
 <!-- NAV -->
 <nav id="nav" style="display:none">
   <button class="ni on" id="ni-home" onclick="setNav('home')">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m3 12 2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/></svg>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m3 12 2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/></svg>
     <span class="nl">Дом</span>
   </button>
   <button class="ni" id="ni-feed" onclick="setNav('feed')">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4" stroke-linecap="round"/></svg>
     <span class="nl">Лента</span>
   </button>
   <button class="ni" id="ni-challenge" onclick="setNav('challenge')">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0"/></svg>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
     <span class="nl">Дуэль</span>
   </button>
   <button class="ni" id="ni-about" onclick="setNav('about')">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13z"/><path stroke-linecap="round" d="M19.14 19.14 21 21M3 21l1.86-1.86"/></svg>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4" stroke-linecap="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg>
     <span class="nl">Автор</span>
   </button>
   <button class="ni" id="ni-profile" onclick="setNav('profile')">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4" stroke-linecap="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 20v-1a8 8 0 0 1 16 0v1"/></svg>
     <span class="nl">Профиль</span>
   </button>
 </nav>
@@ -1015,7 +1020,7 @@ function go(id){
   el('s-'+id).classList.add('on');
   S.screen=id;
   const hasNav=['home','feed','challenge','about','profile'].includes(id);
-  el('nav').style.display=hasNav?'flex':'none';
+  const navEl=el('nav'); if(navEl){ navEl.style.display=hasNav?'flex':'none'; }
 }
 function setNav(id){
   go(id);
@@ -1070,16 +1075,104 @@ function initTheme(){
 }
 
 // ─── AUTH ───
-function enterHandle(){
-  let handle = (el('wl-handle')?.value || '').trim().replace(/^@+/, '');
-  if(!handle){ toast('Введи @username из Threads','red'); el('wl-handle')?.focus(); return; }
-  S.user = {name: handle, handle: '@' + handle, threads: true, cigs: 20, price: 200};
+// Telegram auth globals
+let _tgPendingUser = null;
+
+function triggerTgLogin(){
+  // The widget script renders a hidden button — we click it programmatically
+  const btn = document.querySelector('#tg-widget + iframe')
+    || document.querySelector('iframe[src*="telegram"]');
+  if(btn){ btn.click(); return; }
+  // fallback: find the real tg widget button inside iframe
+  const w = document.querySelector('iframe[src*="telegram"]');
+  if(w){ w.contentDocument?.querySelector('button')?.click(); return; }
+  // If widget not loaded yet, show manual handle input as fallback
+  showManualFallback();
+}
+
+function onTelegramAuth(user){
+  // Called by Telegram widget after user approves
+  const btn = el('tg-login-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Проверяем...'; }
+  
+  fetch('/api/auth/telegram-verify', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(user)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(!data.ok) throw new Error(data.error || 'Auth failed');
+    _tgPendingUser = data.user;
+    // Show cig setup
+    const setup = el('wl-cig-setup');
+    if(setup) setup.style.display = '';
+    if(btn){ btn.style.display = 'none'; }
+    // Update subtitle
+    const sub = document.querySelector('#tg-login-area p');
+    if(sub) sub.textContent = '✅ ' + (data.user.handle || data.user.name) + ' — теперь задай параметры';
+    toast('Telegram подтверждён ✓','green');
+  })
+  .catch(err => {
+    toast('Ошибка входа: ' + err.message, 'red');
+    if(btn){ btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46 4.073 13.52c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg> Попробовать снова'; }
+  });
+}
+
+function startWithTgUser(){
+  if(!_tgPendingUser){ toast('Сначала войди через Telegram','red'); return; }
+  const cigs = parseInt(el('wl-cigs')?.value) || 20;
+  const price = parseInt(el('wl-price')?.value) || 200;
+  S.user = {
+    name: _tgPendingUser.name,
+    handle: _tgPendingUser.handle || ('@' + _tgPendingUser.name),
+    photo: _tgPendingUser.photo || null,
+    cigs, price, tg: true,
+    tgId: _tgPendingUser.id
+  };
   S.startTime = new Date(); S.cravings = 0; S_lastMsCelebrated = -1;
   saveLocal(); bootHome(); setNav('home');
-  toast('@' + handle + ' — отсчёт пошёл 🚭','green');
+  toast((S.user.handle || S.user.name) + ' — отсчёт пошёл 🚭','green');
 }
-// legacy alias
-function loginThreads(){ enterHandle(); }
+
+function showManualFallback(){
+  // fallback if widget fails to load
+  const area = el('tg-login-area');
+  if(!area) return;
+  area.innerHTML = `
+    <div class="wl-field-label">Telegram username (без @)</div>
+    <div class="wl-handle-wrap" style="margin-bottom:10px">
+      <span class="wl-handle-at">@</span>
+      <input id="wl-handle-fb" class="wl-handle-inp" type="text" placeholder="username"
+        autocorrect="off" autocapitalize="none" spellcheck="false">
+    </div>
+    <div class="wl-cig-row">
+      <div class="wl-cig-box">
+        <div class="wl-field-label">Сигарет в день</div>
+        <input id="wl-cigs" class="wl-num-inp" type="number" value="20" min="1" max="60" inputmode="numeric">
+      </div>
+      <div class="wl-cig-box">
+        <div class="wl-field-label">Цена пачки (₽)</div>
+        <input id="wl-price" class="wl-num-inp" type="number" value="200" min="50" max="1000" step="10" inputmode="numeric">
+      </div>
+    </div>
+    <button class="btn-tg" style="margin-top:12px" onclick="enterHandleFallback()">🚭 Бросить</button>`;
+}
+
+function enterHandleFallback(){
+  const handle = (el('wl-handle-fb')?.value||'').trim().replace(/^@+/,'');
+  if(!handle){ toast('Введи username','red'); return; }
+  const cigs = parseInt(el('wl-cigs')?.value)||20;
+  const price = parseInt(el('wl-price')?.value)||200;
+  S.user = {name:handle, handle:'@'+handle, cigs, price, tg:false};
+  S.startTime=new Date(); S.cravings=0; S_lastMsCelebrated=-1;
+  saveLocal(); bootHome(); setNav('home');
+  toast('@'+handle+' — поехали 🚭','green');
+}
+
+function enterHandle(){ enterHandleFallback(); }
+function nextField(){ el('wl-cigs')?.focus(); }
+function loginThreads(){ triggerTgLogin(); }
 
 // ─── ONBOARD ───
 function initAva(){
@@ -1109,8 +1202,16 @@ function renderAvatar(id, photoUrl, name, size){
 function bootHome(){
   if(S.user && S.startTime) sbUpsert(S.user, S.startTime.toISOString()).catch(()=>{});
   if(!S.user||!S.startTime)return;
-  renderAvatar('uc-ava', S.user.photo, S.user.name, 28);
-  el('uc-name').textContent=S.user.handle || S.user.name;
+  // pill avatar
+  const ucAva = el('uc-ava');
+  if(ucAva){
+    if(S.user.photo){
+      ucAva.innerHTML = `<img src="${S.user.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent='👤'">`;
+    } else {
+      ucAva.textContent = S.user.handle ? S.user.handle[1].toUpperCase() : '👤';
+    }
+  }
+  el('uc-name').textContent = S.user.handle ? S.user.handle.replace('@','') : S.user.name;
   const d=Math.floor(elapsed()/86400);
   el('tip-txt').textContent=TIPS[Math.min(d,TIPS.length-1)];
   el('craving-n').textContent=S.cravings;
@@ -1222,9 +1323,18 @@ function shareChallenge(){
 // ─── PROFILE ───
 function renderProfile(){
   if(!S.user)return;
-  renderAvatar('p-ava', S.user.photo, S.user.name, 96);
-  el('p-name').textContent=S.user.name;
-  el('p-handle').innerHTML=S.user.handle ? `${tdot} ${S.user.handle}` : 'Аноним';
+  // profile photo
+  const pAva = el('p-ava');
+  if(pAva){
+    if(S.user.photo){
+      pAva.innerHTML = `<img src="${S.user.photo}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentElement.textContent='👤'">`;
+    } else {
+      pAva.textContent = S.user.handle ? S.user.handle[1].toUpperCase() : '👤';
+    }
+  }
+  el('p-name').textContent = S.user.name || S.user.handle || '—';
+  const ph = el('p-handle');
+  if(ph) ph.innerHTML = S.user.handle ? `<svg viewBox="0 0 24 24" width="14" height="14" fill="#229ED9"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46 4.073 13.52c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg> ${S.user.handle}` : '';
   updateProfileStats();
 
   // all-time stats

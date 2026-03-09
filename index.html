@@ -31,7 +31,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);transition:background
 body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-size:15px}
 
 /* ─── SCREENS ─── */
-.scr{display:none;position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding-bottom:calc(var(--nav-h) + 16px)}
+.scr{display:none;position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;padding-bottom:calc(var(--nav-h) + 16px)}
 .scr::-webkit-scrollbar{display:none}
 .scr.on{display:block;animation:fadeUp .22s ease both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -46,7 +46,7 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
 .ni .dot{position:absolute;top:8px;right:calc(50% - 16px);width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--surface);display:none}
 
 /* ─── HEADER ─── */
-.page-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px;position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:10}
+.page-hdr{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px 8px;position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:10}
 .page-title{font-size:17px;font-weight:700}
 .hdr-action{background:none;border:none;cursor:pointer;color:var(--sub);padding:4px;border-radius:8px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500}
 
@@ -108,7 +108,7 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
 .wl-sl{font-size:11px;color:var(--sub);line-height:1.3}
 
 /* ─── HOME ─── */
-.home-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px}
+.home-hdr{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px 12px}
 .home-day{font-size:13px;font-weight:700;color:var(--sub)}
 .home-chips{display:flex;align-items:center;gap:8px}
 
@@ -332,7 +332,7 @@ body{color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smo
 .cohort-ava{width:32px;height:32px;border-radius:50%;background:var(--surface);border:2px solid var(--blue-border);display:flex;align-items:center;justify-content:center;font-size:16px}
 
 /* HASHTAG PILLS on welcome */
-.tag-pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:16px 0 0}
+.tag-pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:16px 0 20px}
 .tag-pill{padding:5px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;transition:all .15s}
 .tag-pill:hover{border-color:var(--green);color:var(--green)}
 .tag-pill.accent{background:var(--green-bg);border-color:var(--green-border);color:var(--green)}
@@ -371,7 +371,7 @@ body { overflow-x: hidden; max-width: 100vw; }
 
 /* 3. Fix .scr padding so content isn't hidden under nav */
 .scr {
-  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 20px);
+  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 12px);
 }
 
 /* 4. All content sections — stay within screen */

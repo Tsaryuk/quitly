@@ -455,7 +455,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
         <svg viewBox="0 0 192 192" width="20" height="20" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.6171 51.1409 61.7638 62.7979L75.5 72.2192C81.2771 63.5915 90.2076 61.6505 97.2286 61.6505C107.424 61.7161 114.906 64.8921 119.744 71.0607C123.249 75.5065 125.571 81.5747 126.685 89.1929C119.007 87.8628 110.705 87.4986 101.855 88.0264C78.3107 89.3782 63.2904 102.499 64.2166 120.872C64.6863 130.169 69.3314 137.94 77.1601 142.906C83.7769 147.107 92.1714 149.152 100.929 148.695C112.518 148.073 121.714 143.527 127.9 135.195C132.647 128.791 135.617 120.615 136.877 110.507C142.523 113.978 146.673 118.705 148.938 124.47C153.019 134.949 153.259 152.432 140.87 164.768C130.042 175.549 117.015 180.165 97.3433 180.313C75.4869 180.144 58.8956 173.37 47.9029 160.168C37.5793 147.741 32.2437 129.558 32.0761 106.053C32.2437 82.5483 37.5793 64.3649 47.9029 51.9395C58.8956 38.7376 75.4869 31.9641 97.3433 31.7949C119.361 31.966 136.207 38.7735 147.387 52.0418C152.919 58.6049 157.151 66.7841 159.948 76.2636L175.764 71.9676C172.315 60.1198 167.098 50.0307 160.077 41.7645C146.032 25.2175 126.032 17.065 97.4232 16.8862H97.3433C68.7949 17.065 49.028 25.2722 35.2171 42.0556C22.9197 57.0073 16.5957 78.5701 16.3892 106.053C16.5957 133.536 22.9197 155.099 35.2171 170.051C49.028 186.834 68.7949 194.941 97.3433 195.12H97.4232C122.816 194.957 141.179 187.698 155.047 173.873C173.209 155.765 172.629 133.034 166.832 119.214C162.856 109.776 155.358 101.956 141.537 88.9883ZM101.283 131.705C92.0547 132.209 82.4654 128.133 81.9999 119.935C81.657 113.842 86.0946 107.158 102.249 106.209C104.076 106.1 105.862 106.049 107.606 106.049C113.855 106.049 119.702 106.658 124.994 107.815C122.974 129.498 111.107 131.179 101.283 131.705Z"/></svg>
         Войти через Threads
       </button>
-      <button class="btn-fill outline" onclick="go('onboard')">Продолжить без входа →</button>
+
     </div>
   </div>
 </div>
@@ -490,7 +490,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
     <div class="home-chips">
       <div class="theme-seg" id="seg-h"></div>
       <div style="display:flex;align-items:center;gap:7px;padding:6px 12px 6px 8px;background:var(--surface2);border-radius:20px;cursor:pointer;border:1px solid var(--border)" onclick="setNav('profile')">
-        <span id="uc-ava" style="font-size:18px">🐺</span>
+        <span id="uc-ava" style="font-size:18px;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;overflow:hidden;vertical-align:middle">🐺</span>
         <span style="font-size:12px;font-weight:700" id="uc-name">Ты</span>
       </div>
     </div>
@@ -715,7 +715,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 <div id="s-profile" class="scr">
   <div class="page-hdr"><div class="page-title">Профиль</div></div>
   <div class="prof-top">
-    <div class="prof-ava" id="p-ava">🐺</div>
+    <div class="prof-ava" id="p-ava" style="display:flex;align-items:center;justify-content:center;width:96px;height:96px;border-radius:50%;overflow:hidden;margin:0 auto 12px;background:var(--surface2);font-size:64px">🐺</div>
     <div class="prof-name" id="p-name">...</div>
     <div class="prof-handle" id="p-handle"></div>
   </div>
@@ -1047,16 +1047,20 @@ function initTheme(){
 
 // ─── AUTH ───
 function loginThreads(){
-  // If running on real domain — redirect to OAuth
-  if(location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-    window.location.href = '/api/auth/threads';
+  if(location.hostname === 'localhost' || location.hostname === '127.0.0.1'){
+    // Dev mode mock
+    setUser({name:'mr.tsaryuk',photo:'',threads:true,handle:'@mr.tsaryuk',cigs:20,price:200});
+    S.startTime=new Date();S.cravings=0;S_lastMsCelebrated=-1;
+    saveLocal();bootHome();setNav('home');
+    toast('Вошёл через Threads ✓','green');
     return;
   }
-  // Dev/preview mode — mock
-  S.user={name:'mr.tsaryuk',avatar:'👨‍⚕️',cigs:20,price:200,threads:true,handle:'@mr.tsaryuk'};
-  S.startTime=new Date();S.cravings=0;S_lastMsCelebrated=-1;
-  saveLocal();bootHome();setNav('home');
-  toast('Вошёл через Threads ✓','green');
+  window.location.href = '/api/auth/threads';
+}
+
+// helper — устанавливаем user и рендерим аватар везде
+function setUser(u){
+  S.user = u;
 }
 
 // ─── ONBOARD ───
@@ -1074,11 +1078,21 @@ function startQuitting(){
 }
 
 // ─── HOME ───
+function renderAvatar(id, photoUrl, name, size){
+  const el_ = document.getElementById(id);
+  if(!el_) return;
+  if(photoUrl){
+    el_.innerHTML = `<img src="${photoUrl}" alt="${name}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;display:block" onerror="this.parentElement.textContent='👤'">`;
+  } else {
+    el_.textContent = '👤';
+  }
+}
+
 function bootHome(){
   if(S.user && S.startTime) sbUpsert(S.user, S.startTime.toISOString()).catch(()=>{});
   if(!S.user||!S.startTime)return;
-  el('uc-ava').textContent=S.user.avatar;
-  el('uc-name').textContent=S.user.name;
+  renderAvatar('uc-ava', S.user.photo, S.user.name, 28);
+  el('uc-name').textContent=S.user.handle || S.user.name;
   const d=Math.floor(elapsed()/86400);
   el('tip-txt').textContent=TIPS[Math.min(d,TIPS.length-1)];
   el('craving-n').textContent=S.cravings;
@@ -1190,7 +1204,7 @@ function shareChallenge(){
 // ─── PROFILE ───
 function renderProfile(){
   if(!S.user)return;
-  el('p-ava').textContent=S.user.avatar;
+  renderAvatar('p-ava', S.user.photo, S.user.name, 96);
   el('p-name').textContent=S.user.name;
   el('p-handle').innerHTML=S.user.threads?`${tdot} ${S.user.handle}`:'Аноним';
   updateProfileStats();
@@ -1621,8 +1635,8 @@ if ('serviceWorker' in navigator && location.hostname !== 'localhost' && !locati
     const u = {
       name: p.get('name') || p.get('handle'),
       handle: p.get('handle'),
+      photo: p.get('photo') || '',
       threads: true,
-      avatar: '🧵',
       cigs: 20,
       price: 200,
       token: p.get('token')

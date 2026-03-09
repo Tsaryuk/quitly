@@ -57,43 +57,33 @@
 
 /* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html {
+html, body {
   height: 100%;
-  height: 100dvh;
-  /* Safari iOS fix */
-  height: -webkit-fill-available;
+  margin: 0; padding: 0;
+  font-family: 'Manrope', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 body {
-  font-family: 'Manrope', system-ui, sans-serif;
   font-size: 15px;
   color: var(--text);
   background: var(--bg);
-  height: 100%;
-  height: 100dvh;
-  height: -webkit-fill-available;
   overflow: hidden;
-  -webkit-font-smoothing: antialiased;
   transition: background .2s, color .2s;
-  margin: 0;
-  padding: 0;
 }
 
-/* ─── APP SHELL — pure flexbox, no fixed ─── */
+/* ─── APP SHELL ─── */
 #app-shell {
+  /* Занимаем весь экран */
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
-  /* Трёхступенчатый fallback для разных браузеров */
-  height: 100vh;
-  height: 100dvh;
-  height: -webkit-fill-available;
-  max-height: 100dvh;
-  overflow: hidden;
-  position: relative;
 }
 
 /* ─── WELCOME OVERLAY ─── */
 #welcome-screen {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 100;
   background: var(--bg);
@@ -102,6 +92,8 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   padding: calc(var(--safe-top) + 20px) 24px calc(var(--safe-bot) + 32px);
+  /* Safari scroll fix */
+  -webkit-overflow-scrolling: touch;
 }
 #welcome-screen.hidden { display: none; }
 
@@ -119,40 +111,34 @@ body {
 }
 #screens::-webkit-scrollbar { display: none; }
 
-/* ─── SINGLE SCREEN ─── */
+/* ─── SINGLE SCREEN — вертикальный скролл ─── */
 .screen {
   flex: 0 0 100%;
   width: 100%;
-  height: 100%;
+  /* НЕ height:100% — это ломает скролл. Пусть контент определяет высоту */
+  min-height: 100%;
   scroll-snap-align: start;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
-  padding-bottom: 16px;
+  -webkit-overflow-scrolling: touch;
+  /* Отступ снизу чтобы контент не прятался за nav */
+  padding-bottom: calc(var(--nav-h) + var(--safe-bot) + 16px);
 }
 .screen::-webkit-scrollbar { display: none; }
 
-/* ─── BOTTOM NAV — natural flex element, never fixed ─── */
+/* ─── BOTTOM NAV — position:fixed, приклеен к низу ВСЕГДА ─── */
 #nav {
-  flex-shrink: 0;
-  /* Занимаем весь нижний safe area включая системную панель */
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
   height: calc(var(--nav-h) + var(--safe-bot));
   padding-bottom: var(--safe-bot);
   background: var(--surface);
   border-top: 1px solid var(--border);
   display: flex;
   align-items: flex-start;
+  z-index: 50;
   transition: background .2s;
-  /* Расширяем фон за пределы safe-area на случай если что-то выходит за край */
-  position: relative;
-}
-#nav::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0; bottom: -40px;
-  height: 40px;
-  background: var(--surface);
-  pointer-events: none;
 }
 .ni {
   flex: 1;
@@ -1293,10 +1279,19 @@ async function startTgCodeFlow() {
     const tgDeep = 'tg://resolve?domain=quitly1_bot&start=' + data.code;
     const tgHttp = 'https://t.me/quitly1_bot?start=' + data.code;
 
-    // location.href не блокируется браузером (в отличие от window.open после await)
-    location.href = tgDeep;
+    // Открываем через <a target="_blank"> — текущая страница остаётся,
+    // поллинг продолжает работать. window.open блокируется после await,
+    // но click() на <a> — нет.
+    const _a = document.createElement('a');
+    _a.href = tgDeep;
+    _a.target = '_blank';
+    _a.rel = 'noopener';
+    _a.style.display = 'none';
+    document.body.appendChild(_a);
+    _a.click();
+    setTimeout(() => document.body.removeChild(_a), 1000);
 
-    // Через 2с добавляем fallback-ссылку на случай если tg:// не сработал
+    // Через 2с fallback-ссылка через https://t.me/ на случай если tg:// не сработал
     setTimeout(() => {
       const fb = el('tg-fallback-link');
       if (fb) { fb.href = tgHttp; fb.style.display = 'flex'; }
@@ -1431,7 +1426,7 @@ function loadLocal() {
 
 function bootApp() {
   el('welcome-screen').classList.add('hidden');
-  el('app-shell').style.display = 'flex';
+  el('app-shell').style.display = 'flex'; // already in CSS, but keep for show/hide
   updatePill();
   startTimer();
   renderHome();

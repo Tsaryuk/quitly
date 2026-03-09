@@ -658,6 +658,12 @@ body {
         style="text-align:center;font-size:28px;font-weight:900;letter-spacing:6px"
         oninput="if(this.value.length===6) verifyTgCode()">
       <div id="wl-code-status" style="font-size:13px;color:var(--sub);text-align:center;min-height:18px"></div>
+      <a id="tg-fallback-link" href="#" target="_blank" rel="noopener"
+         style="display:none;align-items:center;justify-content:center;gap:8px;
+                padding:12px 16px;background:#229ED9;color:#fff;border-radius:var(--r);
+                font-weight:700;font-size:14px;text-decoration:none;border:none">
+        📲 Открыть Telegram вручную
+      </a>
       <button class="btn btn-ghost btn-sm" onclick="cancelTgFlow()">Отмена</button>
     </div>
   </div>
@@ -1200,7 +1206,19 @@ async function startTgCodeFlow() {
     const r = await fetch('/api/auth/tg-init', { method: 'POST' });
     const data = await r.json();
     if (!data.code) throw new Error('No code');
-    window.open('tg://resolve?domain=quitly1_bot&start=' + data.code);
+
+    const tgDeep = 'tg://resolve?domain=quitly1_bot&start=' + data.code;
+    const tgHttp = 'https://t.me/quitly1_bot?start=' + data.code;
+
+    // location.href не блокируется браузером (в отличие от window.open после await)
+    location.href = tgDeep;
+
+    // Через 2с добавляем fallback-ссылку на случай если tg:// не сработал
+    setTimeout(() => {
+      const fb = el('tg-fallback-link');
+      if (fb) { fb.href = tgHttp; fb.style.display = 'flex'; }
+    }, 2000);
+
     el('wl-code-block').style.display = 'flex';
     el('wl-tg-btn').style.display = 'none';
     startCodePolling(data.code);

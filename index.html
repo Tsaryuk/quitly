@@ -109,28 +109,33 @@ body {
 }
 .screen::-webkit-scrollbar { display: none; }
 
-/* ═══ NAV — ИСПРАВЛЕНО ═══
-   Убираем padding-bottom через CSS переменную.
-   Используем только env() напрямую — Safari понимает это надёжнее.
-   height = кнопки (52px) + safe-area снизу
+/* ═══ NAV — iOS SAFE AREA FIX ═══
+   Подход: nav имеет фиксированную высоту кнопок (52px),
+   а снизу добавляем padding через псевдоэлемент / отдельный div.
+   Это надёжнее чем считать height через calc с env().
 */
 #nav {
   position: fixed;
   left: 0; right: 0; bottom: 0;
   z-index: 999;
-  height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
-  /* Кнопки прижаты к верху, safe-area снизу — пустая */
-  padding-top: 0;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* Только высота кнопок — без safe-area в height */
+  height: var(--nav-h);
   background: var(--surface);
   border-top: 1px solid var(--border);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   transition: background .2s;
-  /* Гарантируем что nav не уедет за экран */
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
-  will-change: transform;
+}
+/* Распорка под nav для safe-area (Home indicator на iPhone) */
+#nav-safe {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 998;
+  height: env(safe-area-inset-bottom, 0px);
+  background: var(--surface);
+  pointer-events: none;
 }
 .ni {
   flex: 1;
@@ -229,7 +234,9 @@ body {
 .sheet {
   width: 100%; background: var(--surface);
   border-radius: 20px 20px 0 0;
-  padding: 20px 20px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  /* Отступ снизу = safe-area, кнопки не скрываются под nav */
+  padding: 20px 20px 0;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
   animation: sheetUp .28s cubic-bezier(.16,1,.3,1);
 }
 @keyframes sheetUp { from { transform:translateY(100%); } }
@@ -994,6 +1001,8 @@ body {
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="8" r="4" stroke-linecap="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 20v-1a8 8 0 0 1 16 0v1"/></svg>
   </button>
 </nav>
+<!-- Распорка для safe-area под nav (Home indicator на iPhone X+) -->
+<div id="nav-safe" style="display:none"></div>
 
 <!-- RELAPSE OVERLAY -->
 <div id="relapse-overlay">
@@ -1040,25 +1049,8 @@ body {
    Делаем ОДИН раз при загрузке и при resize.
    Используем visualViewport для точного bottom.
 ════════════════════════════════════════════ */
-function applyNavFix() {
-  const nav = document.getElementById('nav');
-  const screens = document.getElementById('screens');
-  if (!nav || nav.style.display === 'none') return;
-
-  // На iOS Safari с Home indicator нужно учитывать реальный bottom
-  // visualViewport.height = видимая высота (без клавиатуры)
-  // window.innerHeight - visualViewport.height = высота клавиатуры
-  const vv = window.visualViewport;
-  if (vv) {
-    // Отступ снизу = расстояние от нижнего края viewport до нижнего края экрана
-    const keyboardOffset = window.innerHeight - vv.height - vv.offsetTop;
-    const safeBot = Math.max(0, keyboardOffset);
-    // Когда клавиатура открыта — не двигаем nav (он уезжает под клавиатуру сам)
-    // Когда закрыта — bottom = 0 (safe-area обрабатывается через CSS env())
-    nav.style.bottom = safeBot > 50 ? safeBot + 'px' : '';
-    if (screens) screens.style.bottom = safeBot > 50 ? (nav.offsetHeight + safeBot) + 'px' : '';
-  }
-}
+/* nav fix больше не нужен — используем отдельный #nav-safe div */
+function applyNavFix() {}
 
 if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', applyNavFix);
@@ -1476,6 +1468,7 @@ function bootApp() {
   el('setup-screen').style.display = 'none';
   el('screens').style.display = 'flex';
   el('nav').style.display = 'flex';
+  el('nav-safe').style.display = 'block';
   // Применяем nav fix после показа nav
   setTimeout(applyNavFix, 100);
   updatePill();
@@ -1501,6 +1494,7 @@ function logout() {
   cancelTgFlow();
   el('screens').style.display = 'none';
   el('nav').style.display = 'none';
+  el('nav-safe').style.display = 'none';
   el('welcome-screen').classList.remove('hidden');
   toast('Вышли из аккаунта');
 }

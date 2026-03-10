@@ -257,21 +257,7 @@ body {
 .wl-step.on { display: flex; flex-direction: column; gap: 12px; }
 @keyframes wlPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
 
-/* Step 2 preview */
-.tg-preview {
-  display: flex; align-items: center; gap: 14px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 14px;
-  margin-bottom: 4px;
-}
-.tg-preview-ava {
-  width: 52px; height: 52px; border-radius: 50%;
-  background: var(--surface2); overflow: hidden; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: 22px;
-}
-.tg-preview-ava img { width: 100%; height: 100%; object-fit: cover; }
-.tg-preview-name { font-size: 17px; font-weight: 800; }
-.tg-preview-handle { font-size: 13px; color: var(--sub); margin-top: 2px; }
+
 
 .cig-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
@@ -664,23 +650,40 @@ body {
         Войти через Telegram
       </button>
 
-      <div id="wl-code-block" style="display:none;flex-direction:column;gap:10px">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center">
-          <div style="font-size:24px;margin-bottom:8px">💬</div>
-          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">Telegram открылся</div>
-          <div style="font-size:13px;color:var(--sub);line-height:1.5">Нажми <strong style="color:var(--text)">Старт</strong> у бота <strong style="color:var(--text)">@quitly1_bot</strong><br>— он подтвердит вход автоматически</div>
+      <div id="wl-code-block" style="display:none;flex-direction:column;gap:12px">
+
+        <!-- Анимированная карточка ожидания -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center">
+          <div id="wl-waiting-anim" style="font-size:32px;margin-bottom:12px;animation:wlPulse 1.5s ease-in-out infinite">⏳</div>
+          <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:6px">Ждём подтверждения</div>
+          <div style="font-size:13px;color:var(--sub);line-height:1.6">
+            Telegram открылся — нажми&nbsp;<strong style="color:var(--text)">Старт</strong><br>
+            у бота&nbsp;<strong style="color:var(--text)">@quitly1_bot</strong><br>
+            Страница обновится автоматически ✓
+          </div>
         </div>
-        <div style="text-align:center;font-size:13px;color:var(--sub)">или введи код вручную</div>
-        <input id="wl-code-inp" class="inp" type="number" inputmode="numeric" placeholder="123456"
-          style="text-align:center;font-size:28px;font-weight:900;letter-spacing:6px"
-          oninput="if(this.value.length===6) verifyTgCode()">
-        <div id="wl-code-status" style="font-size:13px;color:var(--sub);text-align:center;min-height:18px"></div>
-        <a id="tg-fallback-link" href="#" target="_blank" rel="noopener"
-           style="display:none;align-items:center;justify-content:center;gap:8px;
-                  padding:12px 16px;background:#229ED9;color:#fff;border-radius:var(--r);
-                  font-weight:700;font-size:14px;text-decoration:none">
-          📲 Открыть Telegram вручную
+
+        <!-- Кнопка открыть Telegram (всегда видна) -->
+        <a id="tg-fallback-link" href="#" target="_blank" rel="noopener noreferrer"
+           style="display:flex;align-items:center;justify-content:center;gap:10px;
+                  padding:14px 16px;background:#229ED9;color:#fff;border-radius:var(--r);
+                  font-weight:700;font-size:15px;text-decoration:none">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46l-2.987-.94c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
+          Открыть Telegram
         </a>
+
+        <!-- Ввод кода вручную (скрыт, раскрывается по ссылке) -->
+        <div id="wl-manual-wrap" style="display:none;flex-direction:column;gap:8px">
+          <input id="wl-code-inp" class="inp" type="number" inputmode="numeric" placeholder="123456"
+            style="text-align:center;font-size:28px;font-weight:900;letter-spacing:6px"
+            oninput="if(this.value.length===6) verifyTgCode()">
+          <div id="wl-code-status" style="font-size:13px;color:var(--sub);text-align:center;min-height:18px"></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="font-size:12px;color:var(--ph)"
+          onclick="el('wl-manual-wrap').style.display=el('wl-manual-wrap').style.display==='flex'?'none':'flex'">
+          Ввести код вручную
+        </button>
+
         <button class="btn btn-ghost btn-sm" onclick="cancelTgFlow()">Отмена</button>
       </div>
 
@@ -690,29 +693,64 @@ body {
     </div>
   </div>
 
-  <!-- Step 2: Setup -->
-  <div id="wl-step2" class="wl-step">
-    <div class="tg-preview" id="wl-tg-preview">
-      <div class="tg-preview-ava" id="wl-preview-ava">👤</div>
-      <div>
-        <div class="tg-preview-name" id="wl-preview-name">—</div>
-        <div class="tg-preview-handle" id="wl-preview-handle"></div>
-      </div>
-    </div>
-    <div class="inp-label">Сигарет в день</div>
-    <div class="cig-row">
-      <div>
-        <div class="inp-label">Сигарет в день</div>
-        <input id="wl-cigs" class="inp" type="number" inputmode="numeric" placeholder="20" value="20">
-      </div>
-      <div>
-        <div class="inp-label">Цена пачки (₽)</div>
-        <input id="wl-price" class="inp" type="number" inputmode="numeric" placeholder="200" value="200">
-      </div>
-    </div>
-    <button class="btn btn-primary" onclick="startWithTgUser()" style="margin-top:8px">
-      🚭 Бросить прямо сейчас
+</div>
+
+<!-- ════════════════════════════════════════
+     SETUP SCREEN (step 2) — отдельный экран
+════════════════════════════════════════ -->
+<div id="setup-screen" style="display:none;position:fixed;inset:0;z-index:110;background:var(--bg);
+     flex-direction:column;padding:calc(var(--safe-top) + 20px) 24px calc(var(--safe-bot) + 32px);
+     overflow-y:auto;-webkit-overflow-scrolling:touch">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px">
+    <button onclick="backToWelcome()" style="width:36px;height:36px;border-radius:50%;
+        background:var(--surface2);border:1px solid var(--border);
+        display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
     </button>
+    <div style="font-size:18px;font-weight:800">Настройка профиля</div>
+  </div>
+
+  <!-- TG Profile preview -->
+  <div style="display:flex;align-items:center;gap:16px;background:var(--surface);
+       border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:32px">
+    <div id="setup-ava" style="width:56px;height:56px;border-radius:50%;background:var(--surface2);
+         overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+         font-size:24px;font-weight:800;border:2px solid var(--border)">👤</div>
+    <div>
+      <div id="setup-name" style="font-size:18px;font-weight:800">—</div>
+      <div id="setup-handle" style="font-size:13px;color:var(--sub);margin-top:2px"></div>
+      <div style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;
+           background:var(--green-bg);border:1px solid var(--green-border);
+           border-radius:12px;padding:3px 10px">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--green)">
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46l-2.987-.94c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/>
+        </svg>
+        <span style="font-size:11px;font-weight:700;color:var(--green)">Telegram подтверждён</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inputs -->
+  <div style="margin-bottom:16px">
+    <div class="inp-label">Сигарет в день</div>
+    <input id="wl-cigs" class="inp" type="number" inputmode="numeric" placeholder="20" value="20">
+  </div>
+  <div style="margin-bottom:32px">
+    <div class="inp-label">Цена пачки (₽)</div>
+    <input id="wl-price" class="inp" type="number" inputmode="numeric" placeholder="200" value="200">
+  </div>
+
+  <div style="flex:1"></div>
+
+  <button class="btn btn-primary" onclick="startWithTgUser()" style="font-size:17px;padding:18px">
+    🚭 Бросить прямо сейчас
+  </button>
+  <div style="text-align:center;font-size:12px;color:var(--ph);margin-top:12px;line-height:1.5">
+    Прогресс синхронизируется с облаком
   </div>
 </div>
 
@@ -1250,23 +1288,21 @@ async function startTgCodeFlow() {
     const tgDeep = 'tg://resolve?domain=quitly1_bot&start=' + data.code;
     const tgHttp = 'https://t.me/quitly1_bot?start=' + data.code;
 
-    // Открываем через <a target="_blank"> — текущая страница остаётся,
-    // поллинг продолжает работать. window.open блокируется после await,
-    // но click() на <a> — нет.
+    // Открываем Telegram через Universal Link (https://t.me/)
+    // Это НЕ уводит текущую страницу — iOS/Android открывают приложение
+    // и возвращают пользователя обратно. Поллинг продолжается.
     const _a = document.createElement('a');
-    _a.href = tgDeep;
+    _a.href = tgHttp;
     _a.target = '_blank';
-    _a.rel = 'noopener';
+    _a.rel = 'noopener noreferrer';
     _a.style.display = 'none';
     document.body.appendChild(_a);
     _a.click();
-    setTimeout(() => document.body.removeChild(_a), 1000);
+    setTimeout(() => { try { document.body.removeChild(_a); } catch {} }, 500);
 
-    // Через 2с fallback-ссылка через https://t.me/ на случай если tg:// не сработал
-    setTimeout(() => {
-      const fb = el('tg-fallback-link');
-      if (fb) { fb.href = tgHttp; fb.style.display = 'flex'; }
-    }, 2000);
+    // Показываем fallback сразу — кнопка "Открыть Telegram" всегда видна
+    const fb = el('tg-fallback-link');
+    if (fb) { fb.href = tgHttp; fb.style.display = 'flex'; }
 
     el('wl-code-block').style.display = 'flex';
     el('wl-tg-btn').style.display = 'none';
@@ -1315,18 +1351,23 @@ async function verifyTgCode() {
 
 function handleTgSuccess(user) {
   _tgPendingUser = user;
-  // Show step 2
-  el('wl-step1').classList.remove('on');
-  el('wl-step2').classList.add('on');
-  // Preview
-  const avaEl = el('wl-preview-ava');
+  clearInterval(_pollTimer);
+  // Заполняем preview в setup-screen
+  const avaEl = el('setup-ava');
   if (user.photo) {
-    avaEl.innerHTML = '<img src="' + user.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent=\'👤\'">';
+    avaEl.innerHTML = '<img src="' + user.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block" onerror="this.parentElement.textContent=\'👤\'">';
   } else {
     avaEl.textContent = user.name ? user.name[0].toUpperCase() : '👤';
   }
-  el('wl-preview-name').textContent = user.name || 'Пользователь';
-  el('wl-preview-handle').textContent = user.handle || '';
+  el('setup-name').textContent = user.name || 'Пользователь';
+  el('setup-handle').textContent = user.handle || '';
+  // Показываем setup-screen поверх всего
+  el('setup-screen').style.display = 'flex';
+}
+
+function backToWelcome() {
+  el('setup-screen').style.display = 'none';
+  cancelTgFlow();
 }
 
 function cancelTgFlow() {
@@ -1399,6 +1440,7 @@ function bootApp() {
   el('welcome-screen').classList.add('hidden');
   el('screens').style.display = 'flex';
   el('nav').style.display = 'flex';
+  setTimeout(fixNavPosition, 50);
   updatePill();
   startTimer();
   renderHome();
@@ -1415,8 +1457,7 @@ function logout() {
   _feedData = [];
   _tgPendingUser = null;
   // Reset welcome screen
-  el('wl-step1').classList.add('on');
-  el('wl-step2').classList.remove('on');
+  el('setup-screen').style.display = 'none';
   el('wl-code-block').style.display = 'none';
   el('wl-tg-btn').style.display = '';
   el('wl-tg-btn').disabled = false;
@@ -1804,6 +1845,58 @@ function openShare() {
   if (loadLocal() && S.user) {
     bootApp();
   }
+
+  // ── iOS Safari nav fix ──
+  // Safari меняет window.innerHeight при появлении/скрытии адресной строки.
+  // position:fixed bottom:0 прилипает к низу LAYOUT viewport, а не visual.
+  // Используем visualViewport API чтобы всегда позиционировать от видимого низа.
+  function fixNavPosition() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const nav = document.getElementById('nav');
+    const screens = document.getElementById('screens');
+    if (!nav || nav.style.display === 'none') return;
+
+    // Высота nav
+    const navH = nav.offsetHeight;
+
+    // Отступ от низа visual viewport до низа layout viewport
+    const offsetFromBottom = window.innerHeight - (vv.offsetTop + vv.height);
+    const bottom = Math.max(0, offsetFromBottom);
+
+    nav.style.bottom = bottom + 'px';
+    if (screens) {
+      screens.style.bottom = (navH + bottom) + 'px';
+    }
+  }
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', fixNavPosition);
+    window.visualViewport.addEventListener('scroll', fixNavPosition);
+  }
+  window.addEventListener('resize', fixNavPosition);
+  // Запустим сразу после загрузки
+  setTimeout(fixNavPosition, 100);
+
+  // ── Safari iOS nav fix ──
+  // Читаем реальную высоту экрана через visualViewport и двигаем nav
+  function fixNavPosition() {
+    const vv = window.visualViewport;
+    const winH = vv ? vv.height : window.innerHeight;
+    const fullH = window.screen.height;
+    // safe-area-inset-bottom через getComputedStyle
+    const safeBot = parseInt(getComputedStyle(document.documentElement)
+      .getPropertyValue('--safe-bot') || '0') || 0;
+    const navEl = document.getElementById('nav');
+    const screensEl = document.getElementById('screens');
+    if (!navEl) return;
+    // Ничего не меняем — position:fixed сам разберётся
+    // Но форсируем repaint чтобы Safari пересчитал layout
+    navEl.style.transform = 'translateZ(0)';
+  }
+  fixNavPosition();
+  window.addEventListener('resize', fixNavPosition);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', fixNavPosition);
 
   // Загружаем live-счётчик на welcome экране
   (async () => {

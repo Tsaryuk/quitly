@@ -87,7 +87,8 @@ body {
 /* ─── APP SHELL ─── */
 #screens {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: calc(var(--nav-h) + env(safe-area-inset-top, 0px));
+  left: 0; right: 0;
   bottom: 0;
   display: flex;
   overflow-x: scroll;
@@ -107,25 +108,22 @@ body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding-bottom: calc(var(--nav-h) + 32px);
+  padding-bottom: 24px;
   background: var(--bg);
 }
 .screen::-webkit-scrollbar { display: none; }
 
-/* ═══ FLOATING NAV PILL ═══ */
+/* ═══ TOP NAV BAR ═══ */
 #nav {
   position: fixed;
-  left: 12px; right: 12px;
-  bottom: 12px;
-  bottom: calc(env(safe-area-inset-bottom, 12px) + 4px);
+  top: 0; left: 0; right: 0;
   z-index: 999;
+  padding-top: env(safe-area-inset-top, 0px);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  height: var(--nav-h);
-  box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+  height: calc(var(--nav-h) + env(safe-area-inset-top, 0px));
   -webkit-transform: translate3d(0,0,0);
   transform: translate3d(0,0,0);
 }
@@ -146,14 +144,14 @@ body {
 }
 .ni:active { transform: scale(.88); }
 .ni.on { color: var(--text); }
-.ni svg { width: 26px; height: 26px; stroke-width: 1.6; }
+.ni svg { width: 24px; height: 24px; stroke-width: 1.6; }
 
 /* ─── PAGE HEADER ─── */
 .page-hdr {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: calc(var(--safe-top) + 14px) 16px 12px;
+  padding: 14px 16px 12px;
   position: sticky;
   top: 0;
   background: var(--bg);
@@ -200,7 +198,7 @@ body {
 /* ─── TOASTS ─── */
 #toasts {
   position: fixed;
-  top: calc(var(--safe-top) + 12px);
+  top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 12px);
   left: 50%; transform: translateX(-50%);
   z-index: 999;
   display: flex; flex-direction: column; gap: 8px;
@@ -264,7 +262,7 @@ body {
 /* ══════════════════════════════════════════
    HOME SCREEN
 ══════════════════════════════════════════ */
-.home-wrap { padding: calc(var(--safe-top) + 14px) 16px 0; }
+.home-wrap { padding: 14px 16px 0; }
 .home-top {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 20px;
@@ -510,7 +508,7 @@ body {
 ══════════════════════════════════════════ */
 .prof-hero {
   display: flex; flex-direction: column; align-items: center;
-  padding: calc(var(--safe-top) + 28px) 20px 20px;
+  padding: 28px 20px 20px;
   text-align: center;
 }
 .prof-ava {
@@ -548,7 +546,7 @@ body {
   position: fixed; inset: 0; z-index: 50;
   background: var(--bg);
   display: none; flex-direction: column;
-  padding: calc(var(--safe-top) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 32px);
+  padding: calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 32px);
 }
 #relapse-overlay.show { display: flex; }
 .relapse-icon { font-size: 52px; margin-bottom: 16px; }
@@ -685,7 +683,7 @@ body {
      SETUP SCREEN
 ════════════════════════════════════════ -->
 <div id="setup-screen" style="display:none;position:fixed;inset:0;z-index:110;background:var(--bg);
-     flex-direction:column;padding:calc(var(--safe-top) + 20px) 24px calc(env(safe-area-inset-bottom, 0px) + 32px);
+     flex-direction:column;padding:calc(env(safe-area-inset-top, 0px) + 20px) 24px calc(env(safe-area-inset-bottom, 0px) + 32px);
      overflow-y:auto;-webkit-overflow-scrolling:touch">
 
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px">
@@ -1343,8 +1341,33 @@ function openTelegramApp() {
   }
 }
 
+// Предзагрузка кода — вызывается при показе welcome screen
+function prefetchTgCode() {
+  if (_tgCode) return; // уже есть
+  fetch('/api/auth/tg-init', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.code) {
+        _tgCode = data.code;
+        _tgHttpUrl = 'https://t.me/quitly1_bot?start=' + data.code;
+      }
+    })
+    .catch(() => {}); // молча — если не получилось, startTgCodeFlow сделает повторный запрос
+}
+
 async function startTgCodeFlow() {
   const btn = el('wl-tg-btn');
+
+  // Если код уже предзагружен — открываем Telegram СРАЗУ (user gesture сохраняется)
+  if (_tgCode) {
+    openTelegramApp();
+    el('wl-code-block').style.display = 'flex';
+    el('wl-tg-btn').style.display = 'none';
+    startCodePolling(_tgCode);
+    return;
+  }
+
+  // Код ещё не готов — старый флоу с ожиданием
   btn.disabled = true;
   btn.textContent = 'Создаём код…';
   try {
@@ -1355,14 +1378,10 @@ async function startTgCodeFlow() {
     _tgCode = data.code;
     _tgHttpUrl = 'https://t.me/quitly1_bot?start=' + data.code;
 
-    // Показываем блок с кодом
     el('wl-code-block').style.display = 'flex';
     el('wl-tg-btn').style.display = 'none';
 
-    // НЕ вызываем openTelegramApp() здесь — к этому моменту user gesture уже потерян (async fetch)
-    // Пользователь сам нажмёт кнопку "Открыть Telegram" — это и есть user gesture
-
-    // Запускаем поллинг
+    // user gesture потерян после await, показываем кнопку "Открыть Telegram"
     startCodePolling(data.code);
   } catch {
     btn.disabled = false;
@@ -1527,6 +1546,7 @@ function logout() {
   el('nav-safe').style.display = 'none';
   el('welcome-screen').classList.remove('hidden');
   toast('Вышли из аккаунта');
+  prefetchTgCode();
 }
 
 /* ════════════════════════════════════════════
@@ -1886,6 +1906,9 @@ function openShare() {
   // Check auth
   if (loadLocal() && S.user) {
     bootApp();
+  } else {
+    // Предзагрузка кода для быстрого открытия Telegram при клике
+    prefetchTgCode();
   }
 
   // Live counter on welcome screen

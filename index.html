@@ -58,16 +58,27 @@
 
 /* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; padding: 0; height: 100%; overscroll-behavior: none; }
-html { min-height: -webkit-fill-available; }
-html { background: var(--surface); }
+html { height: 100%; background: var(--surface); }
 body {
+  margin: 0; padding: 0;
+  height: 100%;
   font-family: 'Manrope', system-ui, sans-serif;
   font-size: 15px;
   color: var(--text);
   background: var(--surface);
   -webkit-font-smoothing: antialiased;
   transition: background .2s, color .2s;
+  overscroll-behavior: none;
+}
+
+/* ─── APP WRAPPER (flexbox column fills viewport) ─── */
+#app-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  /* iOS PWA: stretch to real viewport height */
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
 }
 
 /* ─── WELCOME ─── */
@@ -86,10 +97,8 @@ body {
 
 /* ─── APP SHELL ─── */
 #screens {
-  position: fixed;
-  top: calc(var(--nav-h) + env(safe-area-inset-top, 0px));
-  left: 0; right: 0;
-  bottom: 0;
+  flex: 1;
+  min-height: 0;          /* allow flex child to shrink */
   display: flex;
   overflow-x: scroll;
   overflow-y: hidden;
@@ -113,17 +122,18 @@ body {
 }
 .screen::-webkit-scrollbar { display: none; }
 
-/* ═══ TOP NAV BAR ═══ */
+/* ═══ BOTTOM NAV BAR ═══ */
 #nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 999;
-  padding-top: env(safe-area-inset-top, 0px);
+  flex-shrink: 0;
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
-  height: calc(var(--nav-h) + env(safe-area-inset-top, 0px));
+  height: var(--nav-h);
+  /* safe-area padding pushes nav up from home indicator */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* total height = nav + safe area */
+  height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
   -webkit-transform: translate3d(0,0,0);
   transform: translate3d(0,0,0);
 }
@@ -151,7 +161,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px 12px;
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 12px;
   position: sticky;
   top: 0;
   background: var(--bg);
@@ -198,7 +208,7 @@ body {
 /* ─── TOASTS ─── */
 #toasts {
   position: fixed;
-  top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 12px);
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
   left: 50%; transform: translateX(-50%);
   z-index: 999;
   display: flex; flex-direction: column; gap: 8px;
@@ -262,7 +272,7 @@ body {
 /* ══════════════════════════════════════════
    HOME SCREEN
 ══════════════════════════════════════════ */
-.home-wrap { padding: 14px 16px 0; }
+.home-wrap { padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 0; }
 .home-top {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 20px;
@@ -508,7 +518,7 @@ body {
 ══════════════════════════════════════════ */
 .prof-hero {
   display: flex; flex-direction: column; align-items: center;
-  padding: 28px 20px 20px;
+  padding: calc(env(safe-area-inset-top, 0px) + 28px) 20px 20px;
   text-align: center;
 }
 .prof-ava {
@@ -560,7 +570,7 @@ body {
 #confirm-popup {
   position: fixed;
   left: 16px; right: 16px;
-  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 12px);
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 16px);
   z-index: 300;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -738,6 +748,7 @@ body {
 <!-- ════════════════════════════════════════
      APP SHELL
 ════════════════════════════════════════ -->
+<div id="app-wrap">
 <div id="screens" style="display:none">
 
   <!-- HOME -->
@@ -994,6 +1005,7 @@ body {
 </nav>
 <!-- Распорка для safe-area под nav (Home indicator на iPhone X+) -->
 <div id="nav-safe" style="display:none"></div>
+</div><!-- /#app-wrap -->
 
 <!-- RELAPSE OVERLAY -->
 <div id="relapse-overlay">
@@ -1035,50 +1047,8 @@ body {
 <div id="toasts"></div>
 
 <script>
-/* ════════════════════════════════════════════
-   NAV FIX — iOS Safari
-   Делаем ОДИН раз при загрузке и при resize.
-   Используем visualViewport для точного bottom.
-════════════════════════════════════════════ */
-/* Измеряем реальный safe-area-inset-bottom через JS и прибиваем nav */
-(function() {
-  function fixNav() {
-    const nav = document.getElementById('nav');
-    const navSafe = document.getElementById('nav-safe');
-    const screens = document.getElementById('screens');
-    if (!nav || nav.style.display === 'none') return;
-
-    // Создаём измерительный div если ещё нет
-    let probe = document.getElementById('_safe_probe');
-    if (!probe) {
-      probe = document.createElement('div');
-      probe.id = '_safe_probe';
-      probe.style.cssText = 'position:fixed;bottom:0;left:0;width:1px;height:env(safe-area-inset-bottom,0px);pointer-events:none;opacity:0;z-index:-1';
-      document.body.appendChild(probe);
-    }
-
-    const safeH = probe.offsetHeight || 0;
-    const navH = 52;
-
-    nav.style.bottom = safeH + 'px';
-    if (navSafe) navSafe.style.height = safeH + 'px';
-    if (screens) screens.style.bottom = (navH + safeH) + 'px';
-  }
-
-  // Запускаем сразу и после полной загрузки
-  document.addEventListener('DOMContentLoaded', fixNav);
-  window.addEventListener('load', fixNav);
-  window.addEventListener('resize', fixNav);
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', fixNav);
-  }
-  // Повторяем несколько раз — iOS иногда отдаёт 0 при первом запросе
-  setTimeout(fixNav, 50);
-  setTimeout(fixNav, 200);
-  setTimeout(fixNav, 500);
-
-  window._fixNav = fixNav;
-})();
+/* fixNav removed — now using flexbox document flow instead of position:fixed */
+window._fixNav = function(){};
 
 
 /* ════════════════════════════════════════════

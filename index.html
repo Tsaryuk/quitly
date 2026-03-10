@@ -1312,44 +1312,43 @@ async function sbSendSupport(toTgId, toName, msg) {
    ИСПРАВЛЕНИЕ: открываем tg:// схему напрямую на iOS
 ════════════════════════════════════════════ */
 
-// Функция открытия Telegram — вызывается кнопкой "Открыть Telegram"
+// Функция открытия Telegram — вызывается ТОЛЬКО по прямому клику пользователя
+// iOS Safari разрешает открывать tg:// только через user gesture (клик)
 function openTelegramApp() {
   if (!_tgCode) return;
-
   const tgDeepLink = 'tg://resolve?domain=quitly1_bot&start=' + _tgCode;
   const tgHttpLink = 'https://t.me/quitly1_bot?start=' + _tgCode;
 
-  // iOS: пробуем открыть нативное приложение через tg://
-  // Если не установлен — fallback на https://t.me
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isAndroid = /Android/.test(navigator.userAgent);
 
   if (isIOS) {
-    // На iOS используем скрытый iframe для tg:// — страница НЕ перезагружается
-    // location.href = tg:// перезагружает страницу и ломает авторизацию
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'display:none;width:0;height:0;border:none;position:absolute;top:-1px;left:-1px';
-    iframe.src = tgDeepLink;
-    document.body.appendChild(iframe);
+    // iOS: создаём ссылку и кликаем — ТОЛЬКО так работает tg:// в Safari
+    // window.location.href и iframe блокируются без навигации
+    const a = document.createElement('a');
+    a.href = tgDeepLink;
+    // НЕ _blank — иначе Safari заблокирует как popup
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // Если приложение не установлено — через 2с открываем веб
     setTimeout(function() {
-      try { document.body.removeChild(iframe); } catch {}
-    }, 3000);
-    // Если через 2 сек Telegram не открылся (нет приложения) — открываем веб
-    setTimeout(function() {
-      // Проверяем что страница всё ещё активна
       if (!document.hidden) {
-        window.open(tgHttpLink, '_blank', 'noopener');
+        window.location.href = tgHttpLink;
       }
     }, 2000);
   } else if (isAndroid) {
-    // На Android — intent через ссылку
-    const intentUrl = 'intent://resolve?domain=quitly1_bot&start=' + _tgCode + '#Intent;scheme=tg;package=org.telegram.messenger;end';
-    window.location.href = intentUrl;
+    const a = document.createElement('a');
+    a.href = tgDeepLink;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     setTimeout(function() {
       window.open(tgHttpLink, '_blank', 'noopener');
     }, 1500);
   } else {
-    // Desktop
     window.open(tgHttpLink, '_blank', 'noopener');
   }
 }
@@ -1370,8 +1369,8 @@ async function startTgCodeFlow() {
     el('wl-code-block').style.display = 'flex';
     el('wl-tg-btn').style.display = 'none';
 
-    // Автоматически открываем Telegram
-    openTelegramApp();
+    // НЕ вызываем openTelegramApp() здесь — к этому моменту user gesture уже потерян (async fetch)
+    // Пользователь сам нажмёт кнопку "Открыть Telegram" — это и есть user gesture
 
     // Запускаем поллинг
     startCodePolling(data.code);

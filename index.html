@@ -1330,16 +1330,22 @@ function openTelegramApp() {
   const isAndroid = /Android/.test(navigator.userAgent);
 
   if (isIOS) {
-    // На iOS используем location.href для открытия tg:// без блокировки popup
-    // Сразу после ставим таймаут — если tg:// не сработал за 1.5 сек, открываем веб
-    const start = Date.now();
-    window.location.href = tgDeepLink;
+    // На iOS используем скрытый iframe для tg:// — страница НЕ перезагружается
+    // location.href = tg:// перезагружает страницу и ломает авторизацию
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'display:none;width:0;height:0;border:none;position:absolute;top:-1px;left:-1px';
+    iframe.src = tgDeepLink;
+    document.body.appendChild(iframe);
     setTimeout(function() {
-      // Если страница не ушла (< 2 сек прошло), значит tg:// не сработал
-      if (Date.now() - start < 2000) {
+      try { document.body.removeChild(iframe); } catch {}
+    }, 3000);
+    // Если через 2 сек Telegram не открылся (нет приложения) — открываем веб
+    setTimeout(function() {
+      // Проверяем что страница всё ещё активна
+      if (!document.hidden) {
         window.open(tgHttpLink, '_blank', 'noopener');
       }
-    }, 1500);
+    }, 2000);
   } else if (isAndroid) {
     // На Android — intent через ссылку
     const intentUrl = 'intent://resolve?domain=quitly1_bot&start=' + _tgCode + '#Intent;scheme=tg;package=org.telegram.messenger;end';

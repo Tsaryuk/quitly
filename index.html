@@ -58,10 +58,7 @@
 /* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; padding: 0; height: 100%; }
-html {
-  /* Фон html = цвет nav — белая полоска под nav становится невидимой */
-  background: var(--surface);
-}
+html { background: var(--surface); }
 body {
   font-family: 'Manrope', system-ui, sans-serif;
   font-size: 15px;
@@ -86,12 +83,10 @@ body {
 #welcome-screen.hidden { display: none; }
 
 /* ─── APP SHELL ─── */
-/* ─── SCREENS — горизонтальный свайп ─── */
 #screens {
   position: fixed;
   top: 0; left: 0; right: 0;
-  /* Снизу ровно до nav */
-  bottom: calc(var(--nav-h) + var(--safe-bot));
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
   display: flex;
   overflow-x: scroll;
   overflow-y: hidden;
@@ -101,7 +96,6 @@ body {
 }
 #screens::-webkit-scrollbar { display: none; }
 
-/* ─── SCREEN — вертикальный скролл ─── */
 .screen {
   flex: 0 0 100vw;
   width: 100vw;
@@ -115,22 +109,32 @@ body {
 }
 .screen::-webkit-scrollbar { display: none; }
 
-/* ─── NAV — fixed, всегда у самого края ─── */
+/* ═══ NAV — ИСПРАВЛЕНО ═══
+   Убираем padding-bottom через CSS переменную.
+   Используем только env() напрямую — Safari понимает это надёжнее.
+   height = кнопки (52px) + safe-area снизу
+*/
 #nav {
   position: fixed;
   left: 0; right: 0; bottom: 0;
   z-index: 999;
-  /* Высота = кнопки + safe area + ещё 60px запаса на любой экран */
-  height: calc(var(--nav-h) + var(--safe-bot));
-  padding-bottom: var(--safe-bot);
+  height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+  /* Кнопки прижаты к верху, safe-area снизу — пустая */
+  padding-top: 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--surface);
   border-top: 1px solid var(--border);
   display: flex;
   align-items: flex-start;
   transition: background .2s;
+  /* Гарантируем что nav не уедет за экран */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
 }
 .ni {
   flex: 1;
+  height: var(--nav-h);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -145,8 +149,6 @@ body {
 .ni:active { transform: scale(.88); }
 .ni.on { color: var(--text); }
 .ni svg { width: 26px; height: 26px; stroke-width: 1.6; }
-/* Active indicator dot */
-
 
 /* ─── PAGE HEADER ─── */
 .page-hdr {
@@ -227,7 +229,7 @@ body {
 .sheet {
   width: 100%; background: var(--surface);
   border-radius: 20px 20px 0 0;
-  padding: 20px 20px calc(var(--safe-bot) + 20px);
+  padding: 20px 20px calc(env(safe-area-inset-bottom, 0px) + 20px);
   animation: sheetUp .28s cubic-bezier(.16,1,.3,1);
 }
 @keyframes sheetUp { from { transform:translateY(100%); } }
@@ -256,8 +258,6 @@ body {
 .wl-step { display: none; }
 .wl-step.on { display: flex; flex-direction: column; gap: 12px; }
 @keyframes wlPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
-
-
 
 .cig-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
@@ -329,7 +329,6 @@ body {
 }
 
 /* Milestones */
-/* ─── MILESTONE PROGRESS ─── */
 .ms-wrap { margin-bottom: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
 .ms-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 8px; }
 .ms-title { font-size: 11px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: .6px; }
@@ -369,7 +368,6 @@ body {
 .feed-tabs {
   display: flex; gap: 6px;
   padding: 0 16px 12px;
-  /* also in page-hdr area */
 }
 .ftab {
   padding: 7px 14px; border-radius: 20px;
@@ -437,7 +435,7 @@ body {
 .rank-me { background: var(--green-bg); }
 
 /* ══════════════════════════════════════════
-   CHALLENGE / ДУЭЛЬ SCREEN
+   CHALLENGE SCREEN
 ══════════════════════════════════════════ */
 .ch-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 12px; }
 .ch-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; }
@@ -454,7 +452,7 @@ body {
 .ch-board { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); margin: 0 16px; overflow: hidden; }
 
 /* ══════════════════════════════════════════
-   ABOUT / АВТОР SCREEN
+   ABOUT SCREEN
 ══════════════════════════════════════════ */
 .about-wrap { padding: 0 16px; }
 .author-card {
@@ -550,7 +548,7 @@ body {
   position: fixed; inset: 0; z-index: 50;
   background: var(--bg);
   display: none; flex-direction: column;
-  padding: calc(var(--safe-top) + 24px) 24px calc(var(--safe-bot) + 32px);
+  padding: calc(var(--safe-top) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 32px);
 }
 #relapse-overlay.show { display: flex; }
 .relapse-icon { font-size: 52px; margin-bottom: 16px; }
@@ -564,7 +562,7 @@ body {
 #confirm-popup {
   position: fixed;
   left: 16px; right: 16px;
-  bottom: calc(var(--nav-h) + var(--safe-bot) + 12px);
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 12px);
   z-index: 300;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -589,18 +587,15 @@ body {
 }
 .divider { height: 1px; background: var(--border); margin: 0 16px 12px; }
 
-/* ─── Animations ─── */
 @keyframes slideIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 .screen-content { animation: slideIn .3s ease both; }
 
-/* ─── Theme toggle icon ─── */
 .sun-icon, .moon-icon { display: none; }
 [data-theme="light"] .sun-icon { display: none; }
 [data-theme="light"] .moon-icon { display: block; }
 [data-theme="dark"] .sun-icon { display: block; }
 [data-theme="dark"] .moon-icon { display: none; }
 
-/* ─── Responsive ─── */
 @media (max-width: 360px) {
   .ni span { font-size: 9px; }
   .timer-val { font-size: 34px; }
@@ -613,11 +608,8 @@ body {
      WELCOME SCREEN
 ════════════════════════════════════════ -->
 <div id="welcome-screen">
-
-  <!-- Step 1: Landing + TG login -->
   <div id="wl-step1" class="wl-step on" style="flex:1;display:flex;flex-direction:column;justify-content:space-between">
 
-    <!-- TOP: theme toggle -->
     <div style="display:flex;justify-content:flex-end">
       <button class="theme-btn" onclick="toggleTheme()">
         <svg class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -625,11 +617,9 @@ body {
       </button>
     </div>
 
-    <!-- HERO -->
     <div style="text-align:center;padding:24px 0 20px">
       <div style="font-size:72px;line-height:1;margin-bottom:24px;animation:wlPulse 3s ease-in-out infinite">✊</div>
 
-      <!-- live counter pill -->
       <div id="wl-live-pill" style="display:inline-flex;align-items:center;gap:7px;
            background:var(--green-bg);border:1.5px solid var(--green-border);
            border-radius:24px;padding:6px 14px;margin-bottom:24px">
@@ -643,7 +633,6 @@ body {
       </div>
     </div>
 
-    <!-- BOTTOM: CTA -->
     <div style="display:flex;flex-direction:column;gap:10px">
       <button id="wl-tg-btn" class="btn btn-tg" onclick="startTgCodeFlow()" style="font-size:17px;padding:18px">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46l-2.987-.94c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
@@ -652,7 +641,6 @@ body {
 
       <div id="wl-code-block" style="display:none;flex-direction:column;gap:12px">
 
-        <!-- Анимированная карточка ожидания -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center">
           <div id="wl-waiting-anim" style="font-size:32px;margin-bottom:12px;animation:wlPulse 1.5s ease-in-out infinite">⏳</div>
           <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:6px">Ждём подтверждения</div>
@@ -663,16 +651,15 @@ body {
           </div>
         </div>
 
-        <!-- Кнопка открыть Telegram (всегда видна) -->
-        <a id="tg-fallback-link" href="#" target="_blank" rel="noopener noreferrer"
+        <!-- Кнопка открыть Telegram — использует tg:// на iOS -->
+        <button id="tg-open-btn" onclick="openTelegramApp()"
            style="display:flex;align-items:center;justify-content:center;gap:10px;
                   padding:14px 16px;background:#229ED9;color:#fff;border-radius:var(--r);
-                  font-weight:700;font-size:15px;text-decoration:none">
+                  font-weight:700;font-size:15px;border:none;cursor:pointer;width:100%;font-family:inherit">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46l-2.987-.94c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
           Открыть Telegram
-        </a>
+        </button>
 
-        <!-- Ввод кода вручную (скрыт, раскрывается по ссылке) -->
         <div id="wl-manual-wrap" style="display:none;flex-direction:column;gap:8px">
           <input id="wl-code-inp" class="inp" type="number" inputmode="numeric" placeholder="123456"
             style="text-align:center;font-size:28px;font-weight:900;letter-spacing:6px"
@@ -692,17 +679,15 @@ body {
       </div>
     </div>
   </div>
-
 </div>
 
 <!-- ════════════════════════════════════════
-     SETUP SCREEN (step 2) — отдельный экран
+     SETUP SCREEN
 ════════════════════════════════════════ -->
 <div id="setup-screen" style="display:none;position:fixed;inset:0;z-index:110;background:var(--bg);
-     flex-direction:column;padding:calc(var(--safe-top) + 20px) 24px calc(var(--safe-bot) + 32px);
+     flex-direction:column;padding:calc(var(--safe-top) + 20px) 24px calc(env(safe-area-inset-bottom, 0px) + 32px);
      overflow-y:auto;-webkit-overflow-scrolling:touch">
 
-  <!-- Header -->
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px">
     <button onclick="backToWelcome()" style="width:36px;height:36px;border-radius:50%;
         background:var(--surface2);border:1px solid var(--border);
@@ -714,7 +699,6 @@ body {
     <div style="font-size:18px;font-weight:800">Настройка профиля</div>
   </div>
 
-  <!-- TG Profile preview -->
   <div style="display:flex;align-items:center;gap:16px;background:var(--surface);
        border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:32px">
     <div id="setup-ava" style="width:56px;height:56px;border-radius:50%;background:var(--surface2);
@@ -734,7 +718,6 @@ body {
     </div>
   </div>
 
-  <!-- Inputs -->
   <div style="margin-bottom:16px">
     <div class="inp-label">Сигарет в день</div>
     <input id="wl-cigs" class="inp" type="number" inputmode="numeric" placeholder="20" value="20">
@@ -757,266 +740,262 @@ body {
 <!-- ════════════════════════════════════════
      APP SHELL
 ════════════════════════════════════════ -->
-<!-- SCREENS — horizontal swipe container -->
-  <div id="screens" style="display:none">
+<div id="screens" style="display:none">
 
-    <!-- HOME -->
-    <div class="screen" id="s-home">
-      <div class="screen-content">
-        <div class="home-wrap">
-          <div class="home-top">
-            <div class="user-pill" id="user-pill" onclick="swipeTo(4)">
-              <div class="user-pill-ava" id="pill-ava">?</div>
-              <span class="user-pill-name" id="pill-name">—</span>
-            </div>
-            <div class="home-actions">
-              <button class="icon-btn" onclick="toggleTheme()">
-                <svg class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                <svg class="sun-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2"/></svg>
-              </button>
-            </div>
+  <!-- HOME -->
+  <div class="screen" id="s-home">
+    <div class="screen-content">
+      <div class="home-wrap">
+        <div class="home-top">
+          <div class="user-pill" id="user-pill" onclick="swipeTo(4)">
+            <div class="user-pill-ava" id="pill-ava">?</div>
+            <span class="user-pill-name" id="pill-name">—</span>
           </div>
-
-          <div class="timer-card">
-            <div class="timer-label">Без сигарет</div>
-            <div class="timer-val" id="h-timer">0ч 0м 0с</div>
-            <div class="timer-date" id="h-date">—</div>
-          </div>
-
-          <div class="stats-row">
-            <div class="stat-card">
-              <div class="stat-val green" id="h-nosm">0</div>
-              <div class="stat-lbl">Не выкурено</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-val blue" id="h-saved">₽0</div>
-              <div class="stat-lbl">Сэкономлено</div>
-            </div>
-          </div>
-
-          <div class="craving-wrap">
-            <button class="craving-btn" onclick="craved()">
-              <div>
-                <div class="craving-label">Терплю желание</div>
-                <div style="font-size:12px;color:var(--sub);margin-top:2px">Нажми, когда хочется закурить</div>
-              </div>
-              <div class="craving-count" id="h-cravings">0</div>
+          <div class="home-actions">
+            <button class="icon-btn" onclick="toggleTheme()">
+              <svg class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="sun-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2"/></svg>
             </button>
           </div>
-
-          <div class="ms-wrap" id="h-milestones"></div>
-
-          <div class="action-row">
-            <button class="btn btn-ghost" onclick="openShare()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-              В Threads
-            </button>
-            <button class="btn btn-ghost" style="color:var(--red)" onclick="showRelapse()">
-              🚬 Срыв
-            </button>
-          </div>
-
-          <div id="h-tip"></div>
         </div>
+
+        <div class="timer-card">
+          <div class="timer-label">Без сигарет</div>
+          <div class="timer-val" id="h-timer">0ч 0м 0с</div>
+          <div class="timer-date" id="h-date">—</div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-val green" id="h-nosm">0</div>
+            <div class="stat-lbl">Не выкурено</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val blue" id="h-saved">₽0</div>
+            <div class="stat-lbl">Сэкономлено</div>
+          </div>
+        </div>
+
+        <div class="craving-wrap">
+          <button class="craving-btn" onclick="craved()">
+            <div>
+              <div class="craving-label">Терплю желание</div>
+              <div style="font-size:12px;color:var(--sub);margin-top:2px">Нажми, когда хочется закурить</div>
+            </div>
+            <div class="craving-count" id="h-cravings">0</div>
+          </button>
+        </div>
+
+        <div class="ms-wrap" id="h-milestones"></div>
+
+        <div class="action-row">
+          <button class="btn btn-ghost" onclick="openShare()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            В Threads
+          </button>
+          <button class="btn btn-ghost" style="color:var(--red)" onclick="showRelapse()">
+            🚬 Срыв
+          </button>
+        </div>
+
+        <div id="h-tip"></div>
       </div>
     </div>
+  </div>
 
-    <!-- FEED -->
-    <div class="screen" id="s-feed">
-      <div class="screen-content">
-        <div class="page-hdr">
-          <div class="page-hdr-title">Лента</div>
-          <div class="feed-tabs">
-            <button class="ftab on" id="tab-all" onclick="switchFeedTab('all')">Все</button>
-            <button class="ftab" id="tab-rank" onclick="switchFeedTab('rank')">Топ</button>
-          </div>
-        </div>
-        <div class="feed-meta">
-          <div class="live-dot"></div>
-          <span id="feed-count">Загружаем…</span>
-        </div>
-        <div id="panel-all" class="feed-list"></div>
-        <div id="panel-rank" style="display:none">
-          <div class="ch-board" style="margin:0 16px">
-            <div id="rank-list"></div>
-          </div>
-          <div style="height:16px"></div>
+  <!-- FEED -->
+  <div class="screen" id="s-feed">
+    <div class="screen-content">
+      <div class="page-hdr">
+        <div class="page-hdr-title">Лента</div>
+        <div class="feed-tabs">
+          <button class="ftab on" id="tab-all" onclick="switchFeedTab('all')">Все</button>
+          <button class="ftab" id="tab-rank" onclick="switchFeedTab('rank')">Топ</button>
         </div>
       </div>
-    </div>
-
-    <!-- CHALLENGE -->
-    <div class="screen" id="s-challenge">
-      <div class="screen-content">
-        <div class="page-hdr">
-          <div class="page-hdr-title">Дуэль</div>
-        </div>
-        <div style="height:12px"></div>
-        <div class="ch-stats" id="ch-stats">
-          <div class="ch-stat"><div class="ch-stat-val green" id="ch-streak">—</div><div class="ch-stat-lbl">Текущая серия</div></div>
-          <div class="ch-stat"><div class="ch-stat-val blue" id="ch-rank">—</div><div class="ch-stat-lbl">Место в топе</div></div>
-          <div class="ch-stat"><div class="ch-stat-val" id="ch-nosm">—</div><div class="ch-stat-lbl">Не выкурено</div></div>
-          <div class="ch-stat"><div class="ch-stat-val orange" id="ch-saved">—</div><div class="ch-stat-lbl">Сэкономлено</div></div>
-        </div>
-        <div class="ch-board-hdr">Топ по длительности 🏆</div>
-        <div class="ch-board">
-          <div id="ch-board-list"></div>
+      <div class="feed-meta">
+        <div class="live-dot"></div>
+        <span id="feed-count">Загружаем…</span>
+      </div>
+      <div id="panel-all" class="feed-list"></div>
+      <div id="panel-rank" style="display:none">
+        <div class="ch-board" style="margin:0 16px">
+          <div id="rank-list"></div>
         </div>
         <div style="height:16px"></div>
       </div>
     </div>
+  </div>
 
-    <!-- ABOUT -->
-    <div class="screen" id="s-about">
-      <div class="screen-content">
-        <div class="page-hdr">
-          <div class="page-hdr-title">Об авторе</div>
+  <!-- CHALLENGE -->
+  <div class="screen" id="s-challenge">
+    <div class="screen-content">
+      <div class="page-hdr">
+        <div class="page-hdr-title">Дуэль</div>
+      </div>
+      <div style="height:12px"></div>
+      <div class="ch-stats" id="ch-stats">
+        <div class="ch-stat"><div class="ch-stat-val green" id="ch-streak">—</div><div class="ch-stat-lbl">Текущая серия</div></div>
+        <div class="ch-stat"><div class="ch-stat-val blue" id="ch-rank">—</div><div class="ch-stat-lbl">Место в топе</div></div>
+        <div class="ch-stat"><div class="ch-stat-val" id="ch-nosm">—</div><div class="ch-stat-lbl">Не выкурено</div></div>
+        <div class="ch-stat"><div class="ch-stat-val orange" id="ch-saved">—</div><div class="ch-stat-lbl">Сэкономлено</div></div>
+      </div>
+      <div class="ch-board-hdr">Топ по длительности 🏆</div>
+      <div class="ch-board">
+        <div id="ch-board-list"></div>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="screen" id="s-about">
+    <div class="screen-content">
+      <div class="page-hdr">
+        <div class="page-hdr-title">Об авторе</div>
+      </div>
+      <div class="about-wrap">
+        <div class="author-card">
+          <div class="author-ava">
+            <img src="https://unavatar.io/telegram/tsaryuk_denis" alt="Денис"
+                 onerror="this.src='https://unavatar.io/threads/mr.tsaryuk'">
+          </div>
+          <div>
+            <div class="author-name">Денис Царюк</div>
+            <div class="author-handle">@mr.tsaryuk · Threads</div>
+            <div style="font-size:13px;color:var(--sub);margin-top:6px;line-height:1.4">Изучаю причины зависимостей и способы выйти из них.</div>
+          </div>
         </div>
-        <div class="about-wrap">
-          <div class="author-card">
-            <div class="author-ava">
-              <img src="https://unavatar.io/telegram/tsaryuk_denis" alt="Денис"
-                   onerror="this.src='https://unavatar.io/threads/mr.tsaryuk'">
-            </div>
-            <div>
-              <div class="author-name">Денис Царюк</div>
-              <div class="author-handle">@mr.tsaryuk · Threads</div>
-              <div style="font-size:13px;color:var(--sub);margin-top:6px;line-height:1.4">Изучаю причины зависимостей и способы выйти из них.</div>
-            </div>
+
+        <button class="btn btn-ghost" style="margin-bottom:16px" onclick="window.open('https://threads.com/mr.tsaryuk','_blank')">
+          <svg viewBox="0 0 192 192" width="16" height="16" fill="currentColor"><path d="M141.537 88.988c-.827-.396-1.667-.778-2.518-1.143-1.482-27.307-16.403-42.94-41.457-43.1-.114-.001-.227-.001-.34-.001-14.986 0-27.605 6.397-35.458 17.054l13.75 9.42c5.777-8.627 14.707-10.568 21.728-10.568 10.196.066 17.678 3.242 22.516 9.41 3.505 4.446 5.827 10.515 6.941 18.133-7.678-1.33-15.98-1.694-24.83-1.167-23.544 1.352-38.565 14.473-37.638 32.846.469 9.297 5.114 17.068 12.943 22.034 6.617 4.2 15.011 6.246 23.77 5.789 11.588-.622 20.784-5.168 26.97-13.5 4.747-6.404 7.717-14.58 8.977-24.688 5.646 3.471 9.796 8.198 12.061 13.963 4.081 10.479 4.321 27.962-8.068 40.298-10.828 10.78-23.855 15.396-43.528 15.544-21.856-.17-38.447-6.944-49.44-20.147-10.323-12.427-15.659-30.61-15.826-54.115.167-23.505 5.504-41.688 15.826-54.114 10.993-13.197 27.584-19.972 49.44-20.141 22.018.171 38.864 6.979 50.044 20.247 5.532 6.563 9.764 14.742 12.561 24.222l15.816-4.296c-3.449-11.848-8.666-21.937-15.687-30.203C158.066 41.236 138.066 33.083 109.456 32.904h-.079c-28.548.178-48.315 8.384-62.126 25.168C35.052 73.075 28.728 94.638 28.52 122.12c.207 27.482 6.532 49.046 18.731 63.99 13.81 16.784 33.578 24.891 62.126 25.07h.079c25.394-.163 43.757-7.422 57.625-21.247 18.162-18.108 17.582-40.839 11.785-54.659-3.976-9.438-11.474-17.258-25.295-30.285zM101.283 131.705c-9.228.504-18.817-3.572-19.283-11.77-.333-6.093 4.104-12.777 20.259-13.726 1.827-.109 3.613-.16 5.357-.16 6.249 0 12.096.609 17.388 1.766-1.99 21.683-13.857 23.364-23.721 23.89z"/></svg>
+          Подписаться в Threads
+        </button>
+
+        <div class="sec-title">Статья</div>
+        <div class="article-card">
+          <div class="article-tag">Статья · Почему люди курят</div>
+          <div class="article-title">Курение — это не вредная привычка. Это инстинкт.</div>
+          <div class="article-preview">Большинство курильщиков думают, что курение — это привычка. Что нужно просто взять и бросить...</div>
+          <div class="article-body" id="article-full">
+            <p>Большинство курильщиков думают, что курение — это привычка. Что нужно просто взять и бросить. Волевым усилием. Один раз и навсегда.</p>
+            <p>Но это не так. Курение — это инстинкт. А инстинкты нельзя просто «отключить».</p>
+            <h3>Как это работает</h3>
+            <p>Никотин стимулирует выброс дофамина — нейромедиатора удовольствия. Мозг запоминает: «сделал X → почувствовал удовольствие». Формируется нейронная петля.</p>
+            <p>Стресс → тяга → сигарета → облегчение. Мозг не различает «плохое» и «хорошее» удовольствие. Он просто повторяет то, что работало.</p>
+            <h3>Почему волевые усилия не работают</h3>
+            <p>Потому что ты борешься с инстинктом силой воли. Инстинкт всегда победит в долгосрочной перспективе — у него бесконечный ресурс, у воли — нет.</p>
+            <p>Единственный рабочий способ — заменить инстинкт, а не подавить его. Создать новую нейронную петлю: стресс → другое действие → облегчение.</p>
+            <h3>Что даёт Quitly</h3>
+            <p>Когда ты видишь счётчик времени и сумму сэкономленных денег — это не просто цифры. Это новый источник дофамина. Мозг начинает ассоциировать «не курил» с удовольствием.</p>
+            <p>Поддержка других людей в ленте усиливает эффект — социальное одобрение мощнее никотина в долгосрочной перспективе.</p>
           </div>
+          <button class="article-read-btn" id="article-btn" onclick="toggleArticle()">Читать полностью →</button>
+        </div>
 
-          <button class="btn btn-ghost" style="margin-bottom:16px" onclick="window.open('https://threads.com/mr.tsaryuk','_blank')">
-            <svg viewBox="0 0 192 192" width="16" height="16" fill="currentColor"><path d="M141.537 88.988c-.827-.396-1.667-.778-2.518-1.143-1.482-27.307-16.403-42.94-41.457-43.1-.114-.001-.227-.001-.34-.001-14.986 0-27.605 6.397-35.458 17.054l13.75 9.42c5.777-8.627 14.707-10.568 21.728-10.568 10.196.066 17.678 3.242 22.516 9.41 3.505 4.446 5.827 10.515 6.941 18.133-7.678-1.33-15.98-1.694-24.83-1.167-23.544 1.352-38.565 14.473-37.638 32.846.469 9.297 5.114 17.068 12.943 22.034 6.617 4.2 15.011 6.246 23.77 5.789 11.588-.622 20.784-5.168 26.97-13.5 4.747-6.404 7.717-14.58 8.977-24.688 5.646 3.471 9.796 8.198 12.061 13.963 4.081 10.479 4.321 27.962-8.068 40.298-10.828 10.78-23.855 15.396-43.528 15.544-21.856-.17-38.447-6.944-49.44-20.147-10.323-12.427-15.659-30.61-15.826-54.115.167-23.505 5.504-41.688 15.826-54.114 10.993-13.197 27.584-19.972 49.44-20.141 22.018.171 38.864 6.979 50.044 20.247 5.532 6.563 9.764 14.742 12.561 24.222l15.816-4.296c-3.449-11.848-8.666-21.937-15.687-30.203C158.066 41.236 138.066 33.083 109.456 32.904h-.079c-28.548.178-48.315 8.384-62.126 25.168C35.052 73.075 28.728 94.638 28.52 122.12c.207 27.482 6.532 49.046 18.731 63.99 13.81 16.784 33.578 24.891 62.126 25.07h.079c25.394-.163 43.757-7.422 57.625-21.247 18.162-18.108 17.582-40.839 11.785-54.659-3.976-9.438-11.474-17.258-25.295-30.285zM101.283 131.705c-9.228.504-18.817-3.572-19.283-11.77-.333-6.093 4.104-12.777 20.259-13.726 1.827-.109 3.613-.16 5.357-.16 6.249 0 12.096.609 17.388 1.766-1.99 21.683-13.857 23.364-23.721 23.89z"/></svg>
-            Подписаться в Threads
-          </button>
+        <div class="sec-title" style="margin-top:4px">Подкаст · источник статьи</div>
+        <div class="video-outer">
+          <iframe src="https://www.youtube.com/embed/bfTN7etcf2E?rel=0&modestbranding=1" allowfullscreen allow="autoplay;encrypted-media"></iframe>
+        </div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">Причины курения — разбор с наркологом Яковом Маршаком</div>
+        <div style="font-size:13px;color:var(--sub);margin-bottom:16px;line-height:1.4">Понять механизм — значит найти настоящий выход. Смотри полную версию.</div>
 
-          <div class="sec-title">Статья</div>
-          <div class="article-card">
-            <div class="article-tag">Статья · Почему люди курят</div>
-            <div class="article-title">Курение — это не вредная привычка. Это инстинкт.</div>
-            <div class="article-preview">Большинство курильщиков думают, что курение — это привычка. Что нужно просто взять и бросить...</div>
-            <div class="article-body" id="article-full">
-              <p>Большинство курильщиков думают, что курение — это привычка. Что нужно просто взять и бросить. Волевым усилием. Один раз и навсегда.</p>
-              <p>Но это не так. Курение — это инстинкт. А инстинкты нельзя просто «отключить».</p>
-              <h3>Как это работает</h3>
-              <p>Никотин стимулирует выброс дофамина — нейромедиатора удовольствия. Мозг запоминает: «сделал X → почувствовал удовольствие». Формируется нейронная петля.</p>
-              <p>Стресс → тяга → сигарета → облегчение. Мозг не различает «плохое» и «хорошее» удовольствие. Он просто повторяет то, что работало.</p>
-              <h3>Почему волевые усилия не работают</h3>
-              <p>Потому что ты борешься с инстинктом силой воли. Инстинкт всегда победит в долгосрочной перспективе — у него бесконечный ресурс, у воли — нет.</p>
-              <p>Единственный рабочий способ — заменить инстинкт, а не подавить его. Создать новую нейронную петлю: стресс → другое действие → облегчение.</p>
-              <h3>Что даёт Quitly</h3>
-              <p>Когда ты видишь счётчик времени и сумму сэкономленных денег — это не просто цифры. Это новый источник дофамина. Мозг начинает ассоциировать «не курил» с удовольствием.</p>
-              <p>Поддержка других людей в ленте усиливает эффект — социальное одобрение мощнее никотина в долгосрочной перспективе.</p>
-            </div>
-            <button class="article-read-btn" id="article-btn" onclick="toggleArticle()">Читать полностью →</button>
+        <div class="sec-title">Ссылки</div>
+        <div class="links-list">
+          <a href="https://threads.com/mr.tsaryuk" target="_blank" class="lnk">
+            <div class="lnk-ico">🧵</div>
+            <div><div class="lnk-name">Threads</div><div class="lnk-sub">@mr.tsaryuk</div></div>
+            <div class="lnk-arr">›</div>
+          </a>
+          <a href="https://youtube.com/watch?v=bfTN7etcf2E" target="_blank" class="lnk">
+            <div class="lnk-ico">▶️</div>
+            <div><div class="lnk-name">YouTube</div><div class="lnk-sub">Подкаст о курении</div></div>
+            <div class="lnk-arr">›</div>
+          </a>
+        </div>
+
+        <div class="sec-title" style="margin-top:4px">Офлайн-клуб</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px">
+          <div style="font-size:22px;margin-bottom:8px">🤝</div>
+          <div style="font-size:15px;font-weight:800;margin-bottom:6px">Встречи #БросаемВместе</div>
+          <div style="font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:12px">
+            Каждый месяц собираемся в Москве — делимся опытом, поддерживаем друг друга. Вход бесплатный.
           </div>
+          <a href="https://t.me/quitly1_bot" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="var(--text)"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46l-2.987-.94c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
+            Узнать расписание
+          </a>
+        </div>
 
-          <div class="sec-title" style="margin-top:4px">Подкаст · источник статьи</div>
-          <div class="video-outer">
-            <iframe src="https://www.youtube.com/embed/bfTN7etcf2E?rel=0&modestbranding=1" allowfullscreen allow="autoplay;encrypted-media"></iframe>
+        <div class="sec-title" style="margin-top:4px">Поддержать проект</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:24px">
+          <div style="font-size:22px;margin-bottom:8px">☕</div>
+          <div style="font-size:15px;font-weight:800;margin-bottom:6px">Купи кофе Денису</div>
+          <div style="font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:12px">
+            Quitly бесплатен и без рекламы. Если приложение помогает — можно поддержать разработку.
           </div>
-          <div style="font-size:14px;font-weight:700;margin-bottom:4px">Причины курения — разбор с наркологом Яковом Маршаком</div>
-          <div style="font-size:13px;color:var(--sub);margin-bottom:16px;line-height:1.4">Понять механизм — значит найти настоящий выход. Смотри полную версию.</div>
-
-          <div class="sec-title">Ссылки</div>
-          <div class="links-list">
-            <a href="https://threads.com/mr.tsaryuk" target="_blank" class="lnk">
-              <div class="lnk-ico">🧵</div>
-              <div><div class="lnk-name">Threads</div><div class="lnk-sub">@mr.tsaryuk</div></div>
-              <div class="lnk-arr">›</div>
-            </a>
-            <a href="https://youtube.com/watch?v=bfTN7etcf2E" target="_blank" class="lnk">
-              <div class="lnk-ico">▶️</div>
-              <div><div class="lnk-name">YouTube</div><div class="lnk-sub">Подкаст о курении</div></div>
-              <div class="lnk-arr">›</div>
-            </a>
-          </div>
-
-          <div class="sec-title" style="margin-top:4px">Офлайн-клуб</div>
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px">
-            <div style="font-size:22px;margin-bottom:8px">🤝</div>
-            <div style="font-size:15px;font-weight:800;margin-bottom:6px">Встречи #БросаемВместе</div>
-            <div style="font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:12px">
-              Каждый месяц собираемся в Москве — делимся опытом, поддерживаем друг друга. Вход бесплатный.
-            </div>
-            <a href="https://t.me/quitly1_bot" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="var(--text)"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46l-2.987-.94c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
-              Узнать расписание
-            </a>
-          </div>
-
-          <div class="sec-title" style="margin-top:4px">Поддержать проект</div>
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:24px">
-            <div style="font-size:22px;margin-bottom:8px">☕</div>
-            <div style="font-size:15px;font-weight:800;margin-bottom:6px">Купи кофе Денису</div>
-            <div style="font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:12px">
-              Quitly бесплатен и без рекламы. Если приложение помогает — можно поддержать разработку.
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <a href="https://boosty.to/mr.tsaryuk" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">☕ Boosty</a>
-              <a href="https://t.me/quitly1_bot" target="_blank" class="btn btn-primary btn-sm" style="text-decoration:none">💳 Перевод</a>
-            </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <a href="https://boosty.to/mr.tsaryuk" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">☕ Boosty</a>
+            <a href="https://t.me/quitly1_bot" target="_blank" class="btn btn-primary btn-sm" style="text-decoration:none">💳 Перевод</a>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- PROFILE -->
-    <div class="screen" id="s-profile">
-      <div class="screen-content">
-        <div class="prof-hero">
-          <div class="prof-ava" id="prof-ava">?</div>
-          <div class="prof-name" id="prof-name">—</div>
-          <div class="prof-handle" id="prof-handle"></div>
-        </div>
-        <div class="prof-grid">
-          <div class="pg-card"><div class="pg-val green" id="pr-days">0д</div><div class="pg-lbl">Текущая серия</div></div>
-          <div class="pg-card"><div class="pg-val blue" id="pr-nosm">0</div><div class="pg-lbl">Не выкурено</div></div>
-          <div class="pg-card"><div class="pg-val orange" id="pr-saved">₽0</div><div class="pg-lbl">Сэкономлено</div></div>
-          <div class="pg-card"><div class="pg-val" id="pr-best">0д</div><div class="pg-lbl">Лучшая серия</div></div>
-        </div>
+  <!-- PROFILE -->
+  <div class="screen" id="s-profile">
+    <div class="screen-content">
+      <div class="prof-hero">
+        <div class="prof-ava" id="prof-ava">?</div>
+        <div class="prof-name" id="prof-name">—</div>
+        <div class="prof-handle" id="prof-handle"></div>
+      </div>
+      <div class="prof-grid">
+        <div class="pg-card"><div class="pg-val green" id="pr-days">0д</div><div class="pg-lbl">Текущая серия</div></div>
+        <div class="pg-card"><div class="pg-val blue" id="pr-nosm">0</div><div class="pg-lbl">Не выкурено</div></div>
+        <div class="pg-card"><div class="pg-val orange" id="pr-saved">₽0</div><div class="pg-lbl">Сэкономлено</div></div>
+        <div class="pg-card"><div class="pg-val" id="pr-best">0д</div><div class="pg-lbl">Лучшая серия</div></div>
+      </div>
 
-        <div class="sec-label">История попыток</div>
-        <div class="history-wrap">
-          <div id="prof-history"></div>
-        </div>
+      <div class="sec-label">История попыток</div>
+      <div class="history-wrap">
+        <div id="prof-history"></div>
+      </div>
 
-        <div class="prof-actions">
-          <button class="btn btn-ghost" onclick="openShare()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-            Поделиться в Threads
-          </button>
-          <button class="btn btn-ghost" style="color:var(--red)" onclick="showRelapse()">🚬 Записать срыв</button>
-          <button class="btn btn-ghost" style="color:var(--sub)" onclick="showLogoutConfirm()">Выйти из аккаунта</button>
-        </div>
+      <div class="prof-actions">
+        <button class="btn btn-ghost" onclick="openShare()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Поделиться в Threads
+        </button>
+        <button class="btn btn-ghost" style="color:var(--red)" onclick="showRelapse()">🚬 Записать срыв</button>
+        <button class="btn btn-ghost" style="color:var(--sub)" onclick="showLogoutConfirm()">Выйти из аккаунта</button>
       </div>
     </div>
+  </div>
 
-  </div><!-- /#screens -->
+</div><!-- /#screens -->
 
-  <!-- BOTTOM NAV -->
-  <nav id="nav" style="display:none">
-    <button class="ni on" data-i="0" onclick="swipeTo(0)">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m3 12 2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/></svg>
-    </button>
-    <button class="ni" data-i="1" onclick="swipeTo(1)">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4" stroke-linecap="round"/></svg>
-    </button>
-    <button class="ni" data-i="2" onclick="swipeTo(2)">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-    </button>
-    <button class="ni" data-i="3" onclick="swipeTo(3)">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="8" r="4" stroke-linecap="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg>
-    </button>
-    <button class="ni" data-i="4" onclick="swipeTo(4)">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="8" r="4" stroke-linecap="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 20v-1a8 8 0 0 1 16 0v1"/></svg>
-    </button>
-  </nav>
+<!-- BOTTOM NAV -->
+<nav id="nav" style="display:none">
+  <button class="ni on" data-i="0" onclick="swipeTo(0)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m3 12 2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/></svg>
+  </button>
+  <button class="ni" data-i="1" onclick="swipeTo(1)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4" stroke-linecap="round"/></svg>
+  </button>
+  <button class="ni" data-i="2" onclick="swipeTo(2)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+  </button>
+  <button class="ni" data-i="3" onclick="swipeTo(3)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="8" r="4" stroke-linecap="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg>
+  </button>
+  <button class="ni" data-i="4" onclick="swipeTo(4)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="8" r="4" stroke-linecap="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 20v-1a8 8 0 0 1 16 0v1"/></svg>
+  </button>
+</nav>
 
-
-<!-- ════════════════════════════════════════
-     RELAPSE OVERLAY
-════════════════════════════════════════ -->
+<!-- RELAPSE OVERLAY -->
 <div id="relapse-overlay">
   <div class="relapse-icon">🚬</div>
   <div class="relapse-title">Это просто<br>откат, не конец.</div>
@@ -1028,9 +1007,7 @@ body {
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-     SUPPORT SHEET
-════════════════════════════════════════ -->
+<!-- SUPPORT SHEET -->
 <div class="overlay" id="sup-overlay" onclick="if(event.target===this)closeSup()">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -1044,7 +1021,7 @@ body {
   </div>
 </div>
 
-<!-- CONFIRM POPUP (logout etc) -->
+<!-- CONFIRM POPUP -->
 <div id="confirm-popup">
   <div class="confirm-title" id="confirm-title">—</div>
   <div class="confirm-sub" id="confirm-sub"></div>
@@ -1058,25 +1035,36 @@ body {
 <div id="toasts"></div>
 
 <script>
-
-// ── iOS Safari nav fix — определена первой, до bootApp ──
-function fixNavPosition() {
-  const vv = window.visualViewport;
-  if (!vv) return;
+/* ════════════════════════════════════════════
+   NAV FIX — iOS Safari
+   Делаем ОДИН раз при загрузке и при resize.
+   Используем visualViewport для точного bottom.
+════════════════════════════════════════════ */
+function applyNavFix() {
   const nav = document.getElementById('nav');
   const screens = document.getElementById('screens');
   if (!nav || nav.style.display === 'none') return;
-  const navH = nav.offsetHeight;
-  const offsetFromBottom = window.innerHeight - (vv.offsetTop + vv.height);
-  const bottom = Math.max(0, offsetFromBottom);
-  nav.style.bottom = bottom + 'px';
-  if (screens) screens.style.bottom = (navH + bottom) + 'px';
+
+  // На iOS Safari с Home indicator нужно учитывать реальный bottom
+  // visualViewport.height = видимая высота (без клавиатуры)
+  // window.innerHeight - visualViewport.height = высота клавиатуры
+  const vv = window.visualViewport;
+  if (vv) {
+    // Отступ снизу = расстояние от нижнего края viewport до нижнего края экрана
+    const keyboardOffset = window.innerHeight - vv.height - vv.offsetTop;
+    const safeBot = Math.max(0, keyboardOffset);
+    // Когда клавиатура открыта — не двигаем nav (он уезжает под клавиатуру сам)
+    // Когда закрыта — bottom = 0 (safe-area обрабатывается через CSS env())
+    nav.style.bottom = safeBot > 50 ? safeBot + 'px' : '';
+    if (screens) screens.style.bottom = safeBot > 50 ? (nav.offsetHeight + safeBot) + 'px' : '';
+  }
 }
+
 if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', fixNavPosition);
-  window.visualViewport.addEventListener('scroll', fixNavPosition);
+  window.visualViewport.addEventListener('resize', applyNavFix);
+  window.visualViewport.addEventListener('scroll', applyNavFix);
 }
-window.addEventListener('resize', fixNavPosition);
+window.addEventListener('resize', applyNavFix);
 
 /* ════════════════════════════════════════════
    CONSTANTS
@@ -1110,15 +1098,17 @@ const MILESTONES = [
    STATE
 ════════════════════════════════════════════ */
 let S = {
-  user: null,      // { name, handle, photo, cigs, price, tgId }
-  startTime: null, // Date
+  user: null,
+  startTime: null,
   cravings: 0,
-  history: [],     // [{start, end}]
+  history: [],
   ival: null,
   curTab: 0,
 };
 let _pollTimer = null;
 let _tgPendingUser = null;
+let _tgCode = null; // Сохраняем код для открытия TG
+let _tgHttpUrl = null; // Сохраняем HTTP URL для кнопки
 let _feedData = [];
 let _supTarget = null;
 
@@ -1179,8 +1169,6 @@ function toggleArticle() {
 /* ════════════════════════════════════════════
    SWIPE NAVIGATION
 ════════════════════════════════════════════ */
-const SCREEN_IDS = ['home','feed','challenge','about','profile'];
-
 function swipeTo(idx) {
   const sc = el('screens');
   sc.scrollTo({ left: idx * sc.offsetWidth, behavior: 'smooth' });
@@ -1195,7 +1183,6 @@ function setActiveNav(idx) {
   });
 }
 
-// Sync nav with scroll
 (function() {
   let scrollTimer;
   document.addEventListener('DOMContentLoaded', () => {
@@ -1295,7 +1282,45 @@ async function sbSendSupport(toTgId, toName, msg) {
 
 /* ════════════════════════════════════════════
    AUTH — TG CODE FLOW
+   ИСПРАВЛЕНИЕ: открываем tg:// схему напрямую на iOS
 ════════════════════════════════════════════ */
+
+// Функция открытия Telegram — вызывается кнопкой "Открыть Telegram"
+function openTelegramApp() {
+  if (!_tgCode) return;
+
+  const tgDeepLink = 'tg://resolve?domain=quitly1_bot&start=' + _tgCode;
+  const tgHttpLink = 'https://t.me/quitly1_bot?start=' + _tgCode;
+
+  // iOS: пробуем открыть нативное приложение через tg://
+  // Если не установлен — fallback на https://t.me
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+
+  if (isIOS) {
+    // На iOS используем location.href для открытия tg:// без блокировки popup
+    // Сразу после ставим таймаут — если tg:// не сработал за 1.5 сек, открываем веб
+    const start = Date.now();
+    window.location.href = tgDeepLink;
+    setTimeout(function() {
+      // Если страница не ушла (< 2 сек прошло), значит tg:// не сработал
+      if (Date.now() - start < 2000) {
+        window.open(tgHttpLink, '_blank', 'noopener');
+      }
+    }, 1500);
+  } else if (isAndroid) {
+    // На Android — intent через ссылку
+    const intentUrl = 'intent://resolve?domain=quitly1_bot&start=' + _tgCode + '#Intent;scheme=tg;package=org.telegram.messenger;end';
+    window.location.href = intentUrl;
+    setTimeout(function() {
+      window.open(tgHttpLink, '_blank', 'noopener');
+    }, 1500);
+  } else {
+    // Desktop
+    window.open(tgHttpLink, '_blank', 'noopener');
+  }
+}
+
 async function startTgCodeFlow() {
   const btn = el('wl-tg-btn');
   btn.disabled = true;
@@ -1305,31 +1330,21 @@ async function startTgCodeFlow() {
     const data = await r.json();
     if (!data.code) throw new Error('No code');
 
-    const tgDeep = 'tg://resolve?domain=quitly1_bot&start=' + data.code;
-    const tgHttp = 'https://t.me/quitly1_bot?start=' + data.code;
+    _tgCode = data.code;
+    _tgHttpUrl = 'https://t.me/quitly1_bot?start=' + data.code;
 
-    // Открываем Telegram через Universal Link (https://t.me/)
-    // Это НЕ уводит текущую страницу — iOS/Android открывают приложение
-    // и возвращают пользователя обратно. Поллинг продолжается.
-    const _a = document.createElement('a');
-    _a.href = tgHttp;
-    _a.target = '_blank';
-    _a.rel = 'noopener noreferrer';
-    _a.style.display = 'none';
-    document.body.appendChild(_a);
-    _a.click();
-    setTimeout(() => { try { document.body.removeChild(_a); } catch {} }, 500);
-
-    // Показываем fallback сразу — кнопка "Открыть Telegram" всегда видна
-    const fb = el('tg-fallback-link');
-    if (fb) { fb.href = tgHttp; fb.style.display = 'flex'; }
-
+    // Показываем блок с кодом
     el('wl-code-block').style.display = 'flex';
     el('wl-tg-btn').style.display = 'none';
+
+    // Автоматически открываем Telegram
+    openTelegramApp();
+
+    // Запускаем поллинг
     startCodePolling(data.code);
   } catch {
     btn.disabled = false;
-    btn.textContent = 'Войти через Telegram';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46l-2.987-.94c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg> Войти через Telegram';
     toast('Ошибка. Попробуй ещё раз');
   }
 }
@@ -1372,7 +1387,6 @@ async function verifyTgCode() {
 function handleTgSuccess(user) {
   _tgPendingUser = user;
   clearInterval(_pollTimer);
-  // Заполняем preview в setup-screen
   const avaEl = el('setup-ava');
   if (user.photo) {
     avaEl.innerHTML = '<img src="' + user.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block" onerror="this.parentElement.textContent=\'👤\'">';
@@ -1381,7 +1395,6 @@ function handleTgSuccess(user) {
   }
   el('setup-name').textContent = user.name || 'Пользователь';
   el('setup-handle').textContent = user.handle || '';
-  // Показываем setup-screen поверх всего
   el('setup-screen').style.display = 'flex';
 }
 
@@ -1392,6 +1405,8 @@ function backToWelcome() {
 
 function cancelTgFlow() {
   clearInterval(_pollTimer);
+  _tgCode = null;
+  _tgHttpUrl = null;
   el('wl-code-block').style.display = 'none';
   el('wl-tg-btn').style.display = '';
   el('wl-tg-btn').disabled = false;
@@ -1412,7 +1427,6 @@ async function startWithTgUser() {
     cigs, price
   };
 
-  // Try to load existing session
   const saved = await cloudLoad(tgId);
   if (saved) {
     S.startTime = saved.startTime;
@@ -1462,12 +1476,12 @@ function bootApp() {
   el('setup-screen').style.display = 'none';
   el('screens').style.display = 'flex';
   el('nav').style.display = 'flex';
-  setTimeout(fixNavPosition, 50);
+  // Применяем nav fix после показа nav
+  setTimeout(applyNavFix, 100);
   updatePill();
   startTimer();
   renderHome();
   loadRealFeed();
-  // Всегда стартуем на Home
   setTimeout(() => swipeTo(0), 0);
 }
 
@@ -1478,13 +1492,13 @@ function logout() {
   S = { user: null, startTime: null, cravings: 0, history: [], ival: null, curTab: 0 };
   _feedData = [];
   _tgPendingUser = null;
-  // Reset welcome screen
+  _tgCode = null;
+  _tgHttpUrl = null;
   el('setup-screen').style.display = 'none';
   el('wl-code-block').style.display = 'none';
   el('wl-tg-btn').style.display = '';
   el('wl-tg-btn').disabled = false;
   cancelTgFlow();
-  // Show welcome, hide app
   el('screens').style.display = 'none';
   el('nav').style.display = 'none';
   el('welcome-screen').classList.remove('hidden');
@@ -1524,7 +1538,6 @@ function renderHome() {
 
   el('h-cravings').textContent = S.cravings;
 
-  // Milestones progress bar
   const msEl = el('h-milestones');
   const ms = S.startTime ? Date.now() - S.startTime.getTime() : 0;
   const nextMs = MILESTONES.find(m => ms < m.ms);
@@ -1558,7 +1571,6 @@ function renderHome() {
     }).join('') +
     '</div>';
 
-  // Tip
   const tipIdx = Math.floor(Date.now() / 3600000) % TIPS.length;
   el('h-tip').innerHTML = '<div class="tip-card"><div class="tip-tag">Совет дня</div><div class="tip-text">' + TIPS[tipIdx] + '</div></div>';
 }
@@ -1579,7 +1591,6 @@ function craved() {
   el('h-cravings').textContent = S.cravings;
   saveLocal();
   toast('Держишься! +1 🏆');
-  // brief visual pulse
   const cnt = el('h-cravings').parentElement;
   cnt.style.transform = 'scale(1.15)';
   setTimeout(() => cnt.style.transform = '', 200);
@@ -1607,7 +1618,7 @@ async function loadRealFeed() {
   _feedData = [];
   data.forEach(row => {
     if (!row.display_name) return;
-    if (myId && row.tg_id && String(row.tg_id) === myId) return; // не показываем себя в чужой ленте
+    if (myId && row.tg_id && String(row.tg_id) === myId) return;
     _feedData.push({
       tgId: row.tg_id,
       name: row.display_name,
@@ -1617,7 +1628,6 @@ async function loadRealFeed() {
     });
   });
 
-  // Update count
   const total = _feedData.length + (S.startTime ? 1 : 0);
   el('feed-count').textContent = total > 0
     ? 'Бросают: ' + total + ' ' + (total === 1 ? 'человек' : total < 5 ? 'человека' : 'человек')
@@ -1636,7 +1646,6 @@ function renderAva(item) {
 
 function renderFeed() {
   const list = el('panel-all');
-  // My card at top
   const myCard = S.startTime ? [{
     tgId: S.user?.tgId, name: S.user?.name||'Ты', photo: S.user?.photo||null, t: S.startTime.getTime(), me: true
   }] : [];
@@ -1697,7 +1706,6 @@ function renderRank() {
 ════════════════════════════════════════════ */
 function renderChallenge() {
   const secs = elapsed();
-  const d = Math.floor(secs / 86400);
   const nosm = Math.floor(secs / 86400 * (S.user?.cigs || 20));
   const saved = Math.floor(nosm / 20 * (S.user?.price || 200));
 
@@ -1705,7 +1713,6 @@ function renderChallenge() {
   el('ch-nosm').textContent = S.startTime ? String(nosm) : '—';
   el('ch-saved').textContent = S.startTime ? '₽'+saved.toLocaleString('ru') : '—';
 
-  // Rank position
   const myId = S.user?.tgId ? String(S.user.tgId) : null;
   const allItems = [];
   if (S.startTime) allItems.push({ t: S.startTime.getTime(), me: true });
@@ -1714,7 +1721,6 @@ function renderChallenge() {
   const myPos = sorted.findIndex(it => it.me);
   el('ch-rank').textContent = myPos >= 0 ? '#' + (myPos + 1) : '—';
 
-  // Leaderboard
   const medals = ['🥇','🥈','🥉'];
   const allWithMe = [];
   if (S.startTime) allWithMe.push({ tgId: myId, name: S.user?.name||'Ты', photo: S.user?.photo||null, t: S.startTime.getTime(), me: true });
@@ -1759,13 +1765,12 @@ function renderProfile() {
   el('pr-saved').textContent = '₽' + saved.toLocaleString('ru');
   el('pr-best').textContent = bd > 0 ? bd+'д' : (best > 0 ? fmtDur(best).split(' ')[0] : '—');
 
-  // History
   const histEl = el('prof-history');
   if (!S.history.length) {
     histEl.innerHTML = '<div class="hist-empty">Это первая попытка. Удачи!</div>';
     return;
   }
-  histEl.innerHTML = S.history.slice().reverse().map((h, i) => {
+  histEl.innerHTML = S.history.slice().reverse().map((h) => {
     const dur = Math.floor((new Date(h.end) - new Date(h.start)) / 1000);
     return '<div class="hist-row"><div class="hist-dur">' + fmtDur(dur) + '</div><div class="hist-date">' + fmtDate(new Date(h.start)) + ' → ' + fmtDate(new Date(h.end)) + '</div></div>';
   }).join('');
@@ -1777,11 +1782,9 @@ function renderProfile() {
 function showRelapse() {
   el('relapse-overlay').classList.add('show');
 }
-
 function hideRelapse() {
   el('relapse-overlay').classList.remove('show');
 }
-
 function confirmRelapse() {
   hideRelapse();
   if (S.startTime) {
@@ -1804,11 +1807,9 @@ function openSup(name, tgId) {
   el('sup-msg').value = '';
   el('sup-overlay').classList.add('show');
 }
-
 function closeSup() {
   el('sup-overlay').classList.remove('show');
 }
-
 async function sendSup() {
   const msg = el('sup-msg').value.trim();
   if (!msg) { toast('Напиши что-нибудь'); return; }
@@ -1819,7 +1820,7 @@ async function sendSup() {
 }
 
 /* ════════════════════════════════════════════
-   LOGOUT CONFIRM
+   LOGOUT
 ════════════════════════════════════════════ */
 function showLogoutConfirm() {
   el('confirm-title').textContent = 'Выйти из аккаунта?';
@@ -1827,7 +1828,6 @@ function showLogoutConfirm() {
   el('confirm-ok').onclick = () => { hideConfirm(); logout(); };
   el('confirm-popup').classList.add('show');
 }
-
 function hideConfirm() {
   el('confirm-popup').classList.remove('show');
 }
@@ -1841,17 +1841,13 @@ function openShare() {
   const nosm = Math.floor(secs / 86400 * (S.user?.cigs || 20));
   const saved = Math.floor(nosm / 20 * (S.user?.price || 200));
   const txt = (d > 0
-    ? 'Не курю уже ' + d + ' ' + (d===1?'день':d<5?'дня':'дней') + ' \u23f1'
-    : 'Первый день без сигарет \u23f1') + '\n' +
-    '\ud83d\udea2 Не выкурено: ' + nosm + ' сиг.  \ud83d\udcb0 Сэкономлено: \u20bd' + saved.toLocaleString('ru') + '\n\n' +
+    ? 'Не курю уже ' + d + ' ' + (d===1?'день':d<5?'дня':'дней') + ' ⏱'
+    : 'Первый день без сигарет ⏱') + '\n' +
+    '🚢 Не выкурено: ' + nosm + ' сиг.  💰 Сэкономлено: ₽' + saved.toLocaleString('ru') + '\n\n' +
     TAGS + '\nquitly-sigma.vercel.app';
 
-  // iOS: попытка открыть нативный Threads через deeplink
   const encoded = encodeURIComponent(txt);
-  // Threads web intent
   const threadsUrl = 'https://www.threads.net/intent/post?text=' + encoded;
-
-  // Открываем Threads
   window.open(threadsUrl, '_blank', 'noopener');
 }
 
@@ -1868,28 +1864,7 @@ function openShare() {
     bootApp();
   }
 
-
-  // ── Safari iOS nav fix ──
-  // Читаем реальную высоту экрана через visualViewport и двигаем nav
-  function fixNavPosition() {
-    const vv = window.visualViewport;
-    const winH = vv ? vv.height : window.innerHeight;
-    const fullH = window.screen.height;
-    // safe-area-inset-bottom через getComputedStyle
-    const safeBot = parseInt(getComputedStyle(document.documentElement)
-      .getPropertyValue('--safe-bot') || '0') || 0;
-    const navEl = document.getElementById('nav');
-    const screensEl = document.getElementById('screens');
-    if (!navEl) return;
-    // Ничего не меняем — position:fixed сам разберётся
-    // Но форсируем repaint чтобы Safari пересчитал layout
-    navEl.style.transform = 'translateZ(0)';
-  }
-  fixNavPosition();
-  window.addEventListener('resize', fixNavPosition);
-  if (window.visualViewport) window.visualViewport.addEventListener('resize', fixNavPosition);
-
-  // Загружаем live-счётчик на welcome экране
+  // Live counter on welcome screen
   (async () => {
     try {
       const r = await fetch(SB_URL + '/rest/v1/quit_sessions?select=tg_id&is_active=eq.true', { headers: SB_HDR });
@@ -1898,7 +1873,7 @@ function openShare() {
       const el2 = document.getElementById('wl-live-count');
       if (el2) {
         el2.textContent = n > 0
-          ? n + ' ' + (n===1?'бросает':n<5?'бросают':'бросают') + ' прямо сейчас'
+          ? n + ' ' + (n===1?'бросает':n<5?'бросают':'бросают') + ' прямо сейчас'
           : 'Будь первым — начни сейчас';
       }
     } catch {}

@@ -818,6 +818,7 @@ body {
 
         <div id="pwa-hint" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-top:8px;display:none">
           <div style="font-size:13px;font-weight:700;margin-bottom:6px">&#x1f4f2; Добавь на экран</div>
+          <div style="font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:8px">Quitly будет работать как обычное приложение &#8212; с иконкой на главном экране, без адресной строки и быстрее загружаться.</div>
           <div style="font-size:12px;color:var(--sub);line-height:1.5" id="pwa-hint-text"></div>
         </div>
       </div>
@@ -898,7 +899,7 @@ body {
           <div style="font-size:22px;margin-bottom:8px">&#x1f91d;</div>
           <div style="font-size:15px;font-weight:800;margin-bottom:6px">Встречи Офлайн Клуба</div>
           <div style="font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:12px">
-            Каждый месяц собираемся в Москве &#8212; делимся опытом, поддерживаем друг друга. Вход бесплатный.
+            Каждый месяц собираемся в Москве &#8212; делимся опытом, поддерживаем друг друга.
           </div>
           <a href="https://t.me/offlineclub_ru" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="var(--text)"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.61c-.15.673-.544.838-1.101.52l-3.038-2.238-1.466 1.41c-.162.162-.298.298-.611.298l.217-3.084 5.613-5.07c.244-.217-.053-.337-.378-.12L7.06 14.46l-2.987-.94c-.66-.207-.673-.66.138-.977l10.877-4.193c.55-.2 1.031.134.474.898z"/></svg>
@@ -927,7 +928,7 @@ body {
         <div class="video-outer">
           <iframe src="https://www.youtube.com/embed/bfTN7etcf2E?rel=0&modestbranding=1" allowfullscreen allow="autoplay;encrypted-media"></iframe>
         </div>
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">Причины курения &#8212; разбор с наркологом</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">Причины курения &#8212; разговор с биофизиком</div>
         <div style="font-size:13px;color:var(--sub);margin-bottom:16px;line-height:1.4">Понять механизм &#8212; значит найти настоящий выход.</div>
 
         <div class="sec-title">Статья из подкаста</div>
@@ -959,7 +960,8 @@ body {
           <div style="font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:12px">
             Quitly бесплатен и без рекламы. Если приложение помогает &#8212; можно поддержать.
           </div>
-          <a href="tel:+79660889236" class="btn btn-primary btn-sm" style="text-decoration:none;display:block;text-align:center">&#x1f4b3; СБП перевод +7 966 088 92 36</a>
+          <div style="background:var(--surface2);border-radius:var(--r-sm);padding:10px 12px;font-size:12px;font-family:monospace;word-break:break-all;color:var(--text);margin-bottom:8px">TR4Zy6n9qeGBqB4kJFsNhLXNMCvscrjYmy</div>
+          <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText('TR4Zy6n9qeGBqB4kJFsNhLXNMCvscrjYmy').then(()=>toast('Адрес скопирован'))">&#x1f4cb; Скопировать адрес (USDT TRC20)</button>
         </div>
       </div>
     </div>
@@ -1269,7 +1271,8 @@ async function cloudLoad(tgId) {
 }
 
 async function sbFeed() {
-  return sbGet('quit_sessions?select=tg_id,tg_handle,display_name,photo_url,started_at,cravings,is_active&is_active=eq.true&order=last_seen.desc&limit=50');
+  // is_banned filter applied client-side (column may not exist yet in Supabase)
+  return sbGet('quit_sessions?select=tg_id,tg_handle,display_name,photo_url,started_at,cravings,is_active,is_banned&is_active=eq.true&order=last_seen.desc&limit=50');
 }
 
 async function sbLoadSupMessages() {
@@ -1675,6 +1678,7 @@ async function loadRealFeed() {
   _feedData = [];
   data.forEach(row => {
     if (!row.display_name) return;
+    if (row.is_banned) return;
     if (myId && row.tg_id && String(row.tg_id) === myId) return;
     if (TEST_IDS.includes(String(row.tg_id))) return;
     _feedData.push({
@@ -1922,9 +1926,15 @@ function openSup(name, tgId) {
 function closeSup() {
   el('sup-overlay').classList.remove('show');
 }
+const _BAD_WORDS = /(?:бля|хуй|хуя|хуе|пизд|ебат|ебан|ебну|ёбан|сука|сучк|мудак|мудил|пидор|пидар|гандон|залуп|шлюх|дерьм|говно|жопа|нахуй|нахер|похуй|охуе|ахуе|заеб|отъеб|уёб|выеб|доеб|наеб|pidr|pizd|suka|blyad|ebat|huy|fuck|shit|ass|bitch)/i;
+function hasBadWords(text) {
+  return _BAD_WORDS.test(text.replace(/[^a-zA-Zа-яА-ЯёЁ]/g, ''));
+}
+
 async function sendSup() {
   const msg = el('sup-msg').value.trim();
   if (!msg) { toast('Напиши что-нибудь'); return; }
+  if (hasBadWords(msg)) { toast('Сообщение содержит недопустимые слова'); return; }
   if (!_supTarget?.tgId) { toast('Нет получателя'); closeSup(); return; }
   const ok = await sbSendSupport(_supTarget.tgId, _supTarget.name, msg);
   if (ok) {

@@ -122,7 +122,8 @@ body {
   left: 0; right: 0;
   bottom: 0;
   z-index: 999;
-  height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+  height: var(--nav-h);
+  padding-bottom: constant(safe-area-inset-bottom, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--surface);
   border-top: 1px solid var(--border);
@@ -131,8 +132,18 @@ body {
   transition: background .2s;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
+  box-sizing: content-box;
 }
-/* Больше не нужен отдельный safe-area заполнитель */
+/* Физически закрашивает ВСЕ под навбаром — safe area, overscroll, щели Safari */
+#nav::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  top: 100%;
+  height: 200px;
+  background: inherit;
+  pointer-events: none;
+}
 #nav-safe {
   display: none;
 }

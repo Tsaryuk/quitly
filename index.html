@@ -1058,6 +1058,26 @@ body {
 <div id="toasts"></div>
 
 <script>
+
+// ── iOS Safari nav fix — определена первой, до bootApp ──
+function fixNavPosition() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const nav = document.getElementById('nav');
+  const screens = document.getElementById('screens');
+  if (!nav || nav.style.display === 'none') return;
+  const navH = nav.offsetHeight;
+  const offsetFromBottom = window.innerHeight - (vv.offsetTop + vv.height);
+  const bottom = Math.max(0, offsetFromBottom);
+  nav.style.bottom = bottom + 'px';
+  if (screens) screens.style.bottom = (navH + bottom) + 'px';
+}
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', fixNavPosition);
+  window.visualViewport.addEventListener('scroll', fixNavPosition);
+}
+window.addEventListener('resize', fixNavPosition);
+
 /* ════════════════════════════════════════════
    CONSTANTS
 ════════════════════════════════════════════ */
@@ -1382,9 +1402,10 @@ async function startWithTgUser() {
   if (!_tgPendingUser) return;
   const cigs = parseInt(el('wl-cigs').value) || 20;
   const price = parseInt(el('wl-price').value) || 200;
+  const tgId = String(_tgPendingUser.tgId || _tgPendingUser.id || '');
 
   S.user = {
-    tgId: _tgPendingUser.id,
+    tgId,
     name: _tgPendingUser.name,
     handle: _tgPendingUser.handle,
     photo: _tgPendingUser.photo,
@@ -1392,7 +1413,7 @@ async function startWithTgUser() {
   };
 
   // Try to load existing session
-  const saved = await cloudLoad(String(_tgPendingUser.id));
+  const saved = await cloudLoad(tgId);
   if (saved) {
     S.startTime = saved.startTime;
     S.cravings = saved.cravings;
@@ -1438,6 +1459,7 @@ function loadLocal() {
 
 function bootApp() {
   el('welcome-screen').classList.add('hidden');
+  el('setup-screen').style.display = 'none';
   el('screens').style.display = 'flex';
   el('nav').style.display = 'flex';
   setTimeout(fixNavPosition, 50);
@@ -1846,37 +1868,6 @@ function openShare() {
     bootApp();
   }
 
-  // ── iOS Safari nav fix ──
-  // Safari меняет window.innerHeight при появлении/скрытии адресной строки.
-  // position:fixed bottom:0 прилипает к низу LAYOUT viewport, а не visual.
-  // Используем visualViewport API чтобы всегда позиционировать от видимого низа.
-  function fixNavPosition() {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const nav = document.getElementById('nav');
-    const screens = document.getElementById('screens');
-    if (!nav || nav.style.display === 'none') return;
-
-    // Высота nav
-    const navH = nav.offsetHeight;
-
-    // Отступ от низа visual viewport до низа layout viewport
-    const offsetFromBottom = window.innerHeight - (vv.offsetTop + vv.height);
-    const bottom = Math.max(0, offsetFromBottom);
-
-    nav.style.bottom = bottom + 'px';
-    if (screens) {
-      screens.style.bottom = (navH + bottom) + 'px';
-    }
-  }
-
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', fixNavPosition);
-    window.visualViewport.addEventListener('scroll', fixNavPosition);
-  }
-  window.addEventListener('resize', fixNavPosition);
-  // Запустим сразу после загрузки
-  setTimeout(fixNavPosition, 100);
 
   // ── Safari iOS nav fix ──
   // Читаем реальную высоту экрана через visualViewport и двигаем nav

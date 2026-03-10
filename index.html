@@ -88,8 +88,7 @@ body {
 #screens {
   position: fixed;
   top: 0; left: 0; right: 0;
-  /* nav (52px) + safe-area снизу = полная высота занятая nav-блоком */
-  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+  bottom: 0;
   display: flex;
   overflow-x: scroll;
   overflow-y: hidden;
@@ -108,50 +107,29 @@ body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding-bottom: 24px;
+  padding-bottom: calc(var(--nav-h) + 32px);
   background: var(--bg);
 }
 .screen::-webkit-scrollbar { display: none; }
 
-/* ═══ NAV — iOS SAFE AREA (v3) ═══ */
+/* ═══ FLOATING NAV PILL ═══ */
 #nav {
   position: fixed;
-  left: 0; right: 0;
-  bottom: 0;
+  left: 12px; right: 12px;
+  bottom: 12px;
+  bottom: calc(env(safe-area-inset-bottom, 12px) + 4px);
   z-index: 999;
   background: var(--surface);
-  border-top: 1px solid var(--border);
+  border: 1px solid var(--border);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   height: var(--nav-h);
-  padding-bottom: constant(safe-area-inset-bottom, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-sizing: content-box;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.08);
   -webkit-transform: translate3d(0,0,0);
   transform: translate3d(0,0,0);
 }
-/* Белый блок 200px ниже nav — закрывает safe area, overscroll, щели Safari */
-#nav::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0;
-  top: 100%;
-  height: 200px;
-  background: var(--surface);
-  pointer-events: none;
-}
-/* Страховка — белый блок на самом дне экрана */
-#nav-safe {
-  position: fixed;
-  left: 0; right: 0; bottom: 0;
-  z-index: 998;
-  height: constant(safe-area-inset-bottom, 34px);
-  height: env(safe-area-inset-bottom, 34px);
-  background: var(--surface);
-  pointer-events: none;
-  -webkit-transform: translate3d(0,0,0);
-  transform: translate3d(0,0,0);
-}
+#nav-safe { display: none; }
 .ni {
   flex: 1;
   height: var(--nav-h);

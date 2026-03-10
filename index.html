@@ -1092,11 +1092,6 @@ body {
   window._fixNav = fixNav;
 })();
 
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', applyNavFix);
-  window.visualViewport.addEventListener('scroll', applyNavFix);
-}
-window.addEventListener('resize', applyNavFix);
 
 /* ════════════════════════════════════════════
    CONSTANTS

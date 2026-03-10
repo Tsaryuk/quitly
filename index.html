@@ -86,6 +86,7 @@ body {
 #screens {
   position: fixed;
   top: 0; left: 0; right: 0;
+  /* nav (52px) + safe-area снизу = полная высота занятая nav-блоком */
   bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
   display: flex;
   overflow-x: scroll;
@@ -109,32 +110,34 @@ body {
 }
 .screen::-webkit-scrollbar { display: none; }
 
-/* ═══ NAV — iOS SAFE AREA FIX ═══
-   Подход: nav имеет фиксированную высоту кнопок (52px),
-   а снизу добавляем padding через псевдоэлемент / отдельный div.
-   Это надёжнее чем считать height через calc с env().
+/* ═══ NAV — iOS SAFE AREA ═══
+   nav сидит точно над Home indicator:
+   bottom = safe-area-inset-bottom (высота полоски)
+   height = только высота кнопок (52px)
+   Под nav — #nav-safe той же цвет чтобы не просвечивал фон.
 */
 #nav {
   position: fixed;
-  left: 0; right: 0; bottom: 0;
+  left: 0; right: 0;
+  bottom: env(safe-area-inset-bottom, 0px);
   z-index: 999;
-  /* Только высота кнопок — без safe-area в height */
   height: var(--nav-h);
   background: var(--surface);
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
   transition: background .2s;
-  transform: translateZ(0);
   -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
-/* Распорка под nav для safe-area (Home indicator на iPhone) */
+/* Заполняет зону Home indicator тем же цветом */
 #nav-safe {
   position: fixed;
   left: 0; right: 0; bottom: 0;
   z-index: 998;
   height: env(safe-area-inset-bottom, 0px);
   background: var(--surface);
+  transition: background .2s;
   pointer-events: none;
 }
 .ni {
@@ -1049,8 +1052,45 @@ body {
    Делаем ОДИН раз при загрузке и при resize.
    Используем visualViewport для точного bottom.
 ════════════════════════════════════════════ */
-/* nav fix больше не нужен — используем отдельный #nav-safe div */
-function applyNavFix() {}
+/* Измеряем реальный safe-area-inset-bottom через JS и прибиваем nav */
+(function() {
+  function fixNav() {
+    const nav = document.getElementById('nav');
+    const navSafe = document.getElementById('nav-safe');
+    const screens = document.getElementById('screens');
+    if (!nav || nav.style.display === 'none') return;
+
+    // Создаём измерительный div если ещё нет
+    let probe = document.getElementById('_safe_probe');
+    if (!probe) {
+      probe = document.createElement('div');
+      probe.id = '_safe_probe';
+      probe.style.cssText = 'position:fixed;bottom:0;left:0;width:1px;height:env(safe-area-inset-bottom,0px);pointer-events:none;opacity:0;z-index:-1';
+      document.body.appendChild(probe);
+    }
+
+    const safeH = probe.offsetHeight || 0;
+    const navH = 52;
+
+    nav.style.bottom = safeH + 'px';
+    if (navSafe) navSafe.style.height = safeH + 'px';
+    if (screens) screens.style.bottom = (navH + safeH) + 'px';
+  }
+
+  // Запускаем сразу и после полной загрузки
+  document.addEventListener('DOMContentLoaded', fixNav);
+  window.addEventListener('load', fixNav);
+  window.addEventListener('resize', fixNav);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', fixNav);
+  }
+  // Повторяем несколько раз — iOS иногда отдаёт 0 при первом запросе
+  setTimeout(fixNav, 50);
+  setTimeout(fixNav, 200);
+  setTimeout(fixNav, 500);
+
+  window._fixNav = fixNav;
+})();
 
 if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', applyNavFix);
@@ -1469,8 +1509,8 @@ function bootApp() {
   el('screens').style.display = 'flex';
   el('nav').style.display = 'flex';
   el('nav-safe').style.display = 'block';
-  // Применяем nav fix после показа nav
-  setTimeout(applyNavFix, 100);
+  // Пересчитываем позицию nav после показа
+  setTimeout(function(){ if(window._fixNav) window._fixNav(); }, 50);
   updatePill();
   startTimer();
   renderHome();

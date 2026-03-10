@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
 <title>Quitly</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -111,41 +112,44 @@ body {
 }
 .screen::-webkit-scrollbar { display: none; }
 
-/* ═══ NAV — iOS SAFE AREA ═══
-   nav сидит точно над Home indicator:
-   bottom = safe-area-inset-bottom (высота полоски)
-   height = только высота кнопок (52px)
-   Под nav — #nav-safe той же цвет чтобы не просвечивал фон.
-*/
+/* ═══ NAV — iOS SAFE AREA (v3) ═══ */
 #nav {
   position: fixed;
   left: 0; right: 0;
   bottom: 0;
   z-index: 999;
-  height: var(--nav-h);
-  padding-bottom: constant(safe-area-inset-bottom, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--surface);
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
-  transition: background .2s;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
+  height: var(--nav-h);
+  padding-bottom: constant(safe-area-inset-bottom, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   box-sizing: content-box;
+  -webkit-transform: translate3d(0,0,0);
+  transform: translate3d(0,0,0);
 }
-/* Физически закрашивает ВСЕ под навбаром — safe area, overscroll, щели Safari */
+/* Белый блок 200px ниже nav — закрывает safe area, overscroll, щели Safari */
 #nav::after {
   content: '';
   position: absolute;
   left: 0; right: 0;
   top: 100%;
   height: 200px;
-  background: inherit;
+  background: var(--surface);
   pointer-events: none;
 }
+/* Страховка — белый блок на самом дне экрана */
 #nav-safe {
-  display: none;
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 998;
+  height: constant(safe-area-inset-bottom, 34px);
+  height: env(safe-area-inset-bottom, 34px);
+  background: var(--surface);
+  pointer-events: none;
+  -webkit-transform: translate3d(0,0,0);
+  transform: translate3d(0,0,0);
 }
 .ni {
   flex: 1;

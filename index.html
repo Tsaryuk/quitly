@@ -325,14 +325,17 @@ body {
 .craving-wrap { margin-bottom: 12px; }
 .craving-btn {
   width: 100%; padding: 18px;
-  background: var(--surface); border: 1px solid var(--border);
+  background: linear-gradient(135deg, #ff6b35 0%, #f7c948 100%);
+  border: none;
   border-radius: var(--r); display: flex; align-items: center; justify-content: space-between;
   cursor: pointer; font-family: inherit;
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
 }
-.craving-btn:active { background: var(--surface2); }
-.craving-label { font-size: 15px; font-weight: 700; color: var(--text); }
+.craving-btn:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(255, 107, 53, 0.25); }
+.craving-label { font-size: 16px; font-weight: 800; color: #fff; }
 .craving-count {
-  background: var(--text); color: var(--bg);
+  background: rgba(255,255,255,0.25); color: #fff;
   border-radius: 20px; padding: 4px 12px;
   font-size: 14px; font-weight: 800;
 }
@@ -789,10 +792,17 @@ body {
         <div class="craving-wrap">
           <button class="craving-btn" onclick="craved()">
             <div>
-              <div class="craving-label">Терплю желание</div>
-              <div style="font-size:12px;color:var(--sub);margin-top:2px">Нажми, когда хочется закурить</div>
+              <div class="craving-label">Победить тягу</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:2px">Нажми, когда хочется закурить</div>
             </div>
             <div class="craving-count" id="h-cravings">0</div>
+          </button>
+        </div>
+
+        <div style="margin-bottom:12px">
+          <button class="btn btn-ghost" onclick="openShare()" style="width:100%">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            Поделиться в Threads
           </button>
         </div>
 
@@ -800,12 +810,8 @@ body {
 
         <div id="h-tip"></div>
 
-        <div class="action-row">
-          <button class="btn btn-ghost" onclick="openShare()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-            В Threads
-          </button>
-          <button class="btn btn-ghost" style="color:var(--red)" onclick="showRelapse()">
+        <div style="margin-bottom:12px">
+          <button class="btn btn-ghost" style="color:var(--red);width:100%" onclick="showRelapse()">
             &#x1f6ac; Срыв
           </button>
         </div>
@@ -849,8 +855,14 @@ body {
         <div class="page-hdr-title">Челлендж 90 дней</div>
       </div>
       <div style="height:12px"></div>
-      <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r);padding:14px;margin-bottom:16px;text-align:center">
-        <div style="font-size:13px;font-weight:700;color:var(--green)" id="ch-countdown">90 дней без сигарет</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 16px 14px;margin:0 16px 16px;text-align:center">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+          <span style="font-size:13px;font-weight:700;color:var(--text)" id="ch-days-label">0 / 90 дней</span>
+          <span style="font-size:12px;font-weight:700;color:var(--green)" id="ch-countdown">90 дней без сигарет</span>
+        </div>
+        <div style="height:12px;background:var(--surface2);border-radius:6px;overflow:hidden;position:relative">
+          <div id="ch-progress-bar" style="height:100%;background:linear-gradient(90deg, #1a9e6b, #22c97e);border-radius:6px;width:0%;transition:width 0.6s ease"></div>
+        </div>
       </div>
       <div class="ch-stats" id="ch-stats">
         <div class="ch-stat"><div class="ch-stat-val green" id="ch-streak">&#8212;</div><div class="ch-stat-lbl">Текущая серия</div></div>
@@ -918,11 +930,26 @@ body {
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">Причины курения &#8212; разбор с наркологом</div>
         <div style="font-size:13px;color:var(--sub);margin-bottom:16px;line-height:1.4">Понять механизм &#8212; значит найти настоящий выход.</div>
 
-        <div class="sec-title">Статья</div>
+        <div class="sec-title">Статья из подкаста</div>
         <div class="article-card">
           <div class="article-tag">Почему люди курят</div>
           <div class="article-title">Курение &#8212; это не привычка. Это инстинкт.</div>
           <div class="article-preview">Никотин стимулирует выброс дофамина. Мозг формирует нейронную петлю: стресс &#8594; тяга &#8594; сигарета &#8594; облегчение. Единственный способ &#8212; заменить инстинкт, а не подавить его.</div>
+          <div class="article-body" id="article-full">
+            <h3>Дофаминовая ловушка</h3>
+            <p>Когда никотин попадает в мозг, он за 7 секунд связывается с ацетилхолиновыми рецепторами и провоцирует выброс дофамина. Мозг запоминает: &#171;сигарета = удовольствие&#187;. Через несколько недель формируется устойчивая нейронная петля, и организм начинает требовать никотин не ради удовольствия, а чтобы избежать дискомфорта.</p>
+            <h3>Почему сила воли не работает</h3>
+            <p>Большинство людей считают, что бросить курить &#8212; это вопрос силы воли. Но исследования показывают обратное: никотиновая зависимость задействует те же участки мозга, что и голод. Вы не можете &#171;перетерпеть&#187; голод навсегда, и мозг воспринимает тягу к никотину точно так же. Именно поэтому 95% попыток бросить на силе воли заканчиваются неудачей в первый год.</p>
+            <h3>Триггеры: скрытые кнопки зависимости</h3>
+            <p>Каждый курильщик имеет уникальный набор триггеров &#8212; ситуаций, которые автоматически запускают желание закурить. Утренний кофе, звонок по телефону, стресс на работе, перерыв с коллегами, алкоголь &#8212; мозг связывает сигарету с сотнями повседневных ситуаций. Осознание своих триггеров &#8212; первый шаг к тому, чтобы разорвать автоматическую петлю.</p>
+            <h3>Замена, а не подавление</h3>
+            <p>Нарколог в подкасте объясняет ключевой принцип: нельзя просто убрать сигарету и оставить пустоту. Мозгу нужна замена &#8212; физическая активность, дыхательные упражнения, вода, жвачка. Цель &#8212; создать новую нейронную петлю, которая даст дофамин без никотина. На это уходит 21&#8211;90 дней, и именно поэтому наш челлендж длится 3 месяца.</p>
+            <h3>Физическое восстановление</h3>
+            <p>Уже через 20 минут после последней сигареты давление и пульс нормализуются. Через 24 часа уровень угарного газа в крови падает до нуля. Через 48 часов начинают восстанавливаться вкусовые рецепторы и обоняние. Через 2&#8211;3 недели улучшается кровообращение и функция лёгких. Через 1&#8211;9 месяцев уходит кашель курильщика. Через год риск сердечных заболеваний снижается вдвое.</p>
+            <h3>Социальная поддержка решает</h3>
+            <p>Исследования показывают, что бросать в группе в 3&#8211;5 раз эффективнее, чем в одиночку. Когда рядом есть люди, которые проходят тот же путь, срабатывает несколько механизмов: социальная ответственность, общий опыт, возможность поделиться трудностями. Именно для этого создан Quitly и челлендж #БросаемВместе.</p>
+          </div>
+          <button class="article-read-btn" id="article-btn" onclick="toggleArticle()">Читать полностью &#8594;</button>
         </div>
 
         <div class="sec-title" style="margin-top:4px">Поддержать проект</div>
@@ -1781,12 +1808,21 @@ function renderChallenge() {
   el('ch-nosm').textContent = S.startTime ? String(nosm) : '\u2014';
   el('ch-saved').textContent = S.startTime ? '\u20bd'+saved.toLocaleString('ru') : '\u2014';
 
-  // 90-day countdown
+  // 90-day countdown + progress bar
   var cEl = document.getElementById('ch-countdown');
-  if (cEl && S.startTime) {
+  var barEl = document.getElementById('ch-progress-bar');
+  var daysLabel = document.getElementById('ch-days-label');
+  if (S.startTime) {
     var days = Math.floor(secs / 86400);
-    var left = 90 - days;
-    cEl.textContent = left > 0 ? '\u041e\u0441\u0442\u0430\u043b\u043e\u0441\u044c ' + left + ' ' + (left===1?'\u0434\u0435\u043d\u044c':left<5?'\u0434\u043d\u044f':'\u0434\u043d\u0435\u0439') + ' \u0438\u0437 90' : '\ud83c\udfc6 \u0427\u0435\u043b\u043b\u0435\u043d\u0434\u0436 \u043f\u0440\u043e\u0439\u0434\u0435\u043d!';
+    var left = Math.max(0, 90 - days);
+    var pct = Math.min(100, Math.round(days / 90 * 100));
+    if (cEl) cEl.textContent = left > 0 ? '\u043e\u0441\u0442\u0430\u043b\u043e\u0441\u044c ' + left + ' ' + (left===1?'\u0434\u0435\u043d\u044c':left<5?'\u0434\u043d\u044f':'\u0434\u043d\u0435\u0439') : '\ud83c\udfc6 \u041f\u0440\u043e\u0439\u0434\u0435\u043d!';
+    if (barEl) barEl.style.width = pct + '%';
+    if (daysLabel) daysLabel.textContent = Math.min(days, 90) + ' / 90 \u0434\u043d\u0435\u0439';
+  } else {
+    if (cEl) cEl.textContent = '90 \u0434\u043d\u0435\u0439 \u0431\u0435\u0437 \u0441\u0438\u0433\u0430\u0440\u0435\u0442';
+    if (barEl) barEl.style.width = '0%';
+    if (daysLabel) daysLabel.textContent = '0 / 90 \u0434\u043d\u0435\u0439';
   }
 
   const myId = S.user?.tgId ? String(S.user.tgId) : null;
@@ -1946,7 +1982,7 @@ function makeShareCard() {
   // footer
   x.font = '20px Manrope, sans-serif'; x.fillStyle = 'rgba(255,255,255,0.6)';
   x.fillText(TAGS, 300, 540);
-  x.fillText('quitly-sigma.vercel.app', 300, 570);
+  x.fillText('quitly.ru', 300, 570);
   return { canvas: c, days: d, nosm, saved };
 }
 
@@ -1956,7 +1992,7 @@ async function openShare() {
     ? 'Не курю уже ' + days + ' ' + (days===1?'день':days<5?'дня':'дней') + ' \u23f1'
     : 'Первый день без сигарет \u23f1') + '\n' +
     '\ud83d\udea2 Не выкурено: ' + nosm + ' сиг.  \ud83d\udcb0 Сэкономлено: \u20bd' + saved.toLocaleString('ru') + '\n\n' +
-    TAGS + '\nquitly-sigma.vercel.app';
+    TAGS + '\nquitly.ru';
 
   // Try Web Share API with image
   if (navigator.share && navigator.canShare) {

@@ -7,6 +7,37 @@ export default async function handler(req, res) {
   const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
   const HDR = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` };
 
+  // Цепочка сообщений после регистрации
+  const MESSAGE_CHAIN = [
+    { delay_min: 3,       type: 'podcast',    text: '🎙 Посмотри подкаст — разговор с биофизиком о причинах курения.\n\nПонять механизм зависимости — значит найти настоящий выход.\n\n👉 https://youtu.be/bfTN7etcf2E' },
+    { delay_min: 60,      type: 'tip_1h',     text: '💡 Совет: первые 72 часа — самые сложные. Желание закурить длится 3–5 минут.\n\nКогда накатывает тяга — сделай 10 глубоких вдохов. Это работает.' },
+    { delay_min: 1440,    type: 'day_1',      text: '🎉 1 день без сигарет!\n\nУровень угарного газа в крови упал до нуля. Кислород возвращается к норме.\n\nТы уже лечишься. Продолжай 💪' },
+    { delay_min: 4320,    type: 'day_3',      text: '🔥 3 дня без сигарет!\n\nФизическая зависимость от никотина почти исчезла. Дышать становится легче.\n\nДальше — проще. Держись!' },
+    { delay_min: 10080,   type: 'day_7',      text: '🏆 Неделя!\n\nВкус и запах восстанавливаются. Кашель и одышка уменьшаются.\n\nТы на правильном пути. quitly.ru' },
+    { delay_min: 43200,   type: 'day_30',     text: '💎 Месяц без сигарет!\n\nЛёгкие чистятся. Кожа улучшается. Энергии заметно больше.\n\nТы крут! Поделись результатом в Threads 👉 quitly.ru' },
+    { delay_min: 129600,  type: 'day_90',     text: '🚀 ЧЕЛЛЕНДЖ ПРОЙДЕН!\n\n90 дней без сигарет. Риск инфаркта вдвое ниже, чем у курильщика.\n\nТы сделал это. Поздравляем! 🎉\n\nПоделись результатом: quitly.ru' },
+  ];
+
+  async function scheduleMessages(chatId) {
+    const now = new Date();
+    const rows = MESSAGE_CHAIN.map(m => ({
+      chat_id: String(chatId),
+      send_at: new Date(now.getTime() + m.delay_min * 60000).toISOString(),
+      message_type: m.type,
+      message_text: m.text,
+      sent: false,
+      created_at: now.toISOString()
+    }));
+
+    try {
+      await fetch(`${SB_URL}/rest/v1/scheduled_messages`, {
+        method: 'POST',
+        headers: { ...HDR, 'Prefer': 'return=minimal' },
+        body: JSON.stringify(rows)
+      });
+    } catch (_) {}
+  }
+
   try {
     const update = req.body;
     const msg = update?.message;
@@ -57,7 +88,7 @@ export default async function handler(req, res) {
         );
 
         if (r.ok) {
-          // Отправляем приветственное сообщение
+          // Приветственное сообщение
           await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -67,6 +98,9 @@ export default async function handler(req, res) {
               parse_mode: 'HTML'
             })
           });
+
+          // Запланировать цепочку сообщений
+          await scheduleMessages(chatId);
         } else {
           await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
@@ -81,7 +115,7 @@ export default async function handler(req, res) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: chatId,
-            text: `👋 Привет! Я бот Quitly.\n\nОткрой приложение quitly-sigma.vercel.app и нажми «Войти через Telegram» — я пришлю тебе код входа.`
+            text: `👋 Привет! Я бот Quitly.\n\nОткрой приложение quitly.ru и нажми «Войти через Telegram» — я пришлю тебе код входа.`
           })
         });
       }
